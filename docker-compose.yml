@@ -2,30 +2,20 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile   
     ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-    command: npm run dev -- --host 0.0.0.0
-    stdin_open: true
-    tty: true
+      - "8080:80"            
     depends_on:
-      - backend  
+      - backend
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile   
     ports:
-      - "5000:5000"
+      - "5000:5000"          
     env_file:
       - ./backend/.env
     volumes:
-      - ./backend:/app
-      - /app/node_modules
       - ./backend/serviceaccountKey.json:/app/serviceaccountKey.json:ro
-    command: npm run dev
+    command: ["node", "index.js"]
