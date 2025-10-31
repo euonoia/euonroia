@@ -2,13 +2,13 @@ import express from "express";
 import fs from "fs";
 import dotenv from "dotenv";
 import admin from "firebase-admin";
-import cors from "cors";           // ✅ import cors
+import cors from "cors";          
 import firestoreRoutes from "./api/firestore.js";
 
 dotenv.config();
 
 const app = express();
-app.use(cors());                  // ✅ allow all origins
+app.use(cors());                  
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
