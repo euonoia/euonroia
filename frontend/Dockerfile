@@ -1,18 +1,13 @@
-# Use Node 18
-FROM node:22
-
-# Set working directory
+# Stage 1: Build
+FROM node:22-alpine AS builder
 WORKDIR /app
-
-# Copy package files and install dependencies
 COPY package*.json ./
 RUN npm install
-
-# Copy all source code
 COPY . .
+RUN npm run build
 
-# Expose Vite’s default dev port
-EXPOSE 5173
-
-# Run Vite dev server and make it accessible outside container
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+# Stage 2: Serve
+FROM nginx:alpine
+COPY --from=builder /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

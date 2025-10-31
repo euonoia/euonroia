@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import admin from "firebase-admin";
 import cors from "cors";          
 import firestoreRoutes from "./api/firestore.js";
+import authRoutes from "./api/auth.js"; 
 
 dotenv.config();
 
@@ -28,17 +29,10 @@ admin.initializeApp({
 });
 
 const db = admin.firestore();
-
-// Test Firestore write
-(async () => {
-  try {
-    console.log("✅ Firestore connection OK");
-  } catch (err) {
-    console.error("❌ Firestore connection failed:", err);
-  }
-})();
+console.log("✅ Firestore connection OK");
 
 // Use routes
 app.use("/api", firestoreRoutes(db));
+app.use("/api/auth", authRoutes); 
 
 app.listen(PORT, () => console.log(`🚀 Backend running on port ${PORT}`));
