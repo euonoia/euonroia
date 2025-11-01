@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 
 export default function OAuthCallback() {
   const navigate = useNavigate();
@@ -8,26 +7,22 @@ export default function OAuthCallback() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
-    if (!token) return;
 
-    const verifyToken = async () => {
-      try {
-        const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/verify`, { idToken: token });
-        const user = res.data.user;
-        localStorage.setItem("user", JSON.stringify(user));
+    if (token) {
+      // Store Firebase custom token
+      localStorage.setItem("idToken", token);
 
-        if (window.opener) {
-          window.opener.postMessage({ user }, window.location.origin);
-          window.close();
-        } else {
-          navigate("/dashboard");
-        }
-      } catch {
-        console.error("Token verification failed");
+      // Optionally, post message if opened as popup
+      if (window.opener) {
+        window.opener.postMessage({ user: { token } }, window.location.origin);
+        window.close();
+      } else {
+        navigate("/dashboard");
       }
-    };
-
-    verifyToken();
+    } else {
+      // No token, redirect to login
+      navigate("/");
+    }
   }, []);
 
   return <div>Logging in...</div>;
