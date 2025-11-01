@@ -19,9 +19,10 @@ const app = express();
 const FRONTEND_URL = process.env.VITE_FRONTEND_URL || "http://localhost:5173";
 
 app.use(cors({
-  origin: FRONTEND_URL,  // allow only your frontend domain
-  credentials: true,     // allow sending cookies
+  origin: process.env.VITE_FRONTEND_URL, // must match frontend exactly
+  credentials: true,
 }));
+
 
 app.use(express.json());
 app.use(cookieParser());

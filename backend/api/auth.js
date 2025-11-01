@@ -12,13 +12,13 @@ const isProduction = process.env.NODE_ENV === "production";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
-// Static URLs based on environment
+// Determine redirect URIs dynamically
 const GOOGLE_REDIRECT_URI = isProduction
-  ? process.env.GOOGLE_REDIRECT_URI // e.g. https://euonroia-backend.onrender.com/auth/google/callback
+  ? process.env.GOOGLE_REDIRECT_URI || "https://euonroia-backend.onrender.com/auth/google/callback"
   : "http://localhost:5000/auth/google/callback";
 
 const FRONTEND_URL = isProduction
-  ? process.env.VITE_FRONTEND_URL // e.g. https://euonroia.onrender.com
+  ? process.env.VITE_FRONTEND_URL || "https://euonroia.onrender.com"
   : "http://localhost:5173";
 
 // Initialize Google OAuth2 client
@@ -69,17 +69,13 @@ router.get("/google/callback", async (req, res) => {
       { merge: true }
     );
 
-    // Store user info in HTTP-only cookie
-    res.cookie(
-      "session",
-      JSON.stringify({ uid: id, name, email, picture }),
-      {
-        httpOnly: true,
-        secure: isProduction, // HTTPS in production
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
-        sameSite: "lax",
-      }
-    );
+    // ✅ Store user info in HTTP-only, cross-site cookie
+    res.cookie("session", JSON.stringify({ uid: id, name, email, picture }), {
+      httpOnly: true,
+      secure: isProduction,      // must be true in production (HTTPS)
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: isProduction ? "none" : "lax", // allow cross-domain on deployed
+    });
 
     // Redirect to frontend
     res.redirect(FRONTEND_URL);
@@ -111,7 +107,7 @@ router.post("/signout", (req, res) => {
   res.clearCookie("session", {
     httpOnly: true,
     secure: isProduction,
-    sameSite: "lax",
+    sameSite: isProduction ? "none" : "lax",
   });
   res.json({ success: true });
 });
