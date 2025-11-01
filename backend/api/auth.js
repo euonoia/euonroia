@@ -5,25 +5,17 @@ import { OAuth2Client } from "google-auth-library";
 
 const router = Router();
 
-// Detect environment
+// 🧩 Load environment variables
 const isProduction = process.env.NODE_ENV === "production";
 
-// Load environment variables
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
-// Flexible redirect URI and frontend URL
-const GOOGLE_REDIRECT_URI =
-  process.env.GOOGLE_REDIRECT_URI ||
-  (isProduction
-    ? "https://euonroia-backend.onrender.com/auth/google/callback"
-    : "http://localhost:5000/auth/google/callback");
+// Use env vars for deployed or fallback to localhost
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || "http://localhost:5000/auth/google/callback";
+const FRONTEND_URL = process.env.VITE_FRONTEND_URL || "http://localhost:5173";
 
-const FRONTEND_URL =
-  process.env.VITE_FRONTEND_URL ||
-  (isProduction ? "https://euonroia.onrender.com" : "http://localhost:5173");
-
-// Initialize Google OAuth2 client
+// 🧱 Initialize Google OAuth2 client
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
 // -----------------------------
@@ -49,21 +41,12 @@ router.get("/google", (req, res) => {
 router.get("/google/callback", async (req, res) => {
   try {
     const { code } = req.query;
+    if (!code) throw new Error("Missing authorization code");
 
-    // If no code is provided, redirect to frontend (prevents errors when accessed manually)
-    if (!code) {
-      console.warn("⚠️ /auth/google/callback accessed without code");
-      return res.redirect(FRONTEND_URL);
-    }
-
-    // Exchange code for tokens
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
-    // Get user info from Google
-    const response = await client.request({
-      url: "https://www.googleapis.com/oauth2/v2/userinfo",
-    });
+    const response = await client.request({ url: "https://www.googleapis.com/oauth2/v2/userinfo" });
     const { id, name, email, picture } = response.data;
 
     // Save/update user in Firestore
@@ -72,23 +55,19 @@ router.get("/google/callback", async (req, res) => {
       { merge: true }
     );
 
-    // Store user info in HTTP-only cookie
-    res.cookie(
-      "session",
-      JSON.stringify({ uid: id, name, email, picture }),
-      {
-        httpOnly: true,
-        secure: isProduction,
-        maxAge: 24 * 60 * 60 * 1000, // 1 day
-        sameSite: "lax",
-      }
-    );
+    // Store user info directly in HTTP-only cookie
+    res.cookie("session", JSON.stringify({ uid: id, name, email, picture }), {
+      httpOnly: true,
+      secure: isProduction,
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "lax",
+    });
 
-    // Redirect to frontend
+    // Redirect frontend
     res.redirect(FRONTEND_URL);
   } catch (err) {
     console.error("❌ Google OAuth error:", err);
-    res.status(500).send("Google OAuth failed. Please try again.");
+    res.status(500).send("Google OAuth failed");
   }
 });
 
