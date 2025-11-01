@@ -14,14 +14,11 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-
+// Load Firebase service account
 let serviceAccount;
-
 if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
- 
   serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
 } else if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH && fs.existsSync(process.env.FIREBASE_SERVICE_ACCOUNT_PATH)) {
-  
   serviceAccount = JSON.parse(fs.readFileSync(process.env.FIREBASE_SERVICE_ACCOUNT_PATH, "utf8"));
 } else {
   console.error("❌ Missing Firebase credentials (JSON or file path).");
@@ -36,8 +33,11 @@ admin.initializeApp({
 const db = admin.firestore();
 console.log("✅ Firestore connection OK");
 
-// Use routes
+// Mount routes
 app.use("/api", firestoreRoutes(db));
-app.use("/api/auth", authRoutes);
+
+// Mount auth routes at both /auth (for popup) and /api/auth (for API calls)
+app.use("/auth", authRoutes);       // popup login route
+app.use("/api/auth", authRoutes);   // verify token route
 
 app.listen(PORT, () => console.log(`🚀 Backend running on port ${PORT}`));

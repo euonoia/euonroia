@@ -8,7 +8,6 @@ export default function OAuthCallback() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
-
     if (!token) return;
 
     const verifyToken = async () => {
@@ -17,7 +16,6 @@ export default function OAuthCallback() {
         const user = res.data.user;
         localStorage.setItem("user", JSON.stringify(user));
 
-        // Send to main window if popup
         if (window.opener) {
           window.opener.postMessage({ user }, window.location.origin);
           window.close();
@@ -31,6 +29,6 @@ export default function OAuthCallback() {
 
     verifyToken();
   }, []);
-  
+
   return <div>Logging in...</div>;
 }
