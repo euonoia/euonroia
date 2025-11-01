@@ -1,9 +1,15 @@
 @import "../theme.css";
 
 .landing-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
   background-color: var(--bg-main);
   color: var(--text-primary);
-  min-height: 100vh;
+}
+
+.landing-main {
+  flex: 1; /* Makes main content grow and pushes footer to bottom */
   display: flex;
   flex-direction: column;
 }
@@ -13,7 +19,6 @@
   text-align: center;
   padding: var(--space-8) var(--space-4);
   background-color: var(--bg-card);
-  color: var(--text-primary);
   box-shadow: var(--shadow-md);
 }
 
@@ -29,7 +34,7 @@
   color: var(--text-secondary);
 }
 
-/* Features */
+/* Features Section */
 .features-section {
   display: flex;
   justify-content: center;
@@ -40,6 +45,7 @@
 
 .feature-card {
   max-width: 300px;
+  width: 100%;
   background-color: var(--bg-card);
   padding: var(--space-5);
   border-radius: 12px;
@@ -59,7 +65,7 @@
   margin-bottom: var(--space-3);
 }
 
-/* CTA */
+/* CTA Section */
 .cta-section {
   text-align: center;
   padding: var(--space-8) var(--space-4);
@@ -80,7 +86,6 @@
 .btn-primary {
   background-color: var(--accent);
 }
-
 .btn-primary:hover {
   background-color: var(--accent-hover);
   transform: translateY(-1px);
@@ -89,8 +94,24 @@
 .btn-success {
   background-color: var(--color-success);
 }
-
 .btn-success:hover {
   background-color: #16a34a;
   transform: translateY(-1px);
+}
+
+/* ==============================
+   RESPONSIVE BREAKPOINTS
+   ============================== */
+@media(max-width:1024px){
+  .features-section { gap: var(--space-4); }
+}
+
+@media(max-width:768px){
+  .hero-section h1 { font-size: var(--font-size-2xl); }
+  .feature-card { max-width: 45%; }
+}
+
+@media(max-width:480px){
+  .hero-section h1 { font-size: var(--font-size-xl); }
+  .feature-card { max-width: 100%; }
 }

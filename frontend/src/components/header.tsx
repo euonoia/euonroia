@@ -1,16 +1,13 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useTheme } from "../context/ThemeContext";
 import "../styles/components/header.css";
 
-interface User {
-  name: string;
-  email: string;
-  picture?: string;
-  uid: string;
-}
+interface User { name: string; email: string; picture?: string; uid: string; }
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
@@ -19,45 +16,25 @@ export default function Header() {
 
   const verifyToken = async (idToken: string) => {
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/auth/verify`,
-        { idToken }
-      );
-      const userData: User = res.data.user;
-      setUser(userData);
-      localStorage.setItem("user", JSON.stringify(userData));
-    } catch {
-      setUser(null);
-      localStorage.removeItem("user");
-    }
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/auth/verify`, { idToken });
+      setUser(res.data.user);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+    } catch { setUser(null); localStorage.removeItem("user"); }
   };
 
   const handleGoogleSignIn = () => {
-    const popup = window.open(
-      `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`,
-      "GoogleAuth",
-      "width=500,height=600"
-    );
+    const popup = window.open(`${import.meta.env.VITE_BACKEND_URL}/api/auth/google`, "GoogleAuth", "width=500,height=600");
     if (!popup) return;
-
     const timer = setInterval(() => {
       try {
         if (popup.closed) clearInterval(timer);
         const idToken = localStorage.getItem("idToken");
-        if (idToken) {
-          clearInterval(timer);
-          verifyToken(idToken);
-          popup.close();
-          localStorage.removeItem("idToken");
-        }
+        if (idToken) { clearInterval(timer); verifyToken(idToken); popup.close(); localStorage.removeItem("idToken"); }
       } catch {}
     }, 500);
   };
 
-  const handleSignOut = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-  };
+  const handleSignOut = () => { setUser(null); localStorage.removeItem("user"); };
 
   return (
     <header className="header">
@@ -65,19 +42,16 @@ export default function Header() {
       <div className="header-actions">
         {user ? (
           <div className="user-info">
-            {user.picture && (
-              <img src={user.picture} alt={user.name} className="user-avatar" />
-            )}
+            {user.picture && <img src={user.picture} alt={user.name} className="user-avatar" />}
             <span className="user-name">{user.name}</span>
-            <button className="btn" onClick={handleSignOut}>
-              Sign Out
-            </button>
+            <button className="btn" onClick={handleSignOut}>Sign Out</button>
           </div>
         ) : (
-          <button className="btn" onClick={handleGoogleSignIn}>
-            Sign in with Google
-          </button>
+          <button className="btn" onClick={handleGoogleSignIn}>Sign in with Google</button>
         )}
+        <button className="btn theme-toggle" onClick={toggleTheme}>
+          {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
+        </button>
       </div>
     </header>
   );
