@@ -14,18 +14,28 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const { theme, toggleTheme } = useTheme();
 
+  const fetchUser = async () => {
+    try {
+      const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/auth/me`, {
+        withCredentials: true, // important for HTTP-only cookies
+      });
+      setUser(res.data.user);
+    } catch {
+      setUser(null);
+    }
+  };
+
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/auth/me`, {
-          withCredentials: true,
-        });
-        setUser(res.data.user);
-      } catch {
-        setUser(null);
-      }
-    };
     fetchUser();
+
+    // Optional: detect if redirected from Google OAuth and refetch
+    if (window.location.search.includes("code=")) {
+      fetchUser();
+      // Clean up URL
+      const url = new URL(window.location.href);
+      url.search = "";
+      window.history.replaceState({}, document.title, url.toString());
+    }
   }, []);
 
   const handleGoogleSignIn = () => {
