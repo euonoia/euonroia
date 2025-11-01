@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import "../styles/components/header.css"; // ✅ We'll move visual styling here
 
 interface User {
   name: string;
@@ -63,46 +64,24 @@ export default function Header() {
   };
 
   return (
-    <header
-      style={{
-        backgroundColor: "#282c34",
-        padding: "1rem",
-        color: "white",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <h2>Euonroia</h2>
+    <header className="header">
+      <h2 className="logo">Euonroia</h2>
+
       {user ? (
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+        <div className="user-info">
           {user.picture && (
-            <img
-              src={user.picture}
-              alt={user.name}
-              style={{ width: "35px", borderRadius: "50%" }}
-            />
+            <img src={user.picture} alt={user.name} className="user-avatar" />
           )}
-          <span>{user.name}</span>
-          <button onClick={handleSignOut} style={buttonStyle}>
+          <span className="user-name">{user.name}</span>
+          <button onClick={handleSignOut} className="btn">
             Sign Out
           </button>
         </div>
       ) : (
-        <button onClick={handleGoogleSignIn} style={buttonStyle}>
+        <button onClick={handleGoogleSignIn} className="btn btn-google">
           Sign in with Google
         </button>
       )}
     </header>
   );
 }
-
-const buttonStyle: React.CSSProperties = {
-  padding: "0.5rem 1rem",
-  backgroundColor: "#4285F4",
-  color: "white",
-  border: "none",
-  borderRadius: "0.3rem",
-  cursor: "pointer",
-  fontWeight: "bold",
-};

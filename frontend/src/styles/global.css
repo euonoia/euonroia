@@ -1,0 +1,58 @@
+@import "./theme.css";
+
+/* Reset & base styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-base);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Typography hierarchy */
+h1, h2, h3, h4, h5 {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+p {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+/* Links */
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+a:hover {
+  color: var(--accent-hover);
+}
+
+/* Buttons */
+button {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  padding: var(--space-3) var(--space-5);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  transition: background-color 0.25s ease, transform 0.1s ease;
+}
+button:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+button:active {
+  transform: translateY(1px);
+}
