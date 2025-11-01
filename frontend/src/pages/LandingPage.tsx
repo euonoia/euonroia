@@ -2,23 +2,19 @@ import { FC } from "react";
 import { Link } from "react-router-dom";
 import Header from "../components/header";
 import Footer from "../components/footer";
-import "../styles/pages/LandingPage.css"; 
+import "../styles/pages/LandingPage.css";
 
 const LandingPage: FC = () => {
   return (
     <div className="landing-container">
       <Header />
 
-      {/* Hero Section */}
       <section className="hero-section">
         <h1>Welcome to Euonroia</h1>
         <p>Learn to code, even without a laptop. Start your journey today!</p>
-        <Link to="/signup" className="btn-primary">
-          Get Started
-        </Link>
+        <Link to="/signup" className="btn-primary">Get Started</Link>
       </section>
 
-      {/* Features Section */}
       <section className="features-section">
         <div className="feature-card">
           <h2>Learn Web Development</h2>
@@ -34,11 +30,8 @@ const LandingPage: FC = () => {
         </div>
       </section>
 
-      {/* Call-to-Action Section */}
       <section className="cta-section">
-        <Link to="/signup" className="btn-success">
-          Join Now
-        </Link>
+        <Link to="/signup" className="btn-success">Join Now</Link>
       </section>
 
       <Footer />

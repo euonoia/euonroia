@@ -1,66 +1,49 @@
-:root {
-  /* Typography */
-  font-family: "Inter", "Avenir", Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  /* Color Scheme */
-  color-scheme: light dark;
-
-  /* Theme Colors (dark mode default) */
-  --color-bg: #1e1f26;
-  --color-surface: #2a2b32;
-  --color-text: #e5e7eb;
-  --color-primary: #818cf8;
-  --color-primary-hover: #a5b4fc;
-  --color-secondary: #22d3ee;
-  --color-success: #4ade80;
-  --color-warning: #fbbf24;
-  --color-error: #f87171;
-
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
+/* Reset / base */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
+html, body {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--text-primary);
+  background-color: var(--bg-main);
+  min-height: 100%;
+}
+
+/* Links */
 a {
-  color: var(--color-primary);
+  color: var(--accent);
   text-decoration: none;
-  transition: color 0.25s ease;
 }
 a:hover {
-  color: var(--color-primary-hover);
+  color: var(--accent-hover);
 }
 
+/* Buttons default */
 button {
-  background-color: var(--color-surface);
-  color: var(--color-text);
-  border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
+  font-family: inherit;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.25s ease;
-}
-button:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
+  border-radius: 8px;
+  border: none;
+  padding: 0.5rem 1rem;
+  transition: background-color 0.2s ease;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    --color-bg: #f5f7fa;
-    --color-surface: #ffffff;
-    --color-text: #1a1a1a;
-    --color-primary: #4f46e5;
-    --color-primary-hover: #4338ca;
-    --color-secondary: #06b6d4;
-    --color-success: #16a34a;
-    --color-warning: #f59e0b;
-    --color-error: #dc2626;
+/* Make all containers use flex column by default if needed */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-    background-color: var(--color-bg);
-    color: var(--color-text);
-  }
+/* Optional: smooth color transition when toggling theme */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }

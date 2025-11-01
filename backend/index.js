@@ -1,6 +1,6 @@
+import dotenv from "dotenv";
 import express from "express";
 import fs from "fs";
-import dotenv from "dotenv";
 import admin from "firebase-admin";
 import cors from "cors";
 import firestoreRoutes from "./api/firestore.js";

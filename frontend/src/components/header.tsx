@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import "../styles/components/header.css"; // ✅ We'll move visual styling here
+import "../styles/components/header.css";
 
 interface User {
   name: string;
@@ -12,7 +12,6 @@ interface User {
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
 
-  // Load user from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) setUser(JSON.parse(storedUser));
@@ -27,29 +26,26 @@ export default function Header() {
       const userData: User = res.data.user;
       setUser(userData);
       localStorage.setItem("user", JSON.stringify(userData));
-    } catch (err) {
-      console.error("Token verification failed:", err);
+    } catch {
       setUser(null);
       localStorage.removeItem("user");
     }
   };
 
   const handleGoogleSignIn = () => {
-    const authUrl = `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`;
-    const popup = window.open(authUrl, "GoogleAuth", "width=500,height=600");
+    const popup = window.open(
+      `${import.meta.env.VITE_BACKEND_URL}/api/auth/google`,
+      "GoogleAuth",
+      "width=500,height=600"
+    );
+    if (!popup) return;
 
-    if (!popup) {
-      console.error("Popup blocked");
-      return;
-    }
-
-    const pollTimer = setInterval(() => {
+    const timer = setInterval(() => {
       try {
-        if (popup.closed) clearInterval(pollTimer);
-
+        if (popup.closed) clearInterval(timer);
         const idToken = localStorage.getItem("idToken");
         if (idToken) {
-          clearInterval(pollTimer);
+          clearInterval(timer);
           verifyToken(idToken);
           popup.close();
           localStorage.removeItem("idToken");
@@ -66,22 +62,23 @@ export default function Header() {
   return (
     <header className="header">
       <h2 className="logo">Euonroia</h2>
-
-      {user ? (
-        <div className="user-info">
-          {user.picture && (
-            <img src={user.picture} alt={user.name} className="user-avatar" />
-          )}
-          <span className="user-name">{user.name}</span>
-          <button onClick={handleSignOut} className="btn">
-            Sign Out
+      <div className="header-actions">
+        {user ? (
+          <div className="user-info">
+            {user.picture && (
+              <img src={user.picture} alt={user.name} className="user-avatar" />
+            )}
+            <span className="user-name">{user.name}</span>
+            <button className="btn" onClick={handleSignOut}>
+              Sign Out
+            </button>
+          </div>
+        ) : (
+          <button className="btn" onClick={handleGoogleSignIn}>
+            Sign in with Google
           </button>
-        </div>
-      ) : (
-        <button onClick={handleGoogleSignIn} className="btn btn-google">
-          Sign in with Google
-        </button>
-      )}
+        )}
+      </div>
     </header>
   );
 }

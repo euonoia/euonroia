@@ -1,22 +1,13 @@
-import { useEffect, useState } from "react";
+import { useTheme } from "../context/ThemeContext";
 import "../styles/components/footer.css";
 
 export default function Footer() {
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
-
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <footer className="footer">
       <p>© {new Date().getFullYear()} Euonroia. All rights reserved.</p>
-      <button onClick={toggleTheme} className="theme-toggle">
+      <button className="btn theme-toggle" onClick={toggleTheme}>
         {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
       </button>
     </footer>
