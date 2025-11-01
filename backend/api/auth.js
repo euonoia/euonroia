@@ -11,7 +11,7 @@ const client = new OAuth2Client(
   process.env.GOOGLE_REDIRECT_URI || "http://localhost:5000/auth/google/callback"
 );
 
-// 1️⃣ Verify ID token (for Firebase-based auth)
+// 1️⃣ Verify Firebase ID token (optional)
 router.post("/verify", async (req, res) => {
   const { idToken } = req.body;
   if (!idToken) return res.status(400).json({ error: "No token provided" });
@@ -45,34 +45,34 @@ router.get("/google", (req, res) => {
   res.redirect(url);
 });
 
-// 3️⃣ Handle Google callback and fetch user info
 router.get("/google/callback", async (req, res) => {
   try {
     const { code } = req.query;
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
-    // Fetch user profile
     const response = await client.request({
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
     const { id, name, email, picture } = response.data;
 
-    // Save or update user in Firestore
+    // Save/update user in Firestore
     await admin.firestore().collection("users").doc(id).set(
       { id, name, email, picture, lastLogin: new Date() },
       { merge: true }
     );
 
-    // Redirect or return JSON
-    res.json({
-      success: true,
-      user: { id, name, email, picture },
-    });
+    // Generate Firebase custom token for frontend
+    const firebaseToken = await admin.auth().createCustomToken(id);
+
+    // Redirect popup to frontend with token
+    const redirectUrl = `https://euonroia.onrender.com/oauth-callback?token=${firebaseToken}`;
+    res.redirect(redirectUrl);
   } catch (err) {
     console.error("OAuth error:", err);
-    res.status(500).json({ error: "Google OAuth failed" });
+    res.status(500).send("Google OAuth failed");
   }
 });
+
 
 export default router;

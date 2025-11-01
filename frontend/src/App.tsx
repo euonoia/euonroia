@@ -5,6 +5,7 @@ import Dashboard from './pages/dashboard'
 import AboutPage from './pages/aboutpage'
 import UserList from './pages/userlist'
 import LandingPage from './pages/LandingPage'
+import OAuthCallback from "./components/OAuthCallBack";
 export default function App() {
   return (
     <BrowserRouter>
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/users" element={<UserList />} />
         <Route path="/homepage" element={<Homepage />} />
+        <Route path="/oauth-callback" element={<OAuthCallback />} />
       </Routes>
     </BrowserRouter>
   )
