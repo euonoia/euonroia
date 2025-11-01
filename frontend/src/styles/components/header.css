@@ -1,8 +1,74 @@
-.header { display: flex; justify-content: space-between; align-items: center; padding: var(--space-4); background-color: var(--bg-card); color: var(--text-primary); flex-wrap: wrap; gap: var(--space-3); }
-.logo { font-size: var(--font-size-2xl); font-weight: bold; }
-.header-actions { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
-.user-avatar { width: 35px; height: 35px; border-radius: 50%; }
-.user-name { font-weight: 500; }
-.theme-toggle { background-color: var(--accent); color: var(--text-primary); padding: var(--space-2) var(--space-4); border-radius: 0.5rem; font-weight: bold; cursor: pointer; transition: background-color 0.2s ease; }
-.theme-toggle:hover { background-color: var(--accent-hover); }
-@media(max-width: 480px){ .header { flex-direction: column; align-items: flex-start; } .header-actions { flex-direction: column; gap: var(--space-2); width: 100%; } }
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4);
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.logo {
+  font-size: var(--font-size-2xl);
+  font-weight: bold;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.user-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+}
+
+.user-name {
+  font-weight: 500;
+}
+
+.theme-toggle {
+  background-color: var(--accent);
+  color: var(--text-primary);
+  padding: var(--space-2) var(--space-4);
+  border-radius: 0.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background-color: var(--accent-hover);
+}
+
+/* -------------------
+   Responsive
+------------------- */
+@media (max-width: 480px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-right {
+    flex-direction: column;
+    width: 100%;
+    gap: var(--space-2);
+  }
+
+  .user-info {
+    flex-direction: row; /* keep avatar + name + button inline */
+    width: 100%;
+    justify-content: space-between; /* spreads them nicely */
+  }
+}
