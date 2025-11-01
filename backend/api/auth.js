@@ -1,29 +1,39 @@
-// backend/api/auth.js
 import { Router } from "express";
 import admin from "firebase-admin";
 import { OAuth2Client } from "google-auth-library";
 
 const router = Router();
 
-// 🧠 Detect environment
-const isProduction = process.env.NODE_ENV === "production";
-
 // 🧩 Load environment variables dynamically
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
-const GOOGLE_REDIRECT_URI = isProduction
-  ? "https://euonroia-backend.onrender.com/auth/google/callback"
-  : "http://localhost:5000/auth/google/callback";
-  
-const VITE_FRONTEND_URL = process.env.VITE_FRONTEND_URL?.trim() || (isProduction
-  ? "https://euonroia.onrender.com/"
-  : "http://localhost:5173");
-
 // 🧱 Initialize Google OAuth2 client
-const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
+const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 
-// 1️⃣ Optional verify endpoint (can be removed if not using Firebase ID tokens)
+// Function to determine frontend URL dynamically
+const getFrontendURL = (req) => {
+  if (process.env.VITE_FRONTEND_URL) return process.env.VITE_FRONTEND_URL;
+  // Detect local vs deployed from request hostname
+  const host = req.headers.host;
+  if (host.includes("localhost") || host.includes("127.0.0.1")) {
+    return "http://localhost:5173";
+  } else {
+    return "https://euonroia.onrender.com"; // default deployed frontend
+  }
+};
+
+// Function to determine Google redirect URI dynamically
+const getGoogleRedirectURI = (req) => {
+  const host = req.headers.host;
+  if (host.includes("localhost") || host.includes("127.0.0.1")) {
+    return "http://localhost:5000/auth/google/callback";
+  } else {
+    return "https://euonroia-backend.onrender.com/auth/google/callback";
+  }
+};
+
+// 1️⃣ Optional verify endpoint
 router.post("/verify", async (req, res) => {
   const { idToken } = req.body;
   if (!idToken) return res.status(400).json({ error: "No token provided" });
@@ -46,7 +56,10 @@ router.post("/verify", async (req, res) => {
 
 // 2️⃣ Redirect to Google login
 router.get("/google", (req, res) => {
-  const url = client.generateAuthUrl({
+  const redirectURI = getGoogleRedirectURI(req);
+  const oauthClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, redirectURI);
+
+  const url = oauthClient.generateAuthUrl({
     access_type: "offline",
     prompt: "consent",
     scope: [
@@ -62,13 +75,16 @@ router.get("/google", (req, res) => {
 // 3️⃣ Google callback — fully backend-driven
 router.get("/google/callback", async (req, res) => {
   try {
+    const redirectURI = getGoogleRedirectURI(req);
+    const oauthClient = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, redirectURI);
+
     const { code } = req.query;
     if (!code) throw new Error("Missing authorization code");
 
-    const { tokens } = await client.getToken(code);
-    client.setCredentials(tokens);
+    const { tokens } = await oauthClient.getToken(code);
+    oauthClient.setCredentials(tokens);
 
-    const response = await client.request({ url: "https://www.googleapis.com/oauth2/v2/userinfo" });
+    const response = await oauthClient.request({ url: "https://www.googleapis.com/oauth2/v2/userinfo" });
     const { id, name, email, picture } = response.data;
 
     // Save/update user in Firestore
@@ -80,13 +96,14 @@ router.get("/google/callback", async (req, res) => {
     // ✅ Store user info directly in HTTP-only cookie
     res.cookie("session", JSON.stringify({ uid: id, name, email, picture }), {
       httpOnly: true,
-      secure: isProduction,
+      secure: !req.hostname.includes("localhost"), // only secure on deployed
       maxAge: 24 * 60 * 60 * 1000,
       sameSite: "lax",
     });
 
     // Redirect frontend
-    res.redirect(VITE_FRONTEND_URL);
+    const frontendURL = getFrontendURL(req);
+    res.redirect(frontendURL);
   } catch (err) {
     console.error("❌ Google OAuth error:", err);
     res.status(500).send("Google OAuth failed");
@@ -110,7 +127,7 @@ router.get("/me", (req, res) => {
 router.post("/signout", (req, res) => {
   res.clearCookie("session", {
     httpOnly: true,
-    secure: isProduction,
+    secure: !req.hostname.includes("localhost"),
     sameSite: "lax",
   });
   res.json({ success: true });
