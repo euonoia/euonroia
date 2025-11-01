@@ -1,11 +1,10 @@
-// frontend/src/components/Header.tsx
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useTheme } from "../context/ThemeContext";
 import "../styles/components/header.css";
 
 interface User {
-  uid: string;
+  id: string;
   name: string;
   email: string;
   picture?: string;
@@ -15,14 +14,15 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const { theme, toggleTheme } = useTheme();
 
-  // ✅ Fetch current user on mount
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+  // ✅ Fetch current logged-in user from backend
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_BACKEND_URL}/api/auth/me`,
-          { withCredentials: true } // must include cookies
-        );
+        const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+          withCredentials: true, // send cookies
+        });
         setUser(res.data.user);
       } catch {
         setUser(null);
@@ -30,24 +30,20 @@ export default function Header() {
     };
 
     fetchUser();
-  }, []);
+  }, [BACKEND_URL]);
 
-  // Full-page redirect to backend Google OAuth
+  // 🟢 Trigger Google OAuth (redirects to backend)
   const handleGoogleSignIn = () => {
-    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
+    window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  // Sign out via backend
+  // 🔴 Sign out (clear cookie on backend)
   const handleSignOut = async () => {
     try {
-      await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/auth/signout`,
-        {},
-        { withCredentials: true }
-      );
+      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
       setUser(null);
     } catch (err) {
-      console.error("Failed to sign out:", err);
+      console.error("Sign out failed:", err);
     }
   };
 
@@ -72,7 +68,7 @@ export default function Header() {
           </div>
         ) : (
           <button className="btn" onClick={handleGoogleSignIn}>
-            Sign in with Google
+            Continue with Google
           </button>
         )}
 

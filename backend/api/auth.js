@@ -5,27 +5,17 @@ import { OAuth2Client } from "google-auth-library";
 
 const router = Router();
 
-// Detect environment
 const isProduction = process.env.NODE_ENV === "production";
-
-// Load environment variables
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const FRONTEND_URL = process.env.VITE_FRONTEND_URL;
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
 
-// Determine redirect URIs dynamically
-const GOOGLE_REDIRECT_URI = isProduction
-  ? process.env.GOOGLE_REDIRECT_URI || "https://euonroia-backend.onrender.com/auth/google/callback"
-  : "http://localhost:5000/auth/google/callback";
-
-const FRONTEND_URL = isProduction
-  ? process.env.VITE_FRONTEND_URL || "https://euonroia.onrender.com"
-  : "http://localhost:5173";
-
-// Initialize Google OAuth2 client
+// Initialize OAuth client
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
 // -----------------------------
-// 1️⃣ Redirect to Google OAuth
+// 1️⃣ Redirect to Google
 // -----------------------------
 router.get("/google", (req, res) => {
   const url = client.generateAuthUrl({
@@ -36,57 +26,51 @@ router.get("/google", (req, res) => {
       "https://www.googleapis.com/auth/userinfo.email",
     ],
   });
-
-  console.log("🔗 Redirecting to Google OAuth URL:", url);
   res.redirect(url);
 });
 
 // -----------------------------
-// 2️⃣ Google callback
+// 2️⃣ Handle Google callback
 // -----------------------------
 router.get("/google/callback", async (req, res) => {
   try {
     const { code } = req.query;
-
-    if (!code) {
-      console.warn("⚠️ /auth/google/callback accessed without code");
-      return res.redirect(FRONTEND_URL);
-    }
+    if (!code) return res.redirect(FRONTEND_URL);
 
     // Exchange code for tokens
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
-    // Get user info from Google
-    const response = await client.request({
+    // Get user info
+    const { data } = await client.request({
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
-    const { id, name, email, picture } = response.data;
+    const { id, name, email, picture } = data;
 
-    // Save/update user in Firestore
+    // Store/update user in Firestore
     await admin.firestore().collection("users").doc(id).set(
       { id, name, email, picture, lastLogin: new Date() },
       { merge: true }
     );
 
-    // ✅ Store user info in HTTP-only, cross-site cookie
-    res.cookie("session", JSON.stringify({ uid: id, name, email, picture }), {
+    // Set user info in cookie
+    res.cookie("session", JSON.stringify({ id, name, email, picture }), {
       httpOnly: true,
-      secure: isProduction,      // must be true in production (HTTPS)
-      maxAge: 24 * 60 * 60 * 1000,
-      sameSite: isProduction ? "none" : "lax", // allow cross-domain on deployed
+      secure: isProduction,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
     // Redirect to frontend
     res.redirect(FRONTEND_URL);
   } catch (err) {
     console.error("❌ Google OAuth error:", err);
-    res.status(500).send("Google OAuth failed. Please try again.");
+    res.status(500).send("Google OAuth failed");
   }
 });
 
 // -----------------------------
-// 3️⃣ Get current logged-in user
+// 3️⃣ Return current logged user
 // -----------------------------
 router.get("/me", (req, res) => {
   const cookie = req.cookies.session;
@@ -101,13 +85,13 @@ router.get("/me", (req, res) => {
 });
 
 // -----------------------------
-// 4️⃣ Sign out
+// 4️⃣ Logout
 // -----------------------------
 router.post("/signout", (req, res) => {
   res.clearCookie("session", {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    sameSite: "lax",
   });
   res.json({ success: true });
 });
