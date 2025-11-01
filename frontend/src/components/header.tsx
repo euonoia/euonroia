@@ -14,10 +14,11 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const { theme, toggleTheme } = useTheme();
 
+  // ✅ Fetch current user on page load
   const fetchUser = async () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/auth/me`, {
-        withCredentials: true, // important for HTTP-only cookies
+        withCredentials: true, // must include cookies
       });
       setUser(res.data.user);
     } catch {
@@ -27,24 +28,30 @@ export default function Header() {
 
   useEffect(() => {
     fetchUser();
+  }, []);
 
-    // Optional: detect if redirected from Google OAuth and refetch
-    if (window.location.search.includes("code=")) {
-      fetchUser();
-      // Clean up URL
-      const url = new URL(window.location.href);
-      url.search = "";
-      window.history.replaceState({}, document.title, url.toString());
+  // ✅ If the user just came back from Google OAuth redirect
+  useEffect(() => {
+    // Check if there is a query parameter (like ?code=...) in URL
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("code")) {
+      // Remove query params from URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      fetchUser(); // re-fetch user info from backend
     }
   }, []);
 
+  // Redirect full page to backend Google OAuth
   const handleGoogleSignIn = () => {
     window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
   };
 
+  // Sign out by hitting backend to clear cookie
   const handleSignOut = async () => {
     try {
-      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/signout`, {}, {
+        withCredentials: true,
+      });
       setUser(null);
     } catch {
       console.error("Failed to sign out");

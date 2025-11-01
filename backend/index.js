@@ -1,4 +1,3 @@
-// backend/index.js
 import dotenv from "dotenv";
 import express from "express";
 import fs from "fs";
@@ -13,8 +12,17 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors({ origin: true, credentials: true })); // enable cookies
+// -------------------
+// CORS & Middleware
+// -------------------
+// Use environment variable for frontend URL
+const FRONTEND_URL = process.env.VITE_FRONTEND_URL || "http://localhost:5173";
+
+app.use(cors({
+  origin: FRONTEND_URL,  // allow only your frontend domain
+  credentials: true,     // allow sending cookies
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -49,11 +57,11 @@ console.log("✅ Firestore connection OK");
 // -------------------
 
 // Auth routes (Google OAuth & token verification)
-app.use("/auth", authRoutes);       // popup login route
-app.use("/api/auth", authRoutes);   // API token verification route
+app.use("/auth", authRoutes);       // frontend OAuth redirect route
+app.use("/api/auth", authRoutes);   // backend API token route (me/signout)
 
 // Firestore CRUD routes
-app.use("/api", firestoreRoutes(db)); // ⚡ pass db instance
+app.use("/api", firestoreRoutes(db));
 
 // Protected API routes
 app.use("/api", apiRoutes);
