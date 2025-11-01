@@ -16,8 +16,8 @@ const GOOGLE_REDIRECT_URI = isProduction
   ? "https://euonroia-backend.onrender.com/auth/google/callback"
   : "http://localhost:5000/auth/google/callback";
   
-const VITE_FRONTEND_URL = process.env.VITE_FRONTEND_URL?.trim() || (isProduction 
-  ? "https://euonroia.onrender.com/" 
+const VITE_FRONTEND_URL = process.env.VITE_FRONTEND_URL?.trim() || (isProduction
+  ? "https://euonroia.onrender.com/"
   : "http://localhost:5173");
 
 // 🧱 Initialize Google OAuth2 client
