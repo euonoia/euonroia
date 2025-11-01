@@ -15,10 +15,10 @@ const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_REDIRECT_URI = isProduction
   ? "https://euonroia-backend.onrender.com/auth/google/callback"
   : "http://localhost:5000/auth/google/callback";
-
-const VITE_FRONTEND_URL = isProduction
-  ? process.env.VITE_FRONTEND_URL || "https://euonroia.onrender.com/"
-  : "http://localhost:5173";
+  
+const VITE_FRONTEND_URL = process.env.VITE_FRONTEND_URL?.trim() || (isProduction 
+  ? "https://euonroia.onrender.com/" 
+  : "http://localhost:5173");
 
 // 🧱 Initialize Google OAuth2 client
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
