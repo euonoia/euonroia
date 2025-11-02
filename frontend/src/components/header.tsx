@@ -14,35 +14,31 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const { theme, toggleTheme } = useTheme();
 
-  const BACKEND_URL =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-  // ✅ Ensure Axios sends cookies for cross-origin requests
-  axios.defaults.withCredentials = true;
-
-  // Fetch logged-in user from backend
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`${BACKEND_URL}/auth/me`);
+        const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+          withCredentials: true, // important
+        });
         setUser(res.data.user);
       } catch (err) {
         console.log("No user session found:", err);
         setUser(null);
       }
     };
+
     fetchUser();
   }, [BACKEND_URL]);
 
-  // Trigger Google OAuth login (redirect to backend)
   const handleGoogleSignIn = () => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  // Sign out (clears backend cookie)
   const handleSignOut = async () => {
     try {
-      await axios.post(`${BACKEND_URL}/auth/signout`);
+      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
       setUser(null);
     } catch (err) {
       console.error("Sign out failed:", err);
@@ -52,24 +48,16 @@ export default function Header() {
   return (
     <header className="header">
       <h2 className="logo">Euonroia</h2>
-
       <div className="header-actions">
         {user ? (
           <div className="user-info">
-            {user.picture && (
-              <img src={user.picture} alt={user.name} className="user-avatar" />
-            )}
+            {user.picture && <img src={user.picture} alt={user.name} className="user-avatar" />}
             <span className="user-name">{user.name}</span>
-            <button className="btn" onClick={handleSignOut}>
-              Sign Out
-            </button>
+            <button className="btn" onClick={handleSignOut}>Sign Out</button>
           </div>
         ) : (
-          <button className="btn" onClick={handleGoogleSignIn}>
-            Continue with Google
-          </button>
+          <button className="btn" onClick={handleGoogleSignIn}>Continue with Google</button>
         )}
-
         <button className="btn theme-toggle" onClick={toggleTheme}>
           {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
         </button>

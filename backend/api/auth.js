@@ -1,17 +1,24 @@
+// backend/api/auth.js
 import { Router } from "express";
 import admin from "firebase-admin";
 import { OAuth2Client } from "google-auth-library";
+import cookieParser from "cookie-parser";
 
 const router = Router();
 
+// -----------------------------
+// Config
+// -----------------------------
 const isProduction = process.env.NODE_ENV === "production";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
-const FRONTEND_URL = process.env.VITE_FRONTEND_URL;
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI; // e.g., https://euonroia-backend.onrender.com/auth/google/callback
+const FRONTEND_URL = process.env.VITE_FRONTEND_URL; // e.g., https://euonroia.onrender.com
 
-// Initialize Google OAuth2 client
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
+
+// Middleware to parse cookies
+router.use(cookieParser());
 
 // -----------------------------
 // 1️⃣ Redirect to Google
@@ -29,7 +36,7 @@ router.get("/google", (req, res) => {
 });
 
 // -----------------------------
-// 2️⃣ Handle Google callback
+// 2️⃣ Google callback
 // -----------------------------
 router.get("/google/callback", async (req, res) => {
   try {
@@ -51,15 +58,14 @@ router.get("/google/callback", async (req, res) => {
       { merge: true }
     );
 
-    // Set session cookie
+    // Set cookie for session
     res.cookie("session", JSON.stringify({ id, name, email, picture }), {
       httpOnly: true,
-      secure: isProduction,         // true in production (HTTPS)
-      sameSite: isProduction ? "none" : "lax", // allow cross-site
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      secure: isProduction, // only over HTTPS
+      sameSite: "none", // cross-site cookie
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // Redirect to frontend
     res.redirect(FRONTEND_URL);
   } catch (err) {
     console.error("❌ Google OAuth error:", err);
@@ -68,7 +74,7 @@ router.get("/google/callback", async (req, res) => {
 });
 
 // -----------------------------
-// 3️⃣ Get current logged-in user
+// 3️⃣ Get current user
 // -----------------------------
 router.get("/me", (req, res) => {
   const cookie = req.cookies.session;
@@ -89,7 +95,7 @@ router.post("/signout", (req, res) => {
   res.clearCookie("session", {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    sameSite: "none",
   });
   res.json({ success: true });
 });
