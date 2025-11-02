@@ -12,7 +12,6 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const FRONTEND_URL = process.env.VITE_FRONTEND_URL || "http://localhost:5173";
 const isProduction = process.env.NODE_ENV === "production";
-const API_SECRET_KEY = process.env.API_SECRET_KEY ;
 
 // -----------------------------
 // Initialize Firebase Admin
@@ -20,6 +19,7 @@ const API_SECRET_KEY = process.env.API_SECRET_KEY ;
 let serviceAccount;
 
 if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+  // Use JSON from environment variable (deployed)
   try {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
   } catch (err) {
@@ -27,6 +27,7 @@ if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
     process.exit(1);
   }
 } else {
+  // Use local serviceAccountKey.json
   const serviceAccountPath =
     process.env.FIREBASE_SERVICE_ACCOUNT_PATH || "./serviceAccountKey.json";
 
@@ -48,53 +49,22 @@ admin.initializeApp({
 app.use(
   cors({
     origin: isProduction
-      ? "https://euonroia.onrender.com"
+      ? "https://euonroia.onrender.com" // your deployed frontend
       : "http://localhost:5173",
-    credentials: true,
+    credentials: true, // ✅ allow cookies
   })
 );
 app.use(cookieParser());
 app.use(express.json());
 
 // -----------------------------
-// Protect API routes with API key
-// -----------------------------
-app.use((req, res, next) => {
-  const key = req.headers["x-api-key"];
-  const publicPaths = [
-    "/auth/google",
-    "/auth/google/callback",
-  ];
-
-  if (publicPaths.some(path => req.path.startsWith(path))) {
-    return next(); // allow OAuth without API key
-  }
-
-  // Protect other /auth and /api routes
-  if ((req.path.startsWith("/auth") || req.path.startsWith("/api")) && (!key || key !== API_SECRET_KEY)) {
-    return res.status(403).json({ error: "Forbidden: Invalid API key" });
-  }
-
-  next();
-});
-
-
-// -----------------------------
 // Routes
 // -----------------------------
 app.use("/auth", authRoutes);
 
-// -----------------------------
-// Redirect browser visitors to frontend
-// -----------------------------
 app.get("/", (req, res) => {
-  const ua = req.headers["user-agent"] || "";
-  if (!ua.toLowerCase().includes("axios") && !ua.toLowerCase().includes("fetch")) {
-    return res.redirect(FRONTEND_URL);
-  }
-  res.json({ message: "Backend API is running" });
+  res.send("Backend is running!");
 });
-
 
 // -----------------------------
 // Start server
