@@ -1,4 +1,3 @@
-// backend/api/auth.js
 import { Router } from "express";
 import admin from "firebase-admin";
 import { OAuth2Client } from "google-auth-library";
@@ -8,10 +7,10 @@ const router = Router();
 const isProduction = process.env.NODE_ENV === "production";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const FRONTEND_URL = process.env.VITE_FRONTEND_URL;
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+const FRONTEND_URL = process.env.VITE_FRONTEND_URL;
 
-// Initialize OAuth client
+// Initialize Google OAuth2 client
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
 // -----------------------------
@@ -37,28 +36,27 @@ router.get("/google/callback", async (req, res) => {
     const { code } = req.query;
     if (!code) return res.redirect(FRONTEND_URL);
 
-    // Exchange code for tokens
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
-    // Get user info
     const { data } = await client.request({
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
+
     const { id, name, email, picture } = data;
 
-    // Store/update user in Firestore
+    // Save/update user in Firestore
     await admin.firestore().collection("users").doc(id).set(
       { id, name, email, picture, lastLogin: new Date() },
       { merge: true }
     );
 
-    // Set user info in cookie
-   res.cookie("session", JSON.stringify({ id, name, email, picture }), {
+    // Set session cookie
+    res.cookie("session", JSON.stringify({ id, name, email, picture }), {
       httpOnly: true,
-      secure: isProduction,        // true in production
-      sameSite: isProduction ? "none" : "lax", // allow cross-site cookies in prod
-      maxAge: 24 * 60 * 60 * 1000,
+      secure: isProduction,         // true in production (HTTPS)
+      sameSite: isProduction ? "none" : "lax", // allow cross-site
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
 
     // Redirect to frontend
@@ -70,7 +68,7 @@ router.get("/google/callback", async (req, res) => {
 });
 
 // -----------------------------
-// 3️⃣ Return current logged user
+// 3️⃣ Get current logged-in user
 // -----------------------------
 router.get("/me", (req, res) => {
   const cookie = req.cookies.session;
@@ -91,7 +89,7 @@ router.post("/signout", (req, res) => {
   res.clearCookie("session", {
     httpOnly: true,
     secure: isProduction,
-    sameSite: "lax",
+    sameSite: isProduction ? "none" : "lax",
   });
   res.json({ success: true });
 });

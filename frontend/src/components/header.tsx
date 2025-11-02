@@ -14,45 +14,35 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const { theme, toggleTheme } = useTheme();
 
-  // ✅ Automatically choose backend based on environment
   const BACKEND_URL =
-    import.meta.env.MODE === "production"
-      ? "https://euonroia-backend.onrender.com"
-      : "http://localhost:5000";
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  // ✅ Set axios defaults globally for consistency
+  // ✅ Ensure Axios sends cookies for cross-origin requests
   axios.defaults.withCredentials = true;
-  axios.defaults.baseURL = BACKEND_URL;
 
-  // ✅ Fetch current logged-in user from backend
+  // Fetch logged-in user from backend
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get("/auth/me");
-        if (res.data?.user) {
-          setUser(res.data.user);
-        } else {
-          setUser(null);
-        }
+        const res = await axios.get(`${BACKEND_URL}/auth/me`);
+        setUser(res.data.user);
       } catch (err) {
-        console.warn("No user session found:", err);
+        console.log("No user session found:", err);
         setUser(null);
       }
     };
-
     fetchUser();
-  }, []);
+  }, [BACKEND_URL]);
 
-  // 🟢 Trigger Google OAuth (redirects to backend)
+  // Trigger Google OAuth login (redirect to backend)
   const handleGoogleSignIn = () => {
-    // backend handles redirect to Google, sets cookie, then returns here
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  // 🔴 Sign out (clear cookie on backend)
+  // Sign out (clears backend cookie)
   const handleSignOut = async () => {
     try {
-      await axios.post("/auth/signout");
+      await axios.post(`${BACKEND_URL}/auth/signout`);
       setUser(null);
     } catch (err) {
       console.error("Sign out failed:", err);
@@ -67,11 +57,7 @@ export default function Header() {
         {user ? (
           <div className="user-info">
             {user.picture && (
-              <img
-                src={user.picture}
-                alt={user.name}
-                className="user-avatar"
-              />
+              <img src={user.picture} alt={user.name} className="user-avatar" />
             )}
             <span className="user-name">{user.name}</span>
             <button className="btn" onClick={handleSignOut}>
