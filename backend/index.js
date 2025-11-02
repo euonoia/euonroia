@@ -12,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const FRONTEND_URL = process.env.VITE_FRONTEND_URL || "http://localhost:5173";
 const isProduction = process.env.NODE_ENV === "production";
-const API_SECRET_KEY = process.env.API_SECRET_KEY || "supersecretkey";
+const API_SECRET_KEY = process.env.API_SECRET_KEY ;
 
 // -----------------------------
 // Initialize Firebase Admin
@@ -61,16 +61,23 @@ app.use(express.json());
 // -----------------------------
 app.use((req, res, next) => {
   const key = req.headers["x-api-key"];
-  if (
-    req.path.startsWith("/auth") || 
-    req.path.startsWith("/api")
-  ) {
-    if (!key || key !== API_SECRET_KEY) {
-      return res.status(403).json({ error: "Forbidden: Invalid API key" });
-    }
+  const publicPaths = [
+    "/auth/google",
+    "/auth/google/callback",
+  ];
+
+  if (publicPaths.some(path => req.path.startsWith(path))) {
+    return next(); // allow OAuth without API key
   }
+
+  // Protect other /auth and /api routes
+  if ((req.path.startsWith("/auth") || req.path.startsWith("/api")) && (!key || key !== API_SECRET_KEY)) {
+    return res.status(403).json({ error: "Forbidden: Invalid API key" });
+  }
+
   next();
 });
+
 
 // -----------------------------
 // Routes
