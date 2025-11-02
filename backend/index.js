@@ -19,7 +19,7 @@ const app = express();
 const FRONTEND_URL = process.env.VITE_FRONTEND_URL || "http://localhost:5173";
 
 app.use(cors({
-  origin: process.env.VITE_FRONTEND_URL, // must match frontend exactly
+  origin: process.env.VITE_FRONTEND_URL,
   credentials: true,
 }));
 

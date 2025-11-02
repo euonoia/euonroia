@@ -54,11 +54,11 @@ router.get("/google/callback", async (req, res) => {
     );
 
     // Set user info in cookie
-    res.cookie("session", JSON.stringify({ id, name, email, picture }), {
+   res.cookie("session", JSON.stringify({ id, name, email, picture }), {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      secure: isProduction,        // true in production
+      sameSite: isProduction ? "none" : "lax", // allow cross-site cookies in prod
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     // Redirect to frontend

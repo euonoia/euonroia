@@ -14,33 +14,45 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const { theme, toggleTheme } = useTheme();
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  // ✅ Automatically choose backend based on environment
+  const BACKEND_URL =
+    import.meta.env.MODE === "production"
+      ? "https://euonroia-backend.onrender.com"
+      : "http://localhost:5000";
+
+  // ✅ Set axios defaults globally for consistency
+  axios.defaults.withCredentials = true;
+  axios.defaults.baseURL = BACKEND_URL;
 
   // ✅ Fetch current logged-in user from backend
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-          withCredentials: true, // send cookies
-        });
-        setUser(res.data.user);
-      } catch {
+        const res = await axios.get("/auth/me");
+        if (res.data?.user) {
+          setUser(res.data.user);
+        } else {
+          setUser(null);
+        }
+      } catch (err) {
+        console.warn("No user session found:", err);
         setUser(null);
       }
     };
 
     fetchUser();
-  }, [BACKEND_URL]);
+  }, []);
 
   // 🟢 Trigger Google OAuth (redirects to backend)
   const handleGoogleSignIn = () => {
+    // backend handles redirect to Google, sets cookie, then returns here
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
   // 🔴 Sign out (clear cookie on backend)
   const handleSignOut = async () => {
     try {
-      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+      await axios.post("/auth/signout");
       setUser(null);
     } catch (err) {
       console.error("Sign out failed:", err);
