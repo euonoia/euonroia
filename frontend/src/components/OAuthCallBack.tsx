@@ -7,23 +7,13 @@ export default function OAuthCallback() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
-
     if (token) {
-      // Store Firebase custom token
-      localStorage.setItem("idToken", token);
-
-      // Optionally, post message if opened as popup
-      if (window.opener) {
-        window.opener.postMessage({ user: { token } }, window.location.origin);
-        window.close();
-      } else {
-        navigate("/dashboard");
-      }
-    } else {
-      // No token, redirect to login
-      navigate("/");
+      localStorage.setItem("authToken", token);
     }
-  }, []);
+    // Remove token from URL for cleanliness
+    window.history.replaceState({}, document.title, "/");
+    navigate("/"); // redirect to landing page or dashboard
+  }, [navigate]);
 
-  return <div>Logging in...</div>;
+  return <p>Logging you in...</p>;
 }

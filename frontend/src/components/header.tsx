@@ -17,45 +17,43 @@ export default function Header() {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  // -----------------------------
-  // Helper: get JWT from localStorage
-  // -----------------------------
+  // Helper to get token from localStorage
   const getToken = () => localStorage.getItem("authToken");
 
   // -----------------------------
-  // Fetch current user from backend
-  // -----------------------------
-  const fetchUser = async (token: string) => {
-    try {
-      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setUser(res.data.user);
-    } catch (err) {
-      console.log("No user session found:", err);
-      setUser(null);
-    }
-  };
-
-  useEffect(() => {
-    const token = getToken();
-    if (token) fetchUser(token);
-  }, [BACKEND_URL]);
-
-  // -----------------------------
-  // Handle OAuth redirect (JWT in URL)
+  // Handle OAuth redirect token
   // -----------------------------
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
+
     if (token) {
-      // Save JWT to localStorage
       localStorage.setItem("authToken", token);
-      // Clean URL
+      // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
-      // Fetch user with the new token
-      fetchUser(token);
     }
+  }, []);
+
+  // -----------------------------
+  // Fetch current user
+  // -----------------------------
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = getToken();
+      if (!token) return;
+
+      try {
+        const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUser(res.data.user);
+      } catch (err) {
+        console.log("No user session found:", err);
+        setUser(null);
+      }
+    };
+
+    fetchUser();
   }, [BACKEND_URL]);
 
   // -----------------------------
@@ -68,9 +66,23 @@ export default function Header() {
   // -----------------------------
   // Sign out
   // -----------------------------
-  const handleSignOut = () => {
-    localStorage.removeItem("authToken");
-    setUser(null);
+  const handleSignOut = async () => {
+    const token = getToken();
+    if (!token) return;
+
+    try {
+      await axios.post(
+        `${BACKEND_URL}/auth/signout`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      localStorage.removeItem("authToken");
+      setUser(null);
+    } catch (err) {
+      console.error("Sign out failed:", err);
+    }
   };
 
   return (
