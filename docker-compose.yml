@@ -1,19 +1,19 @@
 services:
- frontend:
-  build:
-    context: ./frontend
-    dockerfile: Dockerfile
-  environment:
-    - VITE_BACKEND_URL=https://euonroia-backend.onrender.com
-  ports:
-    - "8080:80"
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      - VITE_BACKEND_URL=https://euonroia-backend.onrender.com
+    ports:
+      - "8080:80"
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile   
+      dockerfile: Dockerfile
     ports:
-      - "5000:5000"          
+      - "5000:5000"
     env_file:
       - ./backend/.env
     volumes:

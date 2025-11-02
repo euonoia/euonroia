@@ -1,22 +1,29 @@
-// backend/api/auth.js
 import { Router } from "express";
 import admin from "firebase-admin";
 import { OAuth2Client } from "google-auth-library";
+import jwt from "jsonwebtoken";
 
 const router = Router();
 
-const isProduction = process.env.NODE_ENV === "production";
+// ✅ Environment config
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const FRONTEND_URL = process.env.VITE_FRONTEND_URL;
-const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+const FRONTEND_URL =
+  process.env.FRONTEND_URL || "http://localhost:5173";
+const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
 
-// Initialize OAuth client
+// Automatically pick correct redirect URI
+const GOOGLE_REDIRECT_URI =
+  process.env.NODE_ENV === "production"
+    ? `${process.env.BACKEND_URL}/auth/google/callback`
+    : "http://localhost:5000/auth/google/callback";
+
+// 🔐 Initialize OAuth2 Client
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
-// -----------------------------
-// 1️⃣ Redirect to Google
-// -----------------------------
+//
+// 1️⃣ Redirect user to Google login
+//
 router.get("/google", (req, res) => {
   const url = client.generateAuthUrl({
     access_type: "offline",
@@ -29,71 +36,80 @@ router.get("/google", (req, res) => {
   res.redirect(url);
 });
 
-// -----------------------------
-// 2️⃣ Handle Google callback
-// -----------------------------
+//
+// 2️⃣ Handle Google callback → issue JWT
+//
 router.get("/google/callback", async (req, res) => {
   try {
     const { code } = req.query;
-    if (!code) return res.redirect(FRONTEND_URL);
+    if (!code) throw new Error("Missing authorization code");
 
-    // Exchange code for tokens
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
-    // Get user info
-    const { data } = await client.request({
+    const { data: userInfo } = await client.request({
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
-    const { id, name, email, picture } = data;
 
-    // Store/update user in Firestore
+    const { id, name, email, picture } = userInfo;
+
+    // Save to Firestore
     await admin.firestore().collection("users").doc(id).set(
-      { id, name, email, picture, lastLogin: new Date() },
+      {
+        id,
+        name,
+        email,
+        picture,
+        lastLogin: new Date(),
+      },
       { merge: true }
     );
 
-    // Set user info in cookie
-    res.cookie("session", JSON.stringify({ id, name, email, picture }), {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    // 🔑 Generate your own JWT
+    const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, {
+      expiresIn: "7d",
     });
 
-    // Redirect to frontend
-    res.redirect(FRONTEND_URL);
+    // ✅ Redirect user back to frontend
+    const redirectUrl = `${FRONTEND_URL}/oauth-callback?token=${token}`;
+    console.log(`Redirecting to frontend: ${redirectUrl}`);
+    res.redirect(redirectUrl);
   } catch (err) {
-    console.error("❌ Google OAuth error:", err);
+    console.error("Google OAuth error:", err);
     res.status(500).send("Google OAuth failed");
   }
 });
 
-// -----------------------------
-// 3️⃣ Return current logged user
-// -----------------------------
-router.get("/me", (req, res) => {
-  const cookie = req.cookies.session;
-  if (!cookie) return res.status(401).json({ error: "Not logged in" });
+//
+// 3️⃣ Protected route (check JWT)
+//
+router.get("/profile", (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Missing token" });
+  }
 
+  const token = authHeader.split(" ")[1];
   try {
-    const user = JSON.parse(cookie);
-    res.json({ user });
-  } catch {
-    res.status(401).json({ error: "Invalid session" });
+    const decoded = jwt.verify(token, JWT_SECRET);
+    res.json({ user: decoded });
+  } catch (err) {
+    res.status(401).json({ error: "Invalid token" });
   }
 });
 
-// -----------------------------
-// 4️⃣ Logout
-// -----------------------------
-router.post("/signout", (req, res) => {
-  res.clearCookie("session", {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: "lax",
-  });
-  res.json({ success: true });
-});
+router.get("/me", (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "No token provided" });
+  }
 
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    res.json({ user: decoded });
+  } catch {
+    res.status(401).json({ error: "Invalid token" });
+  }
+});
 export default router;
