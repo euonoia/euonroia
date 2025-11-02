@@ -9,12 +9,21 @@ export default function OAuthCallback() {
     const token = params.get("token");
 
     if (token) {
-      localStorage.setItem("jwt", token);
-      navigate("/");
+      // Store Firebase custom token
+      localStorage.setItem("idToken", token);
+
+      // Optionally, post message if opened as popup
+      if (window.opener) {
+        window.opener.postMessage({ user: { token } }, window.location.origin);
+        window.close();
+      } else {
+        navigate("/dashboard");
+      }
     } else {
+      // No token, redirect to login
       navigate("/");
     }
-  }, [navigate]);
+  }, []);
 
-  return <div>Signing you in...</div>;
+  return <div>Logging in...</div>;
 }

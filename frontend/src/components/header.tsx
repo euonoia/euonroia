@@ -14,39 +14,37 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const { theme, toggleTheme } = useTheme();
 
-  const BACKEND_URL =
-    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  // 🟢 Load user if JWT exists
+  // ✅ Fetch current logged-in user from backend
   useEffect(() => {
-    const token = localStorage.getItem("jwt");
-    if (!token) return;
-
     const fetchUser = async () => {
       try {
         const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true, // send cookies
         });
         setUser(res.data.user);
-      } catch (err) {
-        console.error("Error fetching user:", err);
+      } catch {
         setUser(null);
-        localStorage.removeItem("jwt");
       }
     };
 
     fetchUser();
   }, [BACKEND_URL]);
 
-  // 🟡 Start Google OAuth flow
+  // 🟢 Trigger Google OAuth (redirects to backend)
   const handleGoogleSignIn = () => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  // 🔴 Sign out
-  const handleSignOut = () => {
-    localStorage.removeItem("jwt");
-    setUser(null);
+  // 🔴 Sign out (clear cookie on backend)
+  const handleSignOut = async () => {
+    try {
+      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+      setUser(null);
+    } catch (err) {
+      console.error("Sign out failed:", err);
+    }
   };
 
   return (
