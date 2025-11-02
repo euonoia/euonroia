@@ -1,3 +1,4 @@
+// frontend/src/components/Header.tsx
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { useTheme } from "../context/ThemeContext";
@@ -14,13 +15,14 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const { theme, toggleTheme } = useTheme();
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
+  // ✅ Fetch current logged-in user from backend
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-          withCredentials: true, // important
+          withCredentials: true, // send cookies
         });
         setUser(res.data.user);
       } catch (err) {
@@ -32,13 +34,19 @@ export default function Header() {
     fetchUser();
   }, [BACKEND_URL]);
 
+  // 🟢 Trigger Google OAuth (redirects to backend)
   const handleGoogleSignIn = () => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
+  // 🔴 Sign out (clear cookie on backend)
   const handleSignOut = async () => {
     try {
-      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+      await axios.post(
+        `${BACKEND_URL}/auth/signout`,
+        {},
+        { withCredentials: true } // must include credentials to clear cookie
+      );
       setUser(null);
     } catch (err) {
       console.error("Sign out failed:", err);
@@ -48,16 +56,28 @@ export default function Header() {
   return (
     <header className="header">
       <h2 className="logo">Euonroia</h2>
+
       <div className="header-actions">
         {user ? (
           <div className="user-info">
-            {user.picture && <img src={user.picture} alt={user.name} className="user-avatar" />}
+            {user.picture && (
+              <img
+                src={user.picture}
+                alt={user.name}
+                className="user-avatar"
+              />
+            )}
             <span className="user-name">{user.name}</span>
-            <button className="btn" onClick={handleSignOut}>Sign Out</button>
+            <button className="btn" onClick={handleSignOut}>
+              Sign Out
+            </button>
           </div>
         ) : (
-          <button className="btn" onClick={handleGoogleSignIn}>Continue with Google</button>
+          <button className="btn" onClick={handleGoogleSignIn}>
+            Continue with Google
+          </button>
         )}
+
         <button className="btn theme-toggle" onClick={toggleTheme}>
           {theme === "light" ? "🌙 Dark Mode" : "☀️ Light Mode"}
         </button>
