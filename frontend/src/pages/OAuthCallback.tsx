@@ -10,19 +10,12 @@ export default function OAuthCallback() {
     const token = params.get("token");
 
     if (token) {
-      // Store JWT
       localStorage.setItem("authToken", token);
-      // Clean URL
-      window.history.replaceState({}, document.title, "/");
+      window.history.replaceState({}, document.title, "/"); // clean URL
     }
 
-    // Redirect to landing page or dashboard
-    navigate("/");
+    navigate("/"); // redirect to home
   }, [navigate]);
 
-  return (
-    <div style={{ textAlign: "center", marginTop: "2rem" }}>
-      <h2>Logging you in...</h2>
-    </div>
-  );
+  return <div>Logging you in...</div>;
 }
