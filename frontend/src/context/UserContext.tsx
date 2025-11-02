@@ -26,7 +26,7 @@ export const UserProvider = ({ children }: Props) => {
   const [loading, setLoading] = useState(true);
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-  const API_SECRET_KEY = import.meta.env.VITE_API_SECRET_KEY || "supersecretkey"; // must match backend
+  const API_SECRET_KEY = import.meta.env.API_SECRET_KEY || "supersecretkey"; // must match backend
 
   // Get JWT from localStorage
   const getToken = () => localStorage.getItem("authToken");
