@@ -56,11 +56,10 @@ router.get("/google/callback", async (req, res) => {
     // Generate JWT
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
-    // Redirect to frontend with token
-    res.redirect(`${FRONTEND_URL}/oauth-callback?token=${token}`);
+  res.redirect(`${FRONTEND_URL}/oauth-callback?token=${token}`);
   } catch (err) {
-    console.error("Google OAuth error:", err);
-    res.status(500).send("Google OAuth failed");
+    console.error("OAuth callback error:", err);
+    res.redirect(FRONTEND_URL);
   }
 });
 

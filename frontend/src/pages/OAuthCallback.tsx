@@ -8,11 +8,21 @@ export default function OAuthCallback() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
+
     if (token) {
-      localStorage.setItem("jwt", token); // save JWT for API calls
+      // Store JWT
+      localStorage.setItem("authToken", token);
+      // Clean URL
+      window.history.replaceState({}, document.title, "/");
     }
-    navigate("/"); // redirect to home
+
+    // Redirect to landing page or dashboard
+    navigate("/");
   }, [navigate]);
 
-  return <div>Logging in...</div>;
+  return (
+    <div style={{ textAlign: "center", marginTop: "2rem" }}>
+      <h2>Logging you in...</h2>
+    </div>
+  );
 }
