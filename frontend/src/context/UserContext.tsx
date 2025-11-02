@@ -26,11 +26,12 @@ export const UserProvider = ({ children }: Props) => {
   const [loading, setLoading] = useState(true);
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  const API_SECRET_KEY = import.meta.env.VITE_API_SECRET_KEY || "supersecretkey"; // must match backend
 
   // Get JWT from localStorage
   const getToken = () => localStorage.getItem("authToken");
 
-  // Fetch current user with token
+  // Fetch current user with token + API key
   const fetchUser = async (token?: string) => {
     const authToken = token || getToken();
     if (!authToken) {
@@ -41,7 +42,10 @@ export const UserProvider = ({ children }: Props) => {
 
     try {
       const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${authToken}` },
+        headers: { 
+          Authorization: `Bearer ${authToken}`,
+          "x-api-key": API_SECRET_KEY,
+        },
       });
       setUser(res.data.user);
     } catch (err) {
@@ -81,6 +85,7 @@ export const UserProvider = ({ children }: Props) => {
     </UserContext.Provider>
   );
 };
+
 
 // Hook to access context
 export const useUser = () => {
