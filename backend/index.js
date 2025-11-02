@@ -88,15 +88,6 @@ app.get("/", (req, res) => {
   res.json({ message: "Backend API is running" });
 });
 
-// Optional: catch-all to redirect unknown paths to frontend
-app.get("*", (req, res) => {
-  // Exclude API/auth routes
-  if (!req.path.startsWith("/auth") && !req.path.startsWith("/api")) {
-    return res.redirect(FRONTEND_URL);
-  }
-  // If it matches /auth or /api, we just 404
-  res.status(404).send("Not found");
-});
 
 // -----------------------------
 // Start server
