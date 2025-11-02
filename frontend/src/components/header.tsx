@@ -17,12 +17,20 @@ export default function Header() {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  // ✅ Fetch current logged-in user from backend
+  // ✅ Load JWT from localStorage
+  const getToken = () => localStorage.getItem("authToken");
+
+  // -----------------------------
+  // Fetch current user
+  // -----------------------------
   useEffect(() => {
     const fetchUser = async () => {
+      const token = getToken();
+      if (!token) return;
+
       try {
         const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-          withCredentials: true, // send cookies
+          headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data.user);
       } catch (err) {
@@ -34,23 +42,42 @@ export default function Header() {
     fetchUser();
   }, [BACKEND_URL]);
 
-  // 🟢 Trigger Google OAuth (redirects to backend)
+  // -----------------------------
+  // Handle OAuth redirect token
+  // -----------------------------
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (token) {
+      localStorage.setItem("authToken", token);
+      window.history.replaceState({}, document.title, window.location.pathname);
+      const fetchUser = async () => {
+        try {
+          const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+            headers: { Authorization: `Bearer token` },
+          });
+          setUser(res.data.user);
+        } catch {
+          setUser(null);
+        }
+      };
+      fetchUser();
+    }
+  }, [BACKEND_URL]);
+
+  // -----------------------------
+  // Google Sign-In
+  // -----------------------------
   const handleGoogleSignIn = () => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  // 🔴 Sign out (clear cookie on backend)
-  const handleSignOut = async () => {
-    try {
-      await axios.post(
-        `${BACKEND_URL}/auth/signout`,
-        {},
-        { withCredentials: true } // must include credentials to clear cookie
-      );
-      setUser(null);
-    } catch (err) {
-      console.error("Sign out failed:", err);
-    }
+  // -----------------------------
+  // Sign out
+  // -----------------------------
+  const handleSignOut = () => {
+    localStorage.removeItem("authToken");
+    setUser(null);
   };
 
   return (
@@ -60,13 +87,7 @@ export default function Header() {
       <div className="header-actions">
         {user ? (
           <div className="user-info">
-            {user.picture && (
-              <img
-                src={user.picture}
-                alt={user.name}
-                className="user-avatar"
-              />
-            )}
+            {user.picture && <img src={user.picture} alt={user.name} className="user-avatar" />}
             <span className="user-name">{user.name}</span>
             <button className="btn" onClick={handleSignOut}>
               Sign Out

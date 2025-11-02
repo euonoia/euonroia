@@ -2,17 +2,17 @@
 import { Router } from "express";
 import admin from "firebase-admin";
 import { OAuth2Client } from "google-auth-library";
-import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
 
 const router = Router();
-const isProduction = process.env.NODE_ENV === "production";
 
+const isProduction = process.env.NODE_ENV === "production";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
 const FRONTEND_URL = process.env.VITE_FRONTEND_URL;
+const JWT_SECRET = process.env.JWT_SECRET;
 
-// Initialize Google OAuth2
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
 // -----------------------------
@@ -35,7 +35,7 @@ router.get("/google", (req, res) => {
 // -----------------------------
 router.get("/google/callback", async (req, res) => {
   try {
-    const { code } = req.query;
+    const code = req.query.code;
     if (!code) return res.redirect(FRONTEND_URL);
 
     const { tokens } = await client.getToken(code);
@@ -53,46 +53,33 @@ router.get("/google/callback", async (req, res) => {
       { merge: true }
     );
 
-    // ✅ Store user session in HTTP-only cookie
-    res.cookie("session", JSON.stringify({ id, name, email, picture }), {
-      httpOnly: true,                     // cannot be read by JS
-      secure: isProduction,               // HTTPS only in production
-      sameSite: isProduction ? "none" : "lax", // must be none for cross-site cookies
-      maxAge: 24 * 60 * 60 * 1000,        // 1 day
-    });
+    // Generate JWT
+    const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
-    res.redirect(FRONTEND_URL);
+    // Redirect to frontend with token
+    res.redirect(`${FRONTEND_URL}/oauth-callback?token=${token}`);
   } catch (err) {
-    console.error("❌ Google OAuth error:", err);
+    console.error("Google OAuth error:", err);
     res.status(500).send("Google OAuth failed");
   }
 });
 
 // -----------------------------
-// 3️⃣ Get current logged user
+// 3️⃣ Protected route
 // -----------------------------
 router.get("/me", (req, res) => {
-  const cookie = req.cookies.session;
-  if (!cookie) return res.status(401).json({ error: "Not logged in" });
-
-  try {
-    const user = JSON.parse(cookie);
-    res.json({ user });
-  } catch {
-    res.status(401).json({ error: "Invalid session" });
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Not logged in" });
   }
-});
 
-// -----------------------------
-// 4️⃣ Sign out
-// -----------------------------
-router.post("/signout", (req, res) => {
-  res.clearCookie("session", {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-  });
-  res.json({ success: true });
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    res.json({ user: decoded });
+  } catch (err) {
+    res.status(401).json({ error: "Invalid token" });
+  }
 });
 
 export default router;
