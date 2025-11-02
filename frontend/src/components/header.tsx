@@ -17,51 +17,44 @@ export default function Header() {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  // ✅ Load JWT from localStorage
+  // -----------------------------
+  // Helper: get JWT from localStorage
+  // -----------------------------
   const getToken = () => localStorage.getItem("authToken");
 
   // -----------------------------
-  // Fetch current user
+  // Fetch current user from backend
   // -----------------------------
+  const fetchUser = async (token: string) => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setUser(res.data.user);
+    } catch (err) {
+      console.log("No user session found:", err);
+      setUser(null);
+    }
+  };
+
   useEffect(() => {
-    const fetchUser = async () => {
-      const token = getToken();
-      if (!token) return;
-
-      try {
-        const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUser(res.data.user);
-      } catch (err) {
-        console.log("No user session found:", err);
-        setUser(null);
-      }
-    };
-
-    fetchUser();
+    const token = getToken();
+    if (token) fetchUser(token);
   }, [BACKEND_URL]);
 
   // -----------------------------
-  // Handle OAuth redirect token
+  // Handle OAuth redirect (JWT in URL)
   // -----------------------------
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
     if (token) {
+      // Save JWT to localStorage
       localStorage.setItem("authToken", token);
+      // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
-      const fetchUser = async () => {
-        try {
-          const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-            headers: { Authorization: `Bearer token` },
-          });
-          setUser(res.data.user);
-        } catch {
-          setUser(null);
-        }
-      };
-      fetchUser();
+      // Fetch user with the new token
+      fetchUser(token);
     }
   }, [BACKEND_URL]);
 
