@@ -80,5 +80,12 @@ router.get("/me", (req, res) => {
     res.status(401).json({ error: "Invalid token" });
   }
 });
+// -----------------------------
+// 4️⃣ Logout route
+// -----------------------------
+router.post("/signout", (req, res) => {
+  // Since JWT is stateless, just tell client to remove it
+  res.json({ success: true, message: "Logged out" });
+});
 
 export default router;
