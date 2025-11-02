@@ -1,31 +1,22 @@
 // backend/api/auth.js
-const { Router } = require("express");
-const admin = require("firebase-admin");
-const { OAuth2Client } = require("google-auth-library");
-const cookieParser = require("cookie-parser");
+import { Router } from "express";
+import admin from "firebase-admin";
+import { OAuth2Client } from "google-auth-library";
+import cookieParser from "cookie-parser";
 
 const router = Router();
-
-// -----------------------------
-// Config
-// -----------------------------
 const isProduction = process.env.NODE_ENV === "production";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || "http://localhost:5000/auth/google/callback";
-const FRONTEND_URL = process.env.VITE_FRONTEND_URL || "http://localhost:5173";
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
+const FRONTEND_URL = process.env.VITE_FRONTEND_URL;
 
-// -----------------------------
-// Initialize Google OAuth client
-// -----------------------------
+// Initialize Google OAuth2
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
-// Middleware for parsing cookies
-router.use(cookieParser());
-
 // -----------------------------
-// 1️⃣ Redirect to Google login
+// 1️⃣ Redirect to Google
 // -----------------------------
 router.get("/google", (req, res) => {
   const url = client.generateAuthUrl({
@@ -56,16 +47,18 @@ router.get("/google/callback", async (req, res) => {
 
     const { id, name, email, picture } = data;
 
+    // Save/update user in Firestore
     await admin.firestore().collection("users").doc(id).set(
       { id, name, email, picture, lastLogin: new Date() },
       { merge: true }
     );
 
+    // ✅ Store user session in HTTP-only cookie
     res.cookie("session", JSON.stringify({ id, name, email, picture }), {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
-      maxAge: 24 * 60 * 60 * 1000,
+      httpOnly: true,                     // cannot be read by JS
+      secure: isProduction,               // HTTPS only in production
+      sameSite: isProduction ? "none" : "lax", // must be none for cross-site cookies
+      maxAge: 24 * 60 * 60 * 1000,        // 1 day
     });
 
     res.redirect(FRONTEND_URL);
@@ -91,7 +84,7 @@ router.get("/me", (req, res) => {
 });
 
 // -----------------------------
-// 4️⃣ Logout
+// 4️⃣ Sign out
 // -----------------------------
 router.post("/signout", (req, res) => {
   res.clearCookie("session", {
@@ -102,4 +95,4 @@ router.post("/signout", (req, res) => {
   res.json({ success: true });
 });
 
-module.exports = router;
+export default router;
