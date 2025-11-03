@@ -12,7 +12,7 @@ const LandingPage: FC = () => {
       <main className="landing-main">
         {/* Hero Section */}
         <section className="hero-section">
-          <h1>Welcome to Euonroia</h1>
+          <h1>Welcome to Euonroi</h1>
           <p>Learn to code, even without a laptop. Start your journey today!</p>
           <Link to="/signup" className="btn-primary">Get Started</Link>
         </section>
