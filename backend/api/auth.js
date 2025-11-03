@@ -16,7 +16,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // Google redirect URI depends on environment
 const GOOGLE_REDIRECT_URI = isProduction
-  ? "https://euonroia-backend.onrender.com/auth/google/callback"
+  ? "https://euonroia-secured.onrender.com/auth/google/callback"
   : "http://localhost:5000/auth/google/callback";
 
 // Frontend URL depends on environment
