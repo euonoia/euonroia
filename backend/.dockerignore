@@ -1,5 +1,15 @@
+# Ignore local node modules
 node_modules
-npm-debug.log
-Dockerfile
-.dockerignore
+
+# Ignore system or editor files
+.DS_Store
 .env
+*.log
+
+# Ignore git stuff
+.git
+.gitignore
+
+# Ignore local build outputs
+dist
+build
