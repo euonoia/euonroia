@@ -69,11 +69,12 @@ export const UserProvider = ({ children }: Props) => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  // Sign out
   const signOut = () => {
-    localStorage.removeItem("authToken");
-    setUser(null);
-  };
+  localStorage.removeItem("authToken");
+  setUser(null);
+  window.location.href = "/"; // redirect to landing page
+};
+
 
   return (
     <UserContext.Provider value={{ user, loading, signOut, signInWithGoogle }}>

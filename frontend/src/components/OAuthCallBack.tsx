@@ -12,7 +12,7 @@ export default function OAuthCallback() {
     }
     // Remove token from URL for cleanliness
     window.history.replaceState({}, document.title, "/");
-    navigate("/"); // redirect to landing page or dashboard
+    navigate("/dashboard"); // redirect to landing page or dashboard
   }, [navigate]);
 
   return <p>Logging you in...</p>;
