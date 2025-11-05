@@ -1,117 +1,233 @@
 @import "../theme.css";
 
+/* =============================
+   Landing Container
+============================= */
 .landing-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--bg-main);
   color: var(--text-primary);
+  font-family: var(--font-family-base);
 }
-
 .landing-main {
-  flex: 1; /* Makes main content grow and pushes footer to bottom */
+  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: var(--space-12); /* spacing between hero and features */
+  padding-bottom: var(--space-8); /* ensures space before footer */
 }
-
-/* Hero Section */
+/* =============================
+   Hero Section
+============================= */
 .hero-section {
-  text-align: center;
-  padding: var(--space-8) var(--space-4);
-  background-color: var(--bg-card);
-  box-shadow: var(--shadow-md);
-}
-
-.hero-section h1 {
-  font-size: var(--font-size-3xl);
-  margin-bottom: var(--space-3);
-  color: var(--accent);
-}
-
-.hero-section p {
-  font-size: var(--font-size-lg);
-  margin-bottom: var(--space-5);
-  color: var(--text-secondary);
-}
-
-/* Features Section */
-.features-section {
   display: flex;
   justify-content: center;
-  flex-wrap: wrap;
-  gap: var(--space-6);
-  padding: var(--space-8) var(--space-4);
+  align-items: center;
+  padding: var(--space-16) var(--space-4);
+  background-color: var(--bg-main); /* Plain white for light mode, dark for dark mode */
+  min-height: 90vh; /* Almost full screen */
+  position: relative;
+  overflow: hidden;
 }
 
-.feature-card {
-  max-width: 300px;
-  width: 100%;
-  background-color: var(--bg-card);
-  padding: var(--space-5);
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
+.hero-content {
+  max-width: 700px;
   text-align: center;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 1; /* ensures it's above background elements */
+}
+
+.hero-content h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: var(--space-4);
+  line-height: 1.2;
+}
+
+.hero-content p {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-6);
+  line-height: 1.6;
+}
+
+/* Hero buttons */
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  color: var(--bg-card);
+  padding: var(--space-3) var(--space-8);
+  border-radius: 12px;
+  font-weight: 600;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  padding: var(--space-3) var(--space-8);
+  border-radius: 12px;
+  font-weight: 600;
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--accent);
+  color: var(--bg-card);
+  transform: translateY(-2px);
+}
+
+/* =============================
+   Features Section
+============================= */
+.features-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-6);
+  padding: var(--space-12) var(--space-4);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle background shapes using ::before and ::after */
+.features-section::before,
+.features-section::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.15;
+  z-index: 0;
+}
+
+.features-section::before {
+  width: 300px;
+  height: 300px;
+  background: var(--accent);
+  top: -100px;
+  left: -100px;
+}
+
+.features-section::after {
+  width: 400px;
+  height: 400px;
+  background: var(--color-secondary);
+  bottom: -150px;
+  right: -150px;
+}
+
+/* Feature Cards */
+.feature-card {
+  background-color: var(--bg-card);
+  padding: var(--space-6);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  position: relative;
+  z-index: 1; /* ensures cards are above background shapes */
 }
 
 .feature-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-4);
+  color: var(--accent); /* optional color to match theme */
 }
 
 .feature-card h2 {
   font-size: var(--font-size-xl);
   color: var(--accent);
-  margin-bottom: var(--space-3);
+  margin: var(--space-2) 0;
 }
 
-/* CTA Section */
-.cta-section {
-  text-align: center;
-  padding: var(--space-8) var(--space-4);
-  background-color: var(--bg-card);
+.feature-card p {
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
-/* Buttons */
-.btn-primary, .btn-success {
-  display: inline-block;
-  padding: var(--space-3) var(--space-6);
-  border-radius: 8px;
-  color: #fff;
-  text-decoration: none;
-  font-weight: 600;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+/* =============================
+   Responsive Design
+============================= */
+@media (max-width: 480px){
+  .landing-main {
+    gap: var(--space-8);
+  }
 }
 
-.btn-primary {
-  background-color: var(--accent);
-}
-.btn-primary:hover {
-  background-color: var(--accent-hover);
-  transform: translateY(-1px);
-}
-
-.btn-success {
-  background-color: var(--color-success);
-}
-.btn-success:hover {
-  background-color: #16a34a;
-  transform: translateY(-1px);
+@media (max-width: 1024px) {
+  .hero-content h1 {
+    font-size: var(--font-size-2xl);
+  }
+  .hero-content p {
+    font-size: var(--font-size-base);
+  }
 }
 
-/* ==============================
-   RESPONSIVE BREAKPOINTS
-   ============================== */
-@media(max-width:1024px){
-  .features-section { gap: var(--space-4); }
+@media (max-width: 480px) {
+  .hero-section {
+    padding: var(--space-12) var(--space-4);
+  }
+  .hero-content h1 {
+    font-size: var(--font-size-xl);
+  }
+  .hero-content p {
+    font-size: var(--font-size-sm);
+  }
+  .hero-buttons {
+    flex-direction: column;
+  }
 }
 
-@media(max-width:768px){
-  .hero-section h1 { font-size: var(--font-size-2xl); }
-  .feature-card { max-width: 45%; }
+@media (max-width: 1024px) {
+  .features-section::before,
+  .features-section::after {
+    width: 200px;
+    height: 200px;
+  }
 }
 
-@media(max-width:480px){
-  .hero-section h1 { font-size: var(--font-size-xl); }
-  .feature-card { max-width: 100%; }
+@media (max-width: 768px) {
+  .feature-card h2 {
+    font-size: var(--font-size-lg);
+  }
+  .feature-card p {
+    font-size: var(--font-size-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .features-section {
+    grid-template-columns: 1fr;
+    padding: var(--space-8) var(--space-2);
+  }
+  .feature-card {
+    padding: var(--space-4);
+  }
+  .features-section::before,
+  .features-section::after {
+    display: none; /* hides background shapes on small screens for clarity */
+  }
 }
