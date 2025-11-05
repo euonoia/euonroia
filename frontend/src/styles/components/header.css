@@ -2,11 +2,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-4);
-  background-color: var(--bg-card);
+  padding: var(--space-4) var(--space-6);
+  background-color: rgba(255, 255, 255, 0.0); /* fully transparent */
   color: var(--text-primary);
   flex-wrap: wrap;
   gap: var(--space-3);
+  position: absolute; /* stays on top of hero section */
+  width: 100%;
+  top: 0;
+  left: 0;
+  z-index: 100; /* ensures it’s above other content */
+  backdrop-filter: blur(6px); /* optional: subtle glass effect */
 }
 
 .logo {
@@ -39,16 +45,32 @@
 
 .theme-toggle {
   background-color: var(--accent);
-  color: var(--text-primary);
+  color: var(--bg-card); /* button text contrasts the accent */
   padding: var(--space-2) var(--space-4);
   border-radius: 0.5rem;
   font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .theme-toggle:hover {
   background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+/* Buttons style for Google sign-in */
+.btn {
+  background-color: var(--accent);
+  color: var(--bg-card);
+  padding: var(--space-2) var(--space-4);
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
 }
 
 /* -------------------
@@ -58,6 +80,7 @@
   .header {
     flex-direction: column;
     align-items: flex-start;
+    padding: var(--space-3) var(--space-4);
   }
 
   .header-right {
@@ -67,8 +90,8 @@
   }
 
   .user-info {
-    flex-direction: row; /* keep avatar + name + button inline */
+    flex-direction: row; 
     width: 100%;
-    justify-content: space-between; /* spreads them nicely */
+    justify-content: space-between; 
   }
 }

@@ -9,7 +9,7 @@ export default function Header() {
   return (
     <header className="header">
       <h2 className="logo">Euonroia</h2>
-      <div className="header-actions">
+      <div className="header-right">
         {user ? (
           <div className="user-info">
             {user.picture && <img src={user.picture} alt={user.name} className="user-avatar" />}
