@@ -25,6 +25,7 @@ export const UserProvider = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   // Get JWT from localStorage
@@ -69,11 +70,12 @@ export const UserProvider = ({ children }: Props) => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  // Sign out
-  const signOut = () => {
-    localStorage.removeItem("authToken");
-    setUser(null);
+ const signOut = () => {
+  localStorage.removeItem("authToken");
+  setUser(null);
+  window.location.href = FRONTEND_URL;
   };
+
 
   return (
     <UserContext.Provider value={{ user, loading, signOut, signInWithGoogle }}>
