@@ -10,9 +10,9 @@ export default function OAuthCallback() {
     if (token) {
       localStorage.setItem("authToken", token);
     }
-    // Remove token from URL for cleanliness
-    window.history.replaceState({}, document.title, "/");
-    navigate("/dashboard"); // redirect to landing page or dashboard
+
+    // Redirect to dashboard after saving token
+    navigate("/dashboard");
   }, [navigate]);
 
   return <p>Logging you in...</p>;
