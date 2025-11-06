@@ -2,16 +2,14 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 
-export default function OAuthCallback() {
+const OAuthCallback = () => {
   const navigate = useNavigate();
   const { fetchUser } = useUser();
 
   useEffect(() => {
     const handleLogin = async () => {
       try {
-        // Refresh user from backend
-        await fetchUser();
-        // After successful fetch, redirect to dashboard
+        await fetchUser(); // check backend for logged-in user
         navigate("/dashboard", { replace: true });
       } catch (err) {
         console.error("OAuth login failed:", err);
@@ -23,3 +21,5 @@ export default function OAuthCallback() {
 
   return <p>Logging you in...</p>;
 }
+
+export default OAuthCallback;
