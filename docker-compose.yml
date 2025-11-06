@@ -4,7 +4,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     environment:
-      - VITE_BACKEND_URL=https://euonroia-backend.onrender.com
+      - VITE_BACKEND_URL=localhost:5000
     ports:
       - "8080:80"
 
