@@ -68,7 +68,8 @@ router.get("/google/callback", async (req, res) => {
     const cookieOptions = {
       httpOnly: true,
       secure: isProduction,
-      sameSite: "none", // <---- IMPORTANT FIX
+      sameSite: "None", // Fix for cross-origin cookies
+      domain: isProduction ? ".onrender.com" : undefined, // Ensure cookies work across subdomains in production
     };
 
     res.cookie("accessToken", accessToken, {
@@ -112,16 +113,17 @@ router.post("/refresh-token", (req, res) => {
     const cookieOptions = {
       httpOnly: true,
       secure: isProduction,
-      sameSite: "none", // <---- FIX HERE TOO
+      sameSite: "None", // Fix here too
+      domain: isProduction ? ".onrender.com" : undefined, // Ensure cookies work across subdomains in production
     };
 
     res.cookie("accessToken", accessToken, {
       ...cookieOptions,
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
     res.cookie("refreshToken", newRefreshToken, {
       ...cookieOptions,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
     res.json({ success: true });
@@ -133,7 +135,7 @@ router.post("/refresh-token", (req, res) => {
 
 // 5️⃣ Logout
 router.post("/signout", (req, res) => {
-  const cookieOptions = { httpOnly: true, secure: isProduction, sameSite: "none" };
+  const cookieOptions = { httpOnly: true, secure: isProduction, sameSite: "None", domain: isProduction ? ".onrender.com" : undefined };
   res.clearCookie("accessToken", cookieOptions);
   res.clearCookie("refreshToken", cookieOptions);
   res.json({ success: true });
