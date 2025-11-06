@@ -8,8 +8,8 @@ export const securityMiddleware = [
   hpp(),
   xssSanitizer,
   rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 1000,                // allow more requests during dev
     message: "Too many requests, please try again later.",
   }),
 ];

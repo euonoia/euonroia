@@ -9,7 +9,6 @@ services:
     volumes:
       - ./backend:/app
       - backend_node_modules:/app/node_modules
-      - ./backend/serviceAccountKey.json:/app/serviceAccountKey.json:ro
     env_file:
       - ./backend/.env
     environment:
