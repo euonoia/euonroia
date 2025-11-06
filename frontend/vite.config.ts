@@ -1,13 +1,10 @@
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig, loadEnv, type ConfigEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// `mode` needs a type annotation
-export default ({ mode }: { mode: string }) => {
-  const env = loadEnv(mode, process.cwd(), '')
+export default ({ mode }: ConfigEnv) => {
+  const env = loadEnv(mode, process.cwd(), 'VITE_')
+
   return defineConfig({
     plugins: [react()],
-    define: {
-      'process.env': env,
-    },
   })
 }

@@ -1,0 +1,203 @@
+@import "../theme.css";
+
+/* =========================
+   Dashboard Page Layout
+========================= */
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: var(--font-family-base);
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+}
+
+/* Main content grows to push footer down */
+.dashboard-main {
+  flex: 1;
+  margin-top: 2rem;
+  padding: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* -------------------------
+   Top Two-Column Section
+------------------------- */
+.dashboard-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;
+}
+
+/* Left column: greeting + stats */
+.dashboard-left {
+  flex: 1 1 300px;
+  min-width: 280px;
+}
+
+/* Right column: Continue Learning */
+.dashboard-right {
+  flex: 1 1 300px;
+  min-width: 280px;
+}
+
+.continue-learning-card {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.continue-learning-card button {
+  margin-top: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  background: var(--accent);
+  color: var(--bg-card);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.continue-learning-card button:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+/* -------------------------
+   Lessons Overview
+------------------------- */
+.lessons-overview {
+  margin-top: 3rem;
+}
+
+.lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.lesson-card {
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lesson-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.lesson-card h3 {
+  margin: 0;
+}
+
+.lesson-card progress {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+/* -------------------------
+   Bottom Two-Column Section
+   Achievements + Leaderboard
+------------------------- */
+.dashboard-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;
+  margin-top: 3rem;
+}
+
+.dashboard-bottom-left,
+.dashboard-bottom-right {
+  flex: 1 1 300px;
+  min-width: 280px;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 1rem;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease, color 0.3s ease, border 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-bottom-left:hover,
+.dashboard-bottom-right:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.dashboard-bottom-left h2,
+.dashboard-bottom-right h2 {
+  margin-top: 0;
+}
+
+/* -------------------------
+   Footer Styles
+------------------------- */
+.footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--space-4);
+  background-color: var(--bg-card);
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-family-base);
+}
+
+/* Footer text */
+.footer-left p {
+  font-size: var(--font-size-sm);
+  margin: 0;
+}
+
+/* =========================
+   Responsive Design
+========================= */
+
+/* Mobile: stack top columns and cards */
+@media (max-width: 768px) {
+  .dashboard-top {
+    flex-direction: column;
+  }
+
+  .dashboard-left,
+  .dashboard-right {
+    min-width: 100%;
+  }
+
+  .lessons-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .dashboard-bottom {
+    flex-direction: column;
+  }
+
+  .dashboard-bottom-left,
+  .dashboard-bottom-right {
+    min-width: 100%;
+  }
+}
+
+/* Small screens: footer stacks */
+@media (max-width: 480px) {
+  .footer {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+  }
+}
