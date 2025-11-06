@@ -16,19 +16,19 @@ const GOOGLE_REDIRECT_URI = isProduction
   : "http://localhost:5000/auth/google/callback";
 
 const FRONTEND_URL = isProduction
-  ? "https://euonroia-secured.onrender.com"
+  ? "https://euonroia.onrender.com"
   : "http://localhost:5173";
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
-// Helper: generate tokens
+// 🔑 Generate JWT tokens
 const generateTokens = (user) => {
-  const accessToken = jwt.sign(user, JWT_SECRET, { expiresIn: "1d" }); // 1 day
-  const refreshToken = jwt.sign(user, JWT_REFRESH_SECRET, { expiresIn: "30d" }); // 30 days
+  const accessToken = jwt.sign(user, JWT_SECRET, { expiresIn: "1d" });
+  const refreshToken = jwt.sign(user, JWT_REFRESH_SECRET, { expiresIn: "30d" });
   return { accessToken, refreshToken };
 };
 
-// 1️⃣ Redirect to Google
+// 1️⃣ Google Login Redirect
 router.get("/google", (req, res) => {
   const url = client.generateAuthUrl({
     access_type: "offline",
@@ -41,7 +41,7 @@ router.get("/google", (req, res) => {
   res.redirect(url);
 });
 
-// 2️⃣ OAuth callback
+// 2️⃣ Google OAuth Callback
 router.get("/google/callback", async (req, res) => {
   try {
     const code = req.query.code;
@@ -64,18 +64,19 @@ router.get("/google/callback", async (req, res) => {
     const userPayload = { id, name, email, picture };
     const { accessToken, refreshToken } = generateTokens(userPayload);
 
-    // Set HttpOnly cookies
-    res.cookie("accessToken", accessToken, {
+    // ✅ Fix cookies for Render (cross-site)
+    const cookieOptions = {
       httpOnly: true,
       secure: isProduction,
-      sameSite: "lax",
+      sameSite: "none", // <---- IMPORTANT FIX
+    };
+
+    res.cookie("accessToken", accessToken, {
+      ...cookieOptions,
       maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
-
     res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: "lax",
+      ...cookieOptions,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     });
 
@@ -86,7 +87,7 @@ router.get("/google/callback", async (req, res) => {
   }
 });
 
-// 3️⃣ /me route
+// 3️⃣ Get current user
 router.get("/me", async (req, res) => {
   const token = req.cookies.accessToken;
   if (!token) return res.status(401).json({ error: "Not logged in" });
@@ -99,7 +100,7 @@ router.get("/me", async (req, res) => {
   }
 });
 
-// 4️⃣ Refresh token route
+// 4️⃣ Refresh token
 router.post("/refresh-token", (req, res) => {
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) return res.status(401).json({ error: "No refresh token" });
@@ -108,17 +109,18 @@ router.post("/refresh-token", (req, res) => {
     const decoded = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
     const { accessToken, refreshToken: newRefreshToken } = generateTokens(decoded);
 
-    // Update cookies
-    res.cookie("accessToken", accessToken, {
+    const cookieOptions = {
       httpOnly: true,
       secure: isProduction,
-      sameSite: "lax",
+      sameSite: "none", // <---- FIX HERE TOO
+    };
+
+    res.cookie("accessToken", accessToken, {
+      ...cookieOptions,
       maxAge: 24 * 60 * 60 * 1000,
     });
     res.cookie("refreshToken", newRefreshToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: "lax",
+      ...cookieOptions,
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
 
@@ -131,8 +133,9 @@ router.post("/refresh-token", (req, res) => {
 
 // 5️⃣ Logout
 router.post("/signout", (req, res) => {
-  res.clearCookie("accessToken", { httpOnly: true, secure: isProduction, sameSite: "lax" });
-  res.clearCookie("refreshToken", { httpOnly: true, secure: isProduction, sameSite: "lax" });
+  const cookieOptions = { httpOnly: true, secure: isProduction, sameSite: "none" };
+  res.clearCookie("accessToken", cookieOptions);
+  res.clearCookie("refreshToken", cookieOptions);
   res.json({ success: true });
 });
 

@@ -15,9 +15,13 @@ const isProduction = ENV.NODE_ENV === "production";
 // -----------------------------
 app.use(securityMiddleware);
 
+// ✅ Fix: Allow frontend to send cookies cross-domain
 app.use(
   cors({
-    origin: isProduction ? "https://euonroia.onrender.com" : ENV.FRONTEND_URL,
+    origin: [
+      "https://euonroia.onrender.com", // frontend (Render)
+      "http://localhost:5173", // local dev
+    ],
     credentials: true,
   })
 );
@@ -40,6 +44,6 @@ app.use((req, res) => res.redirect(ENV.FRONTEND_URL));
 // -----------------------------
 // Server Start
 // -----------------------------
-app.listen(ENV.PORT, () =>
-  console.log(`🚀 Secure server running on port ${ENV.PORT}`)
-);
+app.listen(ENV.PORT, () => {
+  console.log(`🚀 Secure server running on port ${ENV.PORT}`);
+});
