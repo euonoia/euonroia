@@ -4,7 +4,7 @@ import App from "./App";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AppProvider } from "./context/appcontext";
 import { ThemeProvider } from "./context/ThemeContext";
-import { UserProvider } from "./context/UserContext"; // <-- import your new UserProvider
+import { UserProvider } from "./context/UserContext"; // your UserProvider
 import "./index.css";
 
 const queryClient = new QueryClient();
@@ -14,7 +14,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <AppProvider>
-          <UserProvider> {/* wrap App with UserProvider */}
+          <UserProvider> {/* UserProvider must wrap your App */}
             <App />
           </UserProvider>
         </AppProvider>

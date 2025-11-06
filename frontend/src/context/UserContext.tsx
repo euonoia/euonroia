@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import axios from "axios";
 
 interface User {
@@ -13,80 +13,71 @@ interface UserContextType {
   loading: boolean;
   signOut: () => void;
   signInWithGoogle: () => void;
+  fetchUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-interface Props {
-  children: ReactNode;
-}
+interface Props { children: ReactNode; }
 
 export const UserProvider = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const FRONTEND_URL = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  // Get JWT from localStorage
-  const getToken = () => localStorage.getItem("authToken");
-
-  // Fetch current user with token
-  const fetchUser = async (token?: string) => {
-    const authToken = token || getToken();
-    if (!authToken) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-
+  // Fetch user from /me
+  const fetchUser = useCallback(async () => {
+    setLoading(true);
     try {
-      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-      setUser(res.data.user);
+      const res = await axios.get(`${BACKEND_URL}/auth/me`, { withCredentials: true });
+      setUser(res.data.user || null);
     } catch (err) {
-      setUser(null);
+      // Try refreshing access token if /me fails
+      try {
+        await axios.post(`${BACKEND_URL}/auth/refresh-token`, {}, { withCredentials: true });
+        const res = await axios.get(`${BACKEND_URL}/auth/me`, { withCredentials: true });
+        setUser(res.data.user || null);
+      } catch {
+        setUser(null);
+      }
     } finally {
       setLoading(false);
     }
-  };
+  }, [BACKEND_URL]);
 
-  // Handle token from OAuth redirect
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    if (token) {
-      localStorage.setItem("authToken", token);
-      fetchUser(token);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else {
-      fetchUser();
-    }
-  }, []);
+    fetchUser();
 
-  // Google OAuth redirect
+    // Optional: auto-refresh access token every 12 hours
+    const interval = setInterval(() => {
+      axios.post(`${BACKEND_URL}/auth/refresh-token`, {}, { withCredentials: true }).catch(() => {});
+    }, 12 * 60 * 60 * 1000); // 12 hours
+
+    return () => clearInterval(interval);
+  }, [fetchUser, BACKEND_URL]);
+
   const signInWithGoogle = () => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
- const signOut = () => {
-  localStorage.removeItem("authToken");
-  setUser(null);
-  window.location.href = FRONTEND_URL;
+  const signOut = async () => {
+    try {
+      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+    } catch {}
+    setUser(null);
+    window.location.href = "/";
   };
 
-
   return (
-    <UserContext.Provider value={{ user, loading, signOut, signInWithGoogle }}>
+    <UserContext.Provider value={{ user, loading, signOut, signInWithGoogle, fetchUser }}>
       {children}
     </UserContext.Provider>
   );
 };
 
-// Hook to access context
 export const useUser = () => {
   const context = useContext(UserContext);
-  if (!context) throw new Error("useUser must be used within a UserProvider");
+  if (!context) throw new Error("useUser must be used within UserProvider");
   return context;
 };
