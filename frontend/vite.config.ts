@@ -7,7 +7,7 @@ export default ({ mode }: { mode: string }) => {
   return defineConfig({
     plugins: [react()],
     define: {
-      'process.env': env,
+        'process.env.VITE_BACKEND_URL': JSON.stringify(process.env.VITE_BACKEND_URL)
     },
   })
 }
