@@ -12,11 +12,11 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "refresh-secret";
 
 const GOOGLE_REDIRECT_URI = isProduction
-  ? "https://euonroia-secured.onrender.com/auth/google/callback"
+  ? "https://your-deployed-backend.com/auth/google/callback"
   : "http://localhost:5000/auth/google/callback";
 
 const FRONTEND_URL = isProduction
-  ? "https://euonroia-secured.onrender.com"
+  ? "https://euonroia.onrender.com"
   : "http://localhost:5173";
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);

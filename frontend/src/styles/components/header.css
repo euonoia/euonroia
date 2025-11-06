@@ -3,34 +3,84 @@
   justify-content: space-between;
   align-items: center;
   padding: var(--space-4) var(--space-6);
-  background-color: rgba(255, 255, 255, 0.0); /* fully transparent */
+  background-color: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  position: absolute; /* stays on top of hero section */
+  position: relative;
   width: 100%;
-  top: 0;
-  left: 0;
-  z-index: 100; /* ensures it’s above other content */
-  backdrop-filter: blur(6px); /* optional: subtle glass effect */
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
 }
 
+/* Logo */
 .logo {
   font-size: var(--font-size-2xl);
-  font-weight: bold;
+  font-weight: 700;
+  color: var(--accent);
 }
 
-.header-right {
+/* Nav links */
+.nav-links {
+  display: flex;
+  gap: var(--space-5);
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: var(--font-size-base);
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+/* Right-side actions */
+.header-actions {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  flex-wrap: wrap;
 }
 
+/* Hamburger button */
+.hamburger {
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  display: block; /* always visible if user logged in */
+}
+
+/* Dropdown wrapper for user-info + mobile nav-links */
+.header-right {
+  position: absolute;
+  top: 100%;
+  right: var(--space-4);
+  flex-direction: column;
+  align-items: flex-start;
+  background-color: var(--bg-card);
+  padding: var(--space-4);
+  border-radius: 8px;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-md);
+  display: none;
+  z-index: 200;
+}
+
+.header-right.open {
+  display: flex;
+}
+
+/* User info */
 .user-info {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  flex-direction: column;
 }
 
 .user-avatar {
@@ -43,55 +93,43 @@
   font-weight: 500;
 }
 
-.theme-toggle {
+/* Buttons */
+.btn, .theme-toggle {
   background-color: var(--accent);
-  color: var(--bg-card); /* button text contrasts the accent */
-  padding: var(--space-2) var(--space-4);
-  border-radius: 0.5rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.theme-toggle:hover {
-  background-color: var(--accent-hover);
-  transform: translateY(-1px);
-}
-
-/* Buttons style for Google sign-in */
-.btn {
-  background-color: var(--accent);
-  color: var(--bg-card);
+  color: #fff;
   padding: var(--space-2) var(--space-4);
   border-radius: 0.5rem;
   font-weight: 600;
+  cursor: pointer;
+  border: none;
   transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-.btn:hover {
+.btn:hover, .theme-toggle:hover {
   background-color: var(--accent-hover);
   transform: translateY(-1px);
 }
 
-/* -------------------
-   Responsive
-------------------- */
-@media (max-width: 480px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: var(--space-3) var(--space-4);
+/* ------------------------ */
+/* Responsive Design        */
+/* ------------------------ */
+
+/* Mobile view: show nav-links inside hamburger */
+@media (max-width: 768px) {
+  .desktop-only {
+    display: none;
   }
 
-  .header-right {
+  .mobile-only {
+    display: flex;
     flex-direction: column;
     width: 100%;
-    gap: var(--space-2);
   }
+}
 
-  .user-info {
-    flex-direction: row; 
-    width: 100%;
-    justify-content: space-between; 
+/* Desktop: hide mobile-only nav-links */
+@media (min-width: 769px) {
+  .mobile-only {
+    display: none;
   }
 }
