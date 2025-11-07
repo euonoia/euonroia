@@ -66,7 +66,7 @@ export default function Header({
 
           <nav className="nav-links mobile-only">
             <Link to="/dashboard">Dashboard</Link>
-            <Link to="/lessons">Lessons</Link>
+            <Link to="/lessons/html-basics">Lessons</Link>
             <Link to="/playground">Playground</Link>
           </nav>
         </div>
