@@ -1,20 +1,26 @@
-# Backend Dockerfile (Dev)
+# ---- Backend Dockerfile (Dev) ----
 FROM node:22-alpine
 
+# Set working directory
 WORKDIR /app
 
-# Copy dependency files
+# Install Yarn globally if not already installed
+RUN if ! command -v yarn > /dev/null; then npm install -g yarn; fi
+
+# Copy package dependency files first for caching
 COPY package*.json ./
 
-# Install dependencies inside image
-RUN npm install --legacy-peer-deps
+# Install dependencies using Yarn
+RUN yarn install --frozen-lockfile
 
-# Install nodemon globally
-RUN npm install -g nodemon
+# Install nodemon globally using Yarn
+RUN yarn global add nodemon
 
-# Copy backend source code
+# Copy backend source code into the image
 COPY . .
 
+# Expose the backend port
 EXPOSE 5000
 
-CMD ["npm", "run", "dev"]
+# Use Yarn to run the development script
+CMD ["yarn", "run", "dev"]

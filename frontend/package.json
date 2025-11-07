@@ -12,6 +12,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.90.5",
     "axios": "^1.13.1",
+    "gapi-script": "^1.2.0",
     "jwt-decode": "^4.0.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
@@ -21,6 +22,7 @@
   "devDependencies": {
     "@eslint/js": "^9.36.0",
     "@types/babel__core": "^7.20.5",
+    "@types/gapi": "^0.0.47",
     "@types/node": "^24.9.2",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
