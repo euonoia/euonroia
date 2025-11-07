@@ -28,7 +28,7 @@ export default function Header({
       {!loading && user && !hideUser && (
         <nav className="nav-links desktop-only">
           <Link to="/dashboard">Dashboard</Link>
-          <Link to="/lessons">Lessons</Link>
+          <Link to="/lessons/html-basics">Lessons</Link>
           <Link to="/playground">Playground</Link>
         </nav>
       )}
