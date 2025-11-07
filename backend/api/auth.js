@@ -1,8 +1,8 @@
-// backend/api/auth.js
 import { Router } from "express";
 import admin from "firebase-admin";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
+import firebase from "firebase-admin";  // Ensure Firebase Admin SDK is used
 
 const router = Router();
 
@@ -16,12 +16,12 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // Google redirect URI depends on environment
 const GOOGLE_REDIRECT_URI = isProduction
-  ? "https://euonroia-secured.onrender.com/auth/google/callback"
+  ? "https://your-production-url.com/auth/google/callback"
   : "http://localhost:5000/auth/google/callback";
 
 // Frontend URL depends on environment
 const FRONTEND_URL = isProduction
-  ? "https://euonroia.onrender.com"
+  ? "https://your-frontend-url.com"
   : "http://localhost:5173";
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
@@ -53,29 +53,55 @@ router.get("/google/callback", async (req, res) => {
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
-    // Get user info
+    // Get user info from Google
     const { data } = await client.request({
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
 
-    const { id, name, email, picture } = data;
+    const { id: googleID, name, email, picture } = data;  // Google ID
 
-    // Save or update user in Firestore
-    await admin.firestore().collection("users").doc(id).set(
-      { id, name, email, picture, lastLogin: new Date() },
+    // Check if the user exists in Firebase by using the Google ID (googleID)
+    let firebaseUser = null;
+    try {
+      // Get Firebase user by Google ID (using Firebase's auth service)
+      firebaseUser = await firebase.auth().getUser(googleID);  // Firebase UID will be returned
+
+    } catch (error) {
+      if (error.code === 'auth/user-not-found') {
+        // Create a Firebase user if it doesn't exist (Firebase UID will be auto-generated)
+        firebaseUser = await firebase.auth().createUser({
+          uid: googleID,  // Use Google ID for Firebase UID
+          email: email,
+          displayName: name,
+          photoURL: picture,
+        });
+      }
+    }
+
+    // Firebase UID (this is the identifier for your user in Firebase)
+    const firebaseUID = firebaseUser.uid;
+
+    // Save user info in Firestore (use Firebase UID)
+    await admin.firestore().collection("users").doc(firebaseUID).set(
+      { id: firebaseUID, name, email, picture, lastLogin: new Date() },
       { merge: true }
     );
 
-    // Create JWT for frontend
-    const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
+    // Now create JWT for frontend using Firebase UID
+    const token = jwt.sign(
+      { id: firebaseUID, name, email, picture },  // Use Firebase UID as user identifier
+      JWT_SECRET, 
+      { expiresIn: "7d" }
+    );
 
-    // Redirect to frontend with token
+    // Redirect to frontend with the token
     res.redirect(`${FRONTEND_URL}/oauth-callback?token=${token}`);
   } catch (err) {
     console.error("Google OAuth error:", err);
     res.redirect(FRONTEND_URL);
   }
 });
+
 
 // -----------------------------
 // 3️⃣ Protected route: /me
@@ -89,7 +115,7 @@ router.get("/me", (req, res) => {
   const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    res.json({ user: decoded });
+    res.json({ user: decoded });  // Return decoded Firebase UID here
   } catch (err) {
     res.status(401).json({ error: "Invalid token" });
   }

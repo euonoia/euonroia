@@ -43,7 +43,7 @@ export const UserProvider = ({ children }: Props) => {
       const res = await axios.get(`${BACKEND_URL}/auth/me`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      setUser(res.data.user);
+      setUser(res.data.user);  // Should be using Firebase UID now
     } catch (err) {
       setUser(null);
     } finally {
@@ -55,12 +55,23 @@ export const UserProvider = ({ children }: Props) => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
+
+    console.log("Token from URL:", token); // Debugging line
+
     if (token) {
+      // Save token to localStorage and fetch user data
       localStorage.setItem("authToken", token);
       fetchUser(token);
+      // Replace URL to avoid exposing the token in the URL
       window.history.replaceState({}, document.title, window.location.pathname);
     } else {
-      fetchUser();
+      // If token exists in localStorage, fetch user data
+      const storedToken = getToken();
+      if (storedToken) {
+        fetchUser(storedToken);
+      } else {
+        setLoading(false);
+      }
     }
   }, []);
 
@@ -69,7 +80,7 @@ export const UserProvider = ({ children }: Props) => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  // Sign out
+  // Sign out and remove token from localStorage
   const signOut = () => {
     localStorage.removeItem("authToken");
     setUser(null);
