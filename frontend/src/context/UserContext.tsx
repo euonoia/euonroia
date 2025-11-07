@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import axios from "axios";
+import Cookies from "js-cookie";  // Import js-cookie for cookie management
 
 interface User {
   id: string;
@@ -27,23 +28,11 @@ export const UserProvider = ({ children }: Props) => {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  // Get JWT from localStorage
-  const getToken = () => localStorage.getItem("authToken");
-
-  // Fetch current user with token
-  const fetchUser = async (token?: string) => {
-    const authToken = token || getToken();
-    if (!authToken) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-
+  // Fetch current user with token (from cookies)
+  const fetchUser = async () => {
     try {
-      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-      setUser(res.data.user);  // Should be using Firebase UID now
+      const res = await axios.get(`${BACKEND_URL}/auth/me`, { withCredentials: true });  // Ensure cookies are sent
+      setUser(res.data.user);  // Use Firebase UID here
     } catch (err) {
       setUser(null);
     } finally {
@@ -51,7 +40,7 @@ export const UserProvider = ({ children }: Props) => {
     }
   };
 
-  // Handle token from OAuth redirect
+  // Handle token from OAuth redirect (from URL query params)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get("token");
@@ -59,19 +48,13 @@ export const UserProvider = ({ children }: Props) => {
     console.log("Token from URL:", token); // Debugging line
 
     if (token) {
-      // Save token to localStorage and fetch user data
-      localStorage.setItem("authToken", token);
-      fetchUser(token);
+      // Store the token in the HttpOnly, Secure cookie via backend
+      fetchUser();
+
       // Replace URL to avoid exposing the token in the URL
       window.history.replaceState({}, document.title, window.location.pathname);
     } else {
-      // If token exists in localStorage, fetch user data
-      const storedToken = getToken();
-      if (storedToken) {
-        fetchUser(storedToken);
-      } else {
-        setLoading(false);
-      }
+      fetchUser();  // If token exists in cookies, fetch user data
     }
   }, []);
 
@@ -80,9 +63,9 @@ export const UserProvider = ({ children }: Props) => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  // Sign out and remove token from localStorage
-  const signOut = () => {
-    localStorage.removeItem("authToken");
+  // Sign out and remove token from cookie
+  const signOut = async () => {
+    await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
     setUser(null);
   };
 
