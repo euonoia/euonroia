@@ -4,6 +4,7 @@ interface ImportMetaEnv {
   readonly MODE: "production"
   readonly API_SECRET_KEY: string
   readonly VITE_FRONTEND_URL: string
+  readonly REACT_APP_GOOGLE_CLIENT_ID: string
   // add more env variables here if needed
 }
 

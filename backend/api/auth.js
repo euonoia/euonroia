@@ -1,8 +1,8 @@
-// backend/api/auth.js
 import { Router } from "express";
 import admin from "firebase-admin";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
+import firebase from "firebase-admin";
 
 const router = Router();
 
@@ -14,14 +14,12 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Google redirect URI depends on environment
 const GOOGLE_REDIRECT_URI = isProduction
-  ? "https://euonroia-secured.onrender.com/auth/google/callback"
+  ? "https://your-production-url.com/auth/google/callback"
   : "http://localhost:5000/auth/google/callback";
 
-// Frontend URL depends on environment
 const FRONTEND_URL = isProduction
-  ? "https://euonroia.onrender.com"
+  ? "https://your-frontend-url.com"
   : "http://localhost:5173";
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
@@ -49,28 +47,53 @@ router.get("/google/callback", async (req, res) => {
     const code = req.query.code;
     if (!code) return res.redirect(FRONTEND_URL);
 
-    // Get tokens from Google
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
-    // Get user info
     const { data } = await client.request({
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
 
-    const { id, name, email, picture } = data;
+    const { id: googleID, name, email, picture } = data;  // Google ID
 
-    // Save or update user in Firestore
-    await admin.firestore().collection("users").doc(id).set(
-      { id, name, email, picture, lastLogin: new Date() },
+    let firebaseUser = null;
+    try {
+      firebaseUser = await firebase.auth().getUser(googleID);
+    } catch (error) {
+      if (error.code === 'auth/user-not-found') {
+        firebaseUser = await firebase.auth().createUser({
+          uid: googleID,
+          email: email,
+          displayName: name,
+          photoURL: picture,
+        });
+      }
+    }
+
+    const firebaseUID = firebaseUser.uid;
+
+    await admin.firestore().collection("users").doc(firebaseUID).set(
+      { id: firebaseUID, name, email, picture, lastLogin: new Date() },
       { merge: true }
     );
 
-    // Create JWT for frontend
-    const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
+    // Generate JWT Token
+    const token = jwt.sign(
+      { id: firebaseUID, name, email, picture },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-    // Redirect to frontend with token
-    res.redirect(`${FRONTEND_URL}/oauth-callback?token=${token}`);
+    // Set the JWT in HttpOnly cookie
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: isProduction,   // only set Secure in production
+      sameSite: "Strict",     // CSRF protection
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // Redirect to frontend with the cookie set
+    res.redirect(FRONTEND_URL);
   } catch (err) {
     console.error("Google OAuth error:", err);
     res.redirect(FRONTEND_URL);
@@ -81,14 +104,13 @@ router.get("/google/callback", async (req, res) => {
 // 3️⃣ Protected route: /me
 // -----------------------------
 router.get("/me", (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  const authToken = req.cookies.authToken;  // Access the JWT from cookies
+  if (!authToken) {
     return res.status(401).json({ error: "Not logged in" });
   }
 
-  const token = authHeader.split(" ")[1];
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(authToken, JWT_SECRET);
     res.json({ user: decoded });
   } catch (err) {
     res.status(401).json({ error: "Invalid token" });
@@ -99,7 +121,12 @@ router.get("/me", (req, res) => {
 // 4️⃣ Logout route
 // -----------------------------
 router.post("/signout", (req, res) => {
-  // JWT is stateless, just tell frontend to remove token
+  // Clear the JWT cookie
+  res.clearCookie("authToken", {
+    httpOnly: true,
+    secure: isProduction,  // Only for production
+    sameSite: "Strict",
+  });
   res.json({ success: true, message: "Logged out" });
 });
 

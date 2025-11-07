@@ -27,23 +27,11 @@ export const UserProvider = ({ children }: Props) => {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  // Get JWT from localStorage
-  const getToken = () => localStorage.getItem("authToken");
-
-  // Fetch current user with token
-  const fetchUser = async (token?: string) => {
-    const authToken = token || getToken();
-    if (!authToken) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-
+  // Fetch current user with token (from cookies)
+  const fetchUser = async () => {
     try {
-      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-      setUser(res.data.user);
+      const res = await axios.get(`${BACKEND_URL}/auth/me`, { withCredentials: true }); // Send cookies with request
+      setUser(res.data.user);  // Use Firebase UID here
     } catch (err) {
       setUser(null);
     } finally {
@@ -53,15 +41,7 @@ export const UserProvider = ({ children }: Props) => {
 
   // Handle token from OAuth redirect
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    if (token) {
-      localStorage.setItem("authToken", token);
-      fetchUser(token);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else {
-      fetchUser();
-    }
+    fetchUser();  // Automatically check the user's status on page load
   }, []);
 
   // Google OAuth redirect
@@ -69,9 +49,9 @@ export const UserProvider = ({ children }: Props) => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  // Sign out
-  const signOut = () => {
-    localStorage.removeItem("authToken");
+  // Sign out and remove token by clearing the cookie on the backend
+  const signOut = async () => {
+    await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
     setUser(null);
   };
 
