@@ -1,3 +1,6 @@
+/* =========================
+   Footer Styles
+========================= */
 .footer {
   display: flex;
   justify-content: center; /* center content horizontally */
@@ -10,6 +13,7 @@
   box-shadow: var(--shadow-sm);
   font-family: var(--font-family-base);
   text-align: center;      /* ensures text is centered */
+  margin-top: auto;        /* ensures the footer stays at the bottom */
 }
 
 .footer-left p {
@@ -18,7 +22,7 @@
 }
 
 /* -------------------
-   Responsive
+   Responsive Design
 ------------------- */
 @media (max-width: 768px) {
   .footer {
