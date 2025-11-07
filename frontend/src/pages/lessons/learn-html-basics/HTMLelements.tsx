@@ -184,12 +184,10 @@ const HTMLelements: React.FC = () => {
               <h3>HTML Output:</h3>
               <pre>{htmlOutput || 'Click blocks to build your HTML structure'}</pre>
             </div>
-
-            {/* Next Button */}
+          </div>
             <div className="next-btn-container">
               <button className="next-btn" onClick={handleNextLesson}>READY FOR EXAM?</button>
             </div>
-          </div>
         </div>
       </main>
 

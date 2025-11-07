@@ -163,6 +163,7 @@ const HTMLdocument: React.FC = () => {
               <h3 className="output-title">HTML Output:</h3>
               <pre>{htmlOutput || "Click blocks to build your HTML structure"}</pre>
             </div>
+          </div>
 
             <div className="next-btn-container">
               <button
@@ -173,7 +174,6 @@ const HTMLdocument: React.FC = () => {
                 Next Lesson
               </button>
             </div>
-          </div>
         </div>
       </main>
     </div>

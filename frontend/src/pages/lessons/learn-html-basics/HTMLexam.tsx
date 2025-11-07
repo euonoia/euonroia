@@ -260,12 +260,10 @@ const HTMLexam: React.FC = () => {
               <h3>HTML Output:</h3>
               <pre>{htmlOutput || 'Click blocks to build your HTML structure'}</pre>
             </div>
-
-            {/* Next Button */}
-            <div className="next-btn-container">
+          </div>
+           <div className="next-btn-container">
               <button className="next-btn" onClick={handleNextLesson}>Next Lesson</button>
             </div>
-          </div>
         </div>
       </main>
 
