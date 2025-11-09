@@ -1,10 +1,10 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
 import { ENV } from "./config/env.js";
 import "./config/firebase.js"; // initializes admin
 import { securityMiddleware } from "./config/security.js";
-import redirectBrowser from "./middlewares/redirectBrowser.js";
 import authRoutes from "./api/auth.js";
 
 const app = express();
@@ -16,30 +16,39 @@ const isProduction = ENV.NODE_ENV === "production";
 app.set("trust proxy", 1);
 app.use(securityMiddleware);
 
-// ✅ Fix: Allow frontend to send cookies cross-domain
 app.use(cors({
   origin: [
     "http://localhost:5173",
     "https://euonroia.onrender.com",
   ],
-  credentials: true, // must be true for cookie to work
+  credentials: true,
 }));
-
 
 app.use(cookieParser());
 app.use(express.json());
-app.use(redirectBrowser);
 
 // -----------------------------
-// Routes
+// API Routes
 // -----------------------------
 app.use("/auth", authRoutes);
-app.get("/", (req, res) => res.send("✅ Backend is running securely!"));
 
 // -----------------------------
-// Catch-all Redirect
+// Serve React Frontend (frontend/dist)
 // -----------------------------
-app.use((req, res) => res.redirect(ENV.FRONTEND_URL));
+const __dirname = path.resolve();
+const frontendPath = path.join(__dirname, "frontend", "dist");
+
+app.use(express.static(frontendPath));
+
+// **SPA Fallback without using "*"**
+app.use((req, res, next) => {
+  // If the request is for an API route, skip this
+  if (req.path.startsWith("/auth")) return next();
+  // Otherwise, serve index.html
+  res.sendFile(path.join(frontendPath, "index.html"), (err) => {
+    if (err) next(err);
+  });
+});
 
 // -----------------------------
 // Server Start
