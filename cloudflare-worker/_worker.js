@@ -1,10 +1,7 @@
 export default {
   async scheduled(event, env, ctx) {
-    const urls = [
-      "https://euonroia-secured.onrender.com", // Replace this with your Render URL
-    ];
-
-    await Promise.all(urls.map(url => fetch(url)));
-    console.log("Pinged:", urls.join(", "));
+    const url = "https://euonroia-secured.onrender.com/ping"; // Replace with your Render URL
+    await fetch(url);
+    console.log(`Pinged: ${url}`);
   },
 };
