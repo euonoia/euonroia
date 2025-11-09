@@ -9,12 +9,12 @@ import authRoutes from "./api/auth.js";
 
 const app = express();
 
-// Trust proxy for secure cookies behind Render
+// -----------------------------
+// Trust proxy (needed for secure cookies behind Render)
+// -----------------------------
 app.set("trust proxy", 1);
 
-const isProduction = ENV.NODE_ENV === "production";
-const FRONTEND_URL = ENV.FRONTEND_URL || "https://euonroia.onrender.com";
-
+const FRONTEND_URL = ENV.VITE_FRONTEND_URL|| "https://euonroia.onrender.com";
 const allowedOrigins = [
   "https://euonroia.onrender.com",
   "http://localhost:5173",
@@ -25,15 +25,13 @@ const allowedOrigins = [
 // -----------------------------
 app.use(securityMiddleware);
 
-// ✅ Dynamic CORS to fix "No 'Access-Control-Allow-Origin'" error
+// ✅ Dynamic CORS for allowed origins
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin like curl or mobile apps
-      if (!origin) return callback(null, true);
+      if (!origin) return callback(null, true); // allow curl, mobile apps, etc
       if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = `CORS policy does not allow access from ${origin}`;
-        return callback(new Error(msg), false);
+        return callback(new Error(`CORS not allowed for origin ${origin}`), false);
       }
       return callback(null, true);
     },
@@ -53,14 +51,12 @@ app.use("/auth", authRoutes);
 app.get("/", (req, res) => res.send("✅ Backend is running securely!"));
 
 // -----------------------------
-// Catch-all Redirect
+// Catch-all redirect
 // -----------------------------
 app.use((req, res) => res.redirect(FRONTEND_URL));
 
 // -----------------------------
-// Start Server
+// Start server
 // -----------------------------
 const PORT = ENV.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Secure server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Secure server running on port ${PORT}`));

@@ -15,27 +15,33 @@ interface UserContextType {
   signOut: () => void;
 }
 
-interface Props {
+interface UserProviderProps {
   children: ReactNode;
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://euonroia-secured.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-export const UserContext = createContext<UserContextType | undefined>(undefined);
+// Provide a **fallback object** to prevent undefined access
+const UserContext = createContext<UserContextType>({
+  user: null,
+  loading: true,
+  signInWithGoogle: () => {},
+  signOut: () => {},
+});
 
-export const UserProvider: React.FC<Props> = ({ children }) => {
+export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch current user from backend
   const fetchUser = async () => {
     setLoading(true);
     try {
       const res = await axios.get<{ user: User }>(`${BACKEND_URL}/auth/me`, {
-        withCredentials: true, // send cookies
+        withCredentials: true,
       });
       setUser(res.data.user);
     } catch (err) {
+      console.error("Fetch user failed:", err);
       setUser(null);
     } finally {
       setLoading(false);
@@ -46,18 +52,16 @@ export const UserProvider: React.FC<Props> = ({ children }) => {
     fetchUser();
   }, []);
 
-  // Trigger Google OAuth login
   const signInWithGoogle = () => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  // Logout
   const signOut = async () => {
     try {
       await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
       setUser(null);
     } catch (err) {
-      console.error("Sign out failed:", err);
+      console.error("Sign out failed", err);
     }
   };
 
@@ -68,9 +72,6 @@ export const UserProvider: React.FC<Props> = ({ children }) => {
   );
 };
 
-// Custom hook
 export const useUser = (): UserContextType => {
-  const context = useContext(UserContext);
-  if (!context) throw new Error("useUser must be used within a UserProvider");
-  return context;
+  return useContext(UserContext);
 };

@@ -11,20 +11,16 @@ const OAuthCallback: React.FC = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Request current user; cookie is sent automatically
         const res = await axios.get<{ user: { id: string; name: string; email: string; picture?: string } }>(
           `${BACKEND_URL}/auth/me`,
           { withCredentials: true }
         );
 
-        if (res.data.user) {
-          navigate("/dashboard"); // user exists → go to dashboard
-        } else {
-          navigate("/"); // fallback
-        }
+        if (res.data.user) navigate("/dashboard");
+        else navigate("/");
       } catch (err) {
         console.error("OAuth callback fetch failed:", err);
-        navigate("/"); // fallback
+        navigate("/");
       } finally {
         setLoading(false);
       }
@@ -33,7 +29,7 @@ const OAuthCallback: React.FC = () => {
     checkAuth();
   }, [navigate]);
 
-  if (loading) return <p>Logging you in, please wait...</p>;
+  if (loading) return <p>Logging you in...</p>;
   return null;
 };
 

@@ -19,7 +19,9 @@ const GOOGLE_REDIRECT_URI = isProduction
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
-// 1️⃣ Google redirect
+// -----------------------------
+// 1️⃣ Redirect to Google OAuth
+// -----------------------------
 router.get("/google", (req, res) => {
   const url = client.generateAuthUrl({
     access_type: "offline",
@@ -29,7 +31,9 @@ router.get("/google", (req, res) => {
   res.redirect(url);
 });
 
-// 2️⃣ Google callback
+// -----------------------------
+// 2️⃣ Google OAuth callback
+// -----------------------------
 router.get("/google/callback", async (req, res) => {
   try {
     const code = req.query.code;
@@ -41,14 +45,16 @@ router.get("/google/callback", async (req, res) => {
     const { data } = await client.request({ url: "https://www.googleapis.com/oauth2/v2/userinfo" });
     const { id, name, email, picture } = data;
 
+    // Save/update user in Firestore
     await admin.firestore().collection("users").doc(id).set(
       { id, name, email, picture, lastLogin: new Date() },
       { merge: true }
     );
 
+    // Generate JWT
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
-    // ✅ Correct cookie
+    // Set secure httpOnly cookie
     res.cookie("authToken", token, {
       httpOnly: true,
       secure: true,
@@ -56,6 +62,7 @@ router.get("/google/callback", async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    // Redirect to frontend
     res.redirect(FRONTEND_URL);
   } catch (err) {
     console.error("OAuth error:", err);
@@ -63,7 +70,9 @@ router.get("/google/callback", async (req, res) => {
   }
 });
 
-// 3️⃣ /me route
+// -----------------------------
+// 3️⃣ Protected route: /me
+// -----------------------------
 router.get("/me", (req, res) => {
   const token = req.cookies?.authToken;
   if (!token) return res.status(401).json({ error: "Not logged in" });
@@ -77,7 +86,9 @@ router.get("/me", (req, res) => {
   }
 });
 
+// -----------------------------
 // 4️⃣ Logout
+// -----------------------------
 router.post("/signout", (req, res) => {
   res.clearCookie("authToken", {
     httpOnly: true,
