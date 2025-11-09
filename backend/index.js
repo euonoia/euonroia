@@ -9,6 +9,8 @@ import authRoutes from "./api/auth.js";
 
 const app = express();
 const isProduction = ENV.NODE_ENV === "production";
+// Trust proxy so secure cookies work behind Render/Proxies
+app.set("trust proxy", 1);
 
 // -----------------------------
 // Middleware
