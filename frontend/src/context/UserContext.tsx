@@ -1,7 +1,7 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import axios from "axios";
 
-interface User {
+export interface User {
   id: string;
   name: string;
   email: string;
@@ -11,30 +11,31 @@ interface User {
 interface UserContextType {
   user: User | null;
   loading: boolean;
-  signOut: () => void;
   signInWithGoogle: () => void;
+  signOut: () => void;
 }
-
-const UserContext = createContext<UserContextType | undefined>(undefined);
 
 interface Props {
   children: ReactNode;
 }
 
-export const UserProvider = ({ children }: Props) => {
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://euonroia-secured.onrender.com";
+
+export const UserContext = createContext<UserContextType | undefined>(undefined);
+
+export const UserProvider: React.FC<Props> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://euonroia-secured.onrender.com";
-
+  // Fetch current user from backend
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+      const res = await axios.get<{ user: User }>(`${BACKEND_URL}/auth/me`, {
         withCredentials: true, // send cookies
       });
       setUser(res.data.user);
-    } catch {
+    } catch (err) {
       setUser(null);
     } finally {
       setLoading(false);
@@ -45,28 +46,30 @@ export const UserProvider = ({ children }: Props) => {
     fetchUser();
   }, []);
 
+  // Trigger Google OAuth login
   const signInWithGoogle = () => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
+  // Logout
   const signOut = async () => {
     try {
       await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+      setUser(null);
     } catch (err) {
       console.error("Sign out failed:", err);
-    } finally {
-      setUser(null);
     }
   };
 
   return (
-    <UserContext.Provider value={{ user, loading, signOut, signInWithGoogle }}>
+    <UserContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
       {children}
     </UserContext.Provider>
   );
 };
 
-export const useUser = () => {
+// Custom hook
+export const useUser = (): UserContextType => {
   const context = useContext(UserContext);
   if (!context) throw new Error("useUser must be used within a UserProvider");
   return context;

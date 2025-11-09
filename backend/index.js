@@ -15,16 +15,14 @@ const isProduction = ENV.NODE_ENV === "production";
 // -----------------------------
 app.use(securityMiddleware);
 
-// ✅ Fix: Allow frontend to send cookies cross-domain
-app.use(
-  cors({
-    origin: [
-      "https://euonroia.onrender.com", // frontend (Render)
-      "http://localhost:5173", // local dev
-    ],
-    credentials: true,
-  })
-);
+
+app.use(cors({
+  origin: [
+    "https://euonroia.onrender.com",
+    "http://localhost:5173",
+  ],
+  credentials: true,
+}));
 
 app.use(cookieParser());
 app.use(express.json());
