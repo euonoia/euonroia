@@ -14,7 +14,7 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=5000
-    command: yarn run dev  # Changed from npm run dev to yarn run dev
+    command: yarn run dev 
 
   frontend:
     build:
@@ -29,7 +29,7 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
       - VITE_BACKEND_URL=http://localhost:5000
-    command: yarn run dev -- --host 0.0.0.0  # Changed from npm run dev to yarn run dev
+    command: yarn run dev -- --host 0.0.0.0 
     depends_on:
       - backend
 
