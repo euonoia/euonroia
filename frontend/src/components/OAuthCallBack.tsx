@@ -5,14 +5,11 @@ export default function OAuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    if (token) {
-      localStorage.setItem("authToken", token);
-    }
-    // Remove token from URL for cleanliness
+    // Clean the URL (remove query params)
     window.history.replaceState({}, document.title, "/");
-    navigate("/dashboard"); // redirect to landing page or dashboard
+
+    // Simply redirect to dashboard; backend cookie already contains auth
+    navigate("/dashboard");
   }, [navigate]);
 
   return <p>Logging you in...</p>;
