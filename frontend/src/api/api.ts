@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { User } from './types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const api = axios.create({ baseURL: API_BASE_URL });
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://euonroia-secured.onrender.com';
+const api = axios.create({ baseURL: API_BASE_URL, withCredentials: true });
 
 // GET all users
 export const getUsers = async (): Promise<User[]> => {
