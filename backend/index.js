@@ -3,7 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { ENV } from "./config/env.js";
 import "./config/firebase.js";
-import { securityMiddleware } from "./middlewares/security.js";
+import { securityMiddleware } from "./config/security.js";
 import authRoutes from "./api/auth.js";
 
 const app = express();
