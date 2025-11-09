@@ -1,7 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+
+
+
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import axios from "axios";
 
-export interface User {
+interface User {
   id: string;
   name: string;
   email: string;
@@ -11,67 +14,80 @@ export interface User {
 interface UserContextType {
   user: User | null;
   loading: boolean;
-  signInWithGoogle: () => void;
   signOut: () => void;
+  signInWithGoogle: () => void;
 }
 
-interface UserProviderProps {
+const UserContext = createContext<UserContextType | undefined>(undefined);
+
+interface Props {
   children: ReactNode;
 }
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-
-// Provide a **fallback object** to prevent undefined access
-const UserContext = createContext<UserContextType>({
-  user: null,
-  loading: true,
-  signInWithGoogle: () => {},
-  signOut: () => {},
-});
-
-export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
+export const UserProvider = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUser = async () => {
-    setLoading(true);
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+
+  // Get JWT from localStorage
+  const getToken = () => localStorage.getItem("authToken");
+
+  // Fetch current user with token
+  const fetchUser = async (token?: string) => {
+    const authToken = token || getToken();
+    if (!authToken) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await axios.get<{ user: User }>(`${BACKEND_URL}/auth/me`, {
-        withCredentials: true,
+      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${authToken}` },
       });
       setUser(res.data.user);
     } catch (err) {
-      console.error("Fetch user failed:", err);
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
+  // Handle token from OAuth redirect
   useEffect(() => {
-    fetchUser();
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    if (token) {
+      localStorage.setItem("authToken", token);
+      fetchUser(token);
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else {
+      fetchUser();
+    }
   }, []);
 
+  // Google OAuth redirect
   const signInWithGoogle = () => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  const signOut = async () => {
-    try {
-      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
-      setUser(null);
-    } catch (err) {
-      console.error("Sign out failed", err);
-    }
+  // Sign out
+  const signOut = () => {
+    localStorage.removeItem("authToken");
+    setUser(null);
   };
 
   return (
-    <UserContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+    <UserContext.Provider value={{ user, loading, signOut, signInWithGoogle }}>
       {children}
     </UserContext.Provider>
   );
 };
 
-export const useUser = (): UserContextType => {
-  return useContext(UserContext);
+// Hook to access context
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (!context) throw new Error("useUser must be used within a UserProvider");
+  return context;
 };
