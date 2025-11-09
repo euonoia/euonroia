@@ -1,20 +1,23 @@
 # ---- Backend Dockerfile (Production) ----
 FROM node:18-alpine
 
-# Create and set working directory
+# Set working directory
 WORKDIR /app
 
-# Copy dependency files first for better caching
+# Copy dependency files first for caching
 COPY package*.json ./
 
-# Install only production dependencies (smaller, faster image)
+# Install production dependencies only
 RUN npm install --production
 
-# Copy the rest of your backend code
+# Copy the rest of the backend code
 COPY . .
 
-# Expose your backend port (Render will auto-detect this)
+# Ensure Node runs with proper environment for Render
+ENV NODE_ENV=production
+
+# Expose backend port (Render auto-detects this)
 EXPOSE 5000
 
-# Start your server
-CMD ["node", "index.js"]
+# Start the server with proper flags for stable production
+CMD ["node", "--enable-source-maps", "index.js"]

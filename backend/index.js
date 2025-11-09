@@ -2,10 +2,10 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
 import { ENV } from "./config/env.js";
-import "./config/firebase.js"; // initializes admin
+import "./config/firebase.js"; // Firebase admin
 import { securityMiddleware } from "./config/security.js";
-import redirectBrowser from "./middlewares/redirectBrowser.js";
 import authRoutes from "./api/auth.js";
 
 const app = express();
@@ -14,19 +14,18 @@ const isProduction = ENV.NODE_ENV === "production";
 // -----------------------------
 // Middleware
 // -----------------------------
-app.set("trust proxy", 1);
+app.set("trust proxy", 1); // for Render HTTPS
 app.use(securityMiddleware);
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://euonroia.onrender.com"],
-    credentials: true, // must be true for cookie to work
+    origin: ["https://euonroia.onrender.com", "http://localhost:5173"],
+    credentials: true,
   })
 );
 
 app.use(cookieParser());
 app.use(express.json());
-app.use(redirectBrowser);
 
 // -----------------------------
 // Routes
@@ -35,16 +34,24 @@ app.use("/auth", authRoutes);
 app.get("/", (req, res) => res.send("✅ Backend is running securely!"));
 
 // -----------------------------
-// Catch-all Redirect (Express 5 safe)
+// Serve frontend (optional if using same service)
 // -----------------------------
-// ⚠️ Using regex /.*/ instead of "*" to avoid path-to-regexp crash
+const __dirname = path.resolve();
+const frontendPath = path.join(__dirname, "frontend", "dist");
+app.use(express.static(frontendPath));
+
+// -----------------------------
+// SPA Fallback
+// -----------------------------
 app.get(/.*/, (req, res) => {
-  res.redirect(ENV.VITE_FRONTEND_URL);
+  // Only serve SPA if request is not for API
+  if (req.path.startsWith("/auth")) return res.status(404).send("API endpoint not found");
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
 // -----------------------------
 // Server Start
 // -----------------------------
 app.listen(ENV.PORT, () => {
-  console.log(`🚀 Secure server running on port ${ENV.PORT}`);
+  console.log(`🚀 Backend running on port ${ENV.PORT}`);
 });
