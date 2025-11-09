@@ -1,3 +1,4 @@
+// index.js
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -16,15 +17,12 @@ const isProduction = ENV.NODE_ENV === "production";
 app.set("trust proxy", 1);
 app.use(securityMiddleware);
 
-// ✅ Fix: Allow frontend to send cookies cross-domain
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://euonroia.onrender.com",
-  ],
-  credentials: true, // must be true for cookie to work
-}));
-
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "https://euonroia.onrender.com"],
+    credentials: true, // must be true for cookie to work
+  })
+);
 
 app.use(cookieParser());
 app.use(express.json());
@@ -37,9 +35,12 @@ app.use("/auth", authRoutes);
 app.get("/", (req, res) => res.send("✅ Backend is running securely!"));
 
 // -----------------------------
-// Catch-all Redirect
+// Catch-all Redirect (Express 5 safe)
 // -----------------------------
-app.use((req, res) => res.redirect(ENV.FRONTEND_URL));
+// ⚠️ Using regex /.*/ instead of "*" to avoid path-to-regexp crash
+app.get(/.*/, (req, res) => {
+  res.redirect(ENV.VITE_FRONTEND_URL);
+});
 
 // -----------------------------
 // Server Start
