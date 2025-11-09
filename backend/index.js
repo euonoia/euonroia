@@ -1,10 +1,10 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
 import { ENV } from "./config/env.js";
 import "./config/firebase.js"; // initializes admin
 import { securityMiddleware } from "./config/security.js";
+import redirectBrowser from "./middlewares/redirectBrowser.js";
 import authRoutes from "./api/auth.js";
 
 const app = express();
@@ -16,28 +16,30 @@ const isProduction = ENV.NODE_ENV === "production";
 app.set("trust proxy", 1);
 app.use(securityMiddleware);
 
+// ✅ Fix: Allow frontend to send cookies cross-domain
 app.use(cors({
   origin: [
     "http://localhost:5173",
     "https://euonroia.onrender.com",
   ],
-  credentials: true,
+  credentials: true, // must be true for cookie to work
 }));
+
 
 app.use(cookieParser());
 app.use(express.json());
+app.use(redirectBrowser);
 
 // -----------------------------
-// API Routes
+// Routes
 // -----------------------------
 app.use("/auth", authRoutes);
+app.get("/", (req, res) => res.send("✅ Backend is running securely!"));
 
 // -----------------------------
-// Unknown route handler (backend only)
+// Catch-all Redirect
 // -----------------------------
-app.use((req, res) => {
-  res.status(404).json({ error: "Not found" });
-});
+app.use((req, res) => res.redirect(ENV.FRONTEND_URL));
 
 // -----------------------------
 // Server Start
