@@ -23,7 +23,7 @@ const GOOGLE_REDIRECT_URI = isProduction
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
 // --------------------
-// 1️⃣ Redirect to Google login
+// 1️⃣ Redirect to Google
 // --------------------
 router.get("/google", (req, res) => {
   const url = client.generateAuthUrl({
@@ -48,13 +48,9 @@ router.get("/google/callback", async (req, res) => {
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
-    const { data } = await client.request({
-      url: "https://www.googleapis.com/oauth2/v2/userinfo",
-    });
-
+    const { data } = await client.request({ url: "https://www.googleapis.com/oauth2/v2/userinfo" });
     const { id, name, email, picture } = data;
 
-    // Save/update user in Firestore
     await admin.firestore().collection("users").doc(id).set(
       { id, name, email, picture, lastLogin: new Date() },
       { merge: true }
@@ -63,16 +59,14 @@ router.get("/google/callback", async (req, res) => {
     // Create JWT
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
-    // ✅ Set cookie without domain (works for backend domain)
+    // ✅ Correct cookie setup for cross-origin
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: true,            // HTTPS in prod
-      sameSite: "None",        // Required for cross-site
+      secure: true,       // HTTPS only
+      sameSite: "None",   // Cross-origin allowed
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-
-    // Redirect to frontend
     res.redirect(FRONTEND_URL);
   } catch (err) {
     console.error("Google OAuth error:", err);
@@ -81,7 +75,7 @@ router.get("/google/callback", async (req, res) => {
 });
 
 // --------------------
-// 3️⃣ Protected route: /me
+// 3️⃣ Protected route
 // --------------------
 router.get("/me", (req, res) => {
   const token = req.cookies?.authToken;
@@ -102,7 +96,7 @@ router.get("/me", (req, res) => {
 router.post("/signout", (req, res) => {
   res.clearCookie("authToken", {
     httpOnly: true,
-    secure: isProduction,
+    secure: true,
     sameSite: "None",
   });
   res.json({ success: true });
