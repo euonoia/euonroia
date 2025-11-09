@@ -1,6 +1,3 @@
-
-
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import axios from "axios";
 
@@ -30,38 +27,24 @@ export const UserProvider = ({ children }: Props) => {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  // Get JWT from localStorage
-  const getToken = () => localStorage.getItem("authToken");
-
-  // Fetch current user with token
-  const fetchUser = async (token?: string) => {
-    const authToken = token || getToken();
-    if (!authToken) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
+  // Fetch current user from backend (cookie-based auth)
+  const fetchUser = async () => {
+    setLoading(true);
     try {
-    const res = await axios.get(`${BACKEND_URL}/auth/me`, { withCredentials: true });
-    setUser(res.data.user);
-  } catch (err) {
-    setUser(null);
-  } finally {
-    setLoading(false);
-  }
+      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+        withCredentials: true, // important to send cookies
+      });
+      setUser(res.data.user);
+    } catch (err) {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Handle token from OAuth redirect
+  // On mount, fetch user
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    if (token) {
-      localStorage.setItem("authToken", token);
-      fetchUser(token);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else {
-      fetchUser();
-    }
+    fetchUser();
   }, []);
 
   // Google OAuth redirect
@@ -71,10 +54,14 @@ export const UserProvider = ({ children }: Props) => {
 
   // Sign out
   const signOut = async () => {
-  await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
-  setUser(null);
-};
-
+    try {
+      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+    } catch (err) {
+      console.error("Sign out failed:", err);
+    } finally {
+      setUser(null);
+    }
+  };
 
   return (
     <UserContext.Provider value={{ user, loading, signOut, signInWithGoogle }}>

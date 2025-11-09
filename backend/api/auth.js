@@ -3,23 +3,22 @@ import { Router } from "express";
 import admin from "firebase-admin";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 
 const router = Router();
 
-// -----------------------------
-// Environment setup
-// -----------------------------
+// Middleware
+router.use(cookieParser());
+
 const isProduction = process.env.NODE_ENV === "production";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Google redirect URI depends on environment
 const GOOGLE_REDIRECT_URI = isProduction
   ? "https://euonroia-secured.onrender.com/auth/google/callback"
   : "http://localhost:5000/auth/google/callback";
 
-// Frontend URL depends on environment
 const FRONTEND_URL = isProduction
   ? "https://euonroia.onrender.com"
   : "http://localhost:5173";
@@ -58,22 +57,24 @@ router.get("/google/callback", async (req, res) => {
 
     const { id, name, email, picture } = data;
 
+    // Save or update user in Firestore
     await admin.firestore().collection("users").doc(id).set(
       { id, name, email, picture, lastLogin: new Date() },
       { merge: true }
     );
 
+    // Create JWT
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
-    // Set token in httpOnly cookie
+    // Set cookie for cross-origin
     res.cookie("authToken", token, {
-      httpOnly: true,       
-      secure: isProduction,    
-      sameSite: "Strict",     
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      httpOnly: true,
+      secure: isProduction,         // HTTPS only in production
+      sameSite: "None",             // Cross-origin allowed
+      domain: ".euonroia.onrender.com", // if using subdomains
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
-    // Redirect to frontend without token in URL
     res.redirect(FRONTEND_URL);
   } catch (err) {
     console.error("Google OAuth error:", err);
@@ -85,7 +86,7 @@ router.get("/google/callback", async (req, res) => {
 // 3️⃣ Protected route: /me
 // -----------------------------
 router.get("/me", (req, res) => {
-  const token = req.cookies.authToken;  
+  const token = req.cookies?.authToken;
   if (!token) return res.status(401).json({ error: "Not logged in" });
 
   try {
@@ -96,22 +97,17 @@ router.get("/me", (req, res) => {
   }
 });
 
-
 // -----------------------------
-// 4️⃣ Logout route
+// 4️⃣ Logout
 // -----------------------------
 router.post("/signout", (req, res) => {
   res.clearCookie("authToken", {
     httpOnly: true,
     secure: isProduction,
-    sameSite: "Strict",
+    sameSite: "None",
+    domain: ".euonroia.onrender.com",
   });
   res.json({ success: true });
 });
 
-
 export default router;
-
-
-
-
