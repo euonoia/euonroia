@@ -2,62 +2,47 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const BACKEND_URL =
-  typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_BACKEND_URL
-    ? import.meta.env.VITE_BACKEND_URL
-    : "https://euonroia-secured.onrender.com";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://euonroia-secured.onrender.com";
 
 const OAuthCallback: React.FC = () => {
   const navigate = useNavigate();
-  const [message, setMessage] = useState("Finishing sign in...");
-  const maxAttempts = 6;
-  const baseDelayMs = 500;
+  const [message, setMessage] = useState("Completing sign in...");
 
   useEffect(() => {
     let mounted = true;
-    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-    const tryFetchMe = async (): Promise<boolean> => {
+    const checkLogin = async () => {
       try {
-        const res = await axios.get<{ user: any }>(`${BACKEND_URL}/auth/me`, {
-          withCredentials: true,
-          timeout: 3000,
+        setMessage("Checking authentication...");
+
+        const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+          withCredentials: true, // ensures cookie is sent
+          timeout: 5000,
         });
-        return !!res?.data?.user;
-      } catch {
-        return false;
-      }
-    };
 
-    (async () => {
-      setMessage("Completing login — checking authentication...");
-      for (let i = 0; i < maxAttempts && mounted; i++) {
-        const ok = await tryFetchMe();
-        if (ok) {
-          if (!mounted) return;
+        if (!mounted) return;
+
+        if (res.data?.user) {
           setMessage("Login successful — redirecting...");
-          await sleep(300);
           navigate("/dashboard");
-          return;
+        } else {
+          setMessage("Login failed — redirecting to home...");
+          setTimeout(() => navigate("/"), 800);
         }
-        const delay = baseDelayMs * (i + 1);
-        setMessage(`Waiting for login to complete... (attempt ${i + 1}/${maxAttempts})`);
-        await sleep(delay);
+      } catch (err) {
+        if (!mounted) return;
+        setMessage("Login failed — redirecting to home...");
+        setTimeout(() => navigate("/"), 800);
       }
-
-      if (!mounted) return;
-      setMessage("Login failed — redirecting to home.");
-      await sleep(600);
-      navigate("/");
-    })();
-
-    return () => {
-      mounted = false;
     };
+
+    checkLogin();
+
+    return () => { mounted = false; };
   }, [navigate]);
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 20, textAlign: "center" }}>
       <h2>{message}</h2>
       <p>If you are not redirected automatically, try refreshing or logging in again.</p>
     </div>
