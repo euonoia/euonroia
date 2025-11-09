@@ -1,4 +1,3 @@
-// backend/api/auth.js
 import { Router } from "express";
 import admin from "firebase-admin";
 import { OAuth2Client } from "google-auth-library";
@@ -23,7 +22,9 @@ const GOOGLE_REDIRECT_URI = isProduction
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
+// --------------------
 // 1️⃣ Redirect to Google login
+// --------------------
 router.get("/google", (req, res) => {
   const url = client.generateAuthUrl({
     access_type: "offline",
@@ -36,7 +37,9 @@ router.get("/google", (req, res) => {
   res.redirect(url);
 });
 
+// --------------------
 // 2️⃣ OAuth callback
+// --------------------
 router.get("/google/callback", async (req, res) => {
   try {
     const code = req.query.code;
@@ -60,15 +63,15 @@ router.get("/google/callback", async (req, res) => {
     // Create JWT
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
-    // Set httpOnly cookie for frontend
+    // ✅ Set cookie without domain (works for backend domain)
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: true,                     // HTTPS only
-      sameSite: "None",                 // cross-origin
-      domain: ".euonroia.onrender.com", // frontend domain
-      maxAge: 7 * 24 * 60 * 60 * 1000,  // 7 days
+      secure: isProduction, // secure only in production (https)
+      sameSite: "None",     // allow cross-site
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
+    // Redirect to frontend
     res.redirect(FRONTEND_URL);
   } catch (err) {
     console.error("Google OAuth error:", err);
@@ -76,7 +79,9 @@ router.get("/google/callback", async (req, res) => {
   }
 });
 
+// --------------------
 // 3️⃣ Protected route: /me
+// --------------------
 router.get("/me", (req, res) => {
   const token = req.cookies?.authToken;
   if (!token) return res.status(401).json({ error: "Not logged in" });
@@ -85,17 +90,19 @@ router.get("/me", (req, res) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     res.json({ user: decoded });
   } catch (err) {
+    console.error("JWT verification failed:", err);
     res.status(401).json({ error: "Invalid token" });
   }
 });
 
+// --------------------
 // 4️⃣ Logout
+// --------------------
 router.post("/signout", (req, res) => {
   res.clearCookie("authToken", {
     httpOnly: true,
-    secure: true,
+    secure: isProduction,
     sameSite: "None",
-    domain: ".euonroia.onrender.com",
   });
   res.json({ success: true });
 });

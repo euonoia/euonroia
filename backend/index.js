@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { ENV } from "./config/env.js";
-import "./config/firebase.js"; // initializes admin
+import "./config/firebase.js";
 import { securityMiddleware } from "./config/security.js";
 import redirectBrowser from "./middlewares/redirectBrowser.js";
 import authRoutes from "./api/auth.js";
