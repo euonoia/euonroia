@@ -5,10 +5,7 @@ export default function OAuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Clean the URL (remove query params)
     window.history.replaceState({}, document.title, "/");
-
-    // Simply redirect to dashboard; backend cookie already contains auth
     navigate("/dashboard");
   }, [navigate]);
 
