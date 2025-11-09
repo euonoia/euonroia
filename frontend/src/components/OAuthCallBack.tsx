@@ -2,13 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-// Backend URL from env or fallback
-const BACKEND_URL: string =
-  import.meta.env.VITE_BACKEND_URL ?? "https://euonroia-secured.onrender.com";
-
 const OAuthCallback: React.FC = () => {
   const navigate = useNavigate();
-  const [message, setMessage] = useState<string>("Completing sign in...");
+  const [message, setMessage] = useState("Completing sign in...");
 
   useEffect(() => {
     let mounted = true;
@@ -17,14 +13,11 @@ const OAuthCallback: React.FC = () => {
       try {
         setMessage("Checking authentication...");
 
-        // Make request to backend to get current user
-        const res = await axios.get<{ user?: { id: string; name: string; email: string; picture?: string } }>(
-          `${BACKEND_URL}/auth/me`,
-          {
-            withCredentials: true,
-            timeout: 5000,
-          }
-        );
+        // ✅ Call backend via Nginx proxy
+        const res = await axios.get("/auth/me", {
+          withCredentials: true, // cookies sent automatically
+          timeout: 5000,
+        });
 
         if (!mounted) return;
 
@@ -35,7 +28,7 @@ const OAuthCallback: React.FC = () => {
           setMessage("Login failed — redirecting to home...");
           setTimeout(() => navigate("/"), 800);
         }
-      } catch (err) {
+      } catch {
         if (!mounted) return;
         setMessage("Login failed — redirecting to home...");
         setTimeout(() => navigate("/"), 800);
