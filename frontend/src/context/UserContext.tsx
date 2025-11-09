@@ -41,17 +41,14 @@ export const UserProvider = ({ children }: Props) => {
       setLoading(false);
       return;
     }
-
     try {
-      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-      setUser(res.data.user);
-    } catch (err) {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
+    const res = await axios.get(`${BACKEND_URL}/auth/me`, { withCredentials: true });
+    setUser(res.data.user);
+  } catch (err) {
+    setUser(null);
+  } finally {
+    setLoading(false);
+  }
   };
 
   // Handle token from OAuth redirect
@@ -73,10 +70,11 @@ export const UserProvider = ({ children }: Props) => {
   };
 
   // Sign out
-  const signOut = () => {
-    localStorage.removeItem("authToken");
-    setUser(null);
-  };
+  const signOut = async () => {
+  await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+  setUser(null);
+};
+
 
   return (
     <UserContext.Provider value={{ user, loading, signOut, signInWithGoogle }}>
