@@ -1,4 +1,3 @@
-// backend/api/auth.js
 import { Router } from "express";
 import admin from "firebase-admin";
 import { OAuth2Client } from "google-auth-library";
@@ -14,12 +13,10 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Google redirect URI depends on environment
 const GOOGLE_REDIRECT_URI = isProduction
   ? "https://euonroia-secured.onrender.com/auth/google/callback"
   : "http://localhost:5000/auth/google/callback";
 
-// Frontend URL depends on environment
 const FRONTEND_URL = isProduction
   ? "https://euonroia.onrender.com"
   : "http://localhost:5173";
@@ -49,11 +46,9 @@ router.get("/google/callback", async (req, res) => {
     const code = req.query.code;
     if (!code) return res.redirect(FRONTEND_URL);
 
-    // Get tokens from Google
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
-    // Get user info
     const { data } = await client.request({
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
@@ -66,11 +61,19 @@ router.get("/google/callback", async (req, res) => {
       { merge: true }
     );
 
-    // Create JWT for frontend
+    // Create JWT
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
-    // Redirect to frontend with token
-    res.redirect(`${FRONTEND_URL}/oauth-callback?token=${token}`);
+    // ✅ Set secure cookie (httpOnly so JS can't access it)
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: isProduction, // HTTPS only in prod
+      sameSite: isProduction ? "None" : "Lax", // Allow cross-site cookies in prod
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // Redirect to frontend (no token in URL)
+    res.redirect(`${FRONTEND_URL}/dashboard`);
   } catch (err) {
     console.error("Google OAuth error:", err);
     res.redirect(FRONTEND_URL);
@@ -81,17 +84,14 @@ router.get("/google/callback", async (req, res) => {
 // 3️⃣ Protected route: /me
 // -----------------------------
 router.get("/me", (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Not logged in" });
-  }
-
-  const token = authHeader.split(" ")[1];
   try {
+    const token = req.cookies?.authToken;
+    if (!token) return res.status(401).json({ error: "Not logged in" });
+
     const decoded = jwt.verify(token, JWT_SECRET);
     res.json({ user: decoded });
   } catch (err) {
-    res.status(401).json({ error: "Invalid token" });
+    res.status(401).json({ error: "Invalid or expired token" });
   }
 });
 
@@ -99,12 +99,12 @@ router.get("/me", (req, res) => {
 // 4️⃣ Logout route
 // -----------------------------
 router.post("/signout", (req, res) => {
-  // JWT is stateless, just tell frontend to remove token
+  res.clearCookie("authToken", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "None" : "Lax",
+  });
   res.json({ success: true, message: "Logged out" });
 });
 
 export default router;
-
-
-
-

@@ -1,6 +1,3 @@
-
-
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import axios from "axios";
 
@@ -14,8 +11,8 @@ interface User {
 interface UserContextType {
   user: User | null;
   loading: boolean;
-  signOut: () => void;
   signInWithGoogle: () => void;
+  signOut: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -30,62 +27,43 @@ export const UserProvider = ({ children }: Props) => {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
-  // Get JWT from localStorage
-  const getToken = () => localStorage.getItem("authToken");
-
-  // Fetch current user with token
-  const fetchUser = async (token?: string) => {
-    const authToken = token || getToken();
-    if (!authToken) {
-      setUser(null);
-      setLoading(false);
-      return;
-    }
-
+  const fetchUser = async () => {
+    setLoading(true);
     try {
-      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${authToken}` },
-      });
-      setUser(res.data.user);
-    } catch (err) {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle token from OAuth redirect
+    const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+      withCredentials: true, // ✅ includes cookies
+    });
+    setUser(res.data.user);
+  } catch {
+    setUser(null);
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get("token");
-    if (token) {
-      localStorage.setItem("authToken", token);
-      fetchUser(token);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } else {
-      fetchUser();
-    }
+    fetchUser();
   }, []);
 
-  // Google OAuth redirect
   const signInWithGoogle = () => {
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
-  // Sign out
-  const signOut = () => {
-    localStorage.removeItem("authToken");
-    setUser(null);
+  const signOut = async () => {
+    try {
+      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+      setUser(null);
+    } catch (err) {
+      console.error("Sign out failed:", err);
+    }
   };
 
   return (
-    <UserContext.Provider value={{ user, loading, signOut, signInWithGoogle }}>
+    <UserContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
       {children}
     </UserContext.Provider>
   );
 };
 
-// Hook to access context
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) throw new Error("useUser must be used within a UserProvider");
