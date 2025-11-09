@@ -65,13 +65,12 @@ router.get("/google/callback", async (req, res) => {
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
     // ✅ Set secure cookie (httpOnly so JS can't access it)
-      res.cookie("authToken", token, {
-      httpOnly: true,          // JS cannot read it
-      secure: isProduction,    // HTTPS only in prod
-      sameSite: isProduction ? "None" : "Lax", // cross-site in prod
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: isProduction, // HTTPS only in prod
+      sameSite: isProduction ? "None" : "Lax", // Allow cross-site cookies in prod
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
-
 
     // Redirect to frontend (no token in URL)
     res.redirect(`${FRONTEND_URL}/dashboard`);

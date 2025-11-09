@@ -30,7 +30,6 @@ const OAuthCallback: React.FC = () => {
           setTimeout(() => navigate("/"), 800);
         }
       } catch (err) {
-        console.error("OAuthCallback error:", err);
         if (!mounted) return;
         setMessage("Login failed — redirecting to home...");
         setTimeout(() => navigate("/"), 800);
