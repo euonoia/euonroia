@@ -4,28 +4,21 @@ import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 
 const router = Router();
-
-// -----------------------------
-// Environment setup
-// -----------------------------
 const isProduction = process.env.NODE_ENV === "production";
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const JWT_SECRET = process.env.JWT_SECRET;
-
-const GOOGLE_REDIRECT_URI = isProduction
-  ? "https://euonroia-secured.onrender.com/auth/google/callback"
-  : "http://localhost:5000/auth/google/callback";
-
 const FRONTEND_URL = isProduction
   ? "https://euonroia.onrender.com"
   : "http://localhost:5173";
 
-const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
+const client = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  isProduction
+    ? "https://euonroia-secured.onrender.com/auth/google/callback"
+    : "http://localhost:5000/auth/google/callback"
+);
 
-// -----------------------------
-// 1️⃣ Redirect to Google login
-// -----------------------------
+// --- 1️⃣ Redirect to Google ---
 router.get("/google", (req, res) => {
   const url = client.generateAuthUrl({
     access_type: "offline",
@@ -38,9 +31,7 @@ router.get("/google", (req, res) => {
   res.redirect(url);
 });
 
-// -----------------------------
-// 2️⃣ Handle Google OAuth callback
-// -----------------------------
+// --- 2️⃣ OAuth callback ---
 router.get("/google/callback", async (req, res) => {
   try {
     const code = req.query.code;
@@ -55,56 +46,48 @@ router.get("/google/callback", async (req, res) => {
 
     const { id, name, email, picture } = data;
 
-    // Save or update user in Firestore
     await admin.firestore().collection("users").doc(id).set(
       { id, name, email, picture, lastLogin: new Date() },
       { merge: true }
     );
 
-    // Create JWT
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
-    // ✅ Set secure cookie (httpOnly so JS can't access it)
+    // ✅ httpOnly cookie
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: isProduction, // HTTPS only in prod
-      sameSite: isProduction ? "None" : "Lax", // Allow cross-site cookies in prod
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // Redirect to frontend (no token in URL)
     res.redirect(`${FRONTEND_URL}/dashboard`);
   } catch (err) {
-    console.error("Google OAuth error:", err);
+    console.error(err);
     res.redirect(FRONTEND_URL);
   }
 });
 
-// -----------------------------
-// 3️⃣ Protected route: /me
-// -----------------------------
+// --- 3️⃣ Protected route ---
 router.get("/me", (req, res) => {
   try {
     const token = req.cookies?.authToken;
     if (!token) return res.status(401).json({ error: "Not logged in" });
-
     const decoded = jwt.verify(token, JWT_SECRET);
     res.json({ user: decoded });
-  } catch (err) {
-    res.status(401).json({ error: "Invalid or expired token" });
+  } catch {
+    res.status(401).json({ error: "Invalid token" });
   }
 });
 
-// -----------------------------
-// 4️⃣ Logout route
-// -----------------------------
+// --- 4️⃣ Logout ---
 router.post("/signout", (req, res) => {
   res.clearCookie("authToken", {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "None" : "Lax",
   });
-  res.json({ success: true, message: "Logged out" });
+  res.json({ success: true });
 });
 
 export default router;
