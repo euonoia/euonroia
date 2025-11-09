@@ -11,10 +11,7 @@ const isProduction = process.env.NODE_ENV === "production";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const JWT_SECRET = process.env.JWT_SECRET;
-
-const FRONTEND_URL = isProduction
-  ? "https://euonroia.onrender.com"
-  : "http://localhost:5173";
+const FRONTEND_URL = process.env.VITE_FRONTEND_URL || "https://euonroia.onrender.com";
 
 const GOOGLE_REDIRECT_URI = isProduction
   ? "https://euonroia-secured.onrender.com/auth/google/callback"
@@ -22,24 +19,17 @@ const GOOGLE_REDIRECT_URI = isProduction
 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI);
 
-// --------------------
-// 1️⃣ Redirect to Google
-// --------------------
+// 1️⃣ Google redirect
 router.get("/google", (req, res) => {
   const url = client.generateAuthUrl({
     access_type: "offline",
     prompt: "consent",
-    scope: [
-      "https://www.googleapis.com/auth/userinfo.profile",
-      "https://www.googleapis.com/auth/userinfo.email",
-    ],
+    scope: ["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
   });
   res.redirect(url);
 });
 
-// --------------------
-// 2️⃣ OAuth callback
-// --------------------
+// 2️⃣ Google callback
 router.get("/google/callback", async (req, res) => {
   try {
     const code = req.query.code;
@@ -56,27 +46,24 @@ router.get("/google/callback", async (req, res) => {
       { merge: true }
     );
 
-    // Create JWT
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
-    // ✅ Correct cookie setup for cross-origin
+    // ✅ Correct cookie
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: true,       // HTTPS only
-      sameSite: "None",   // Cross-origin allowed
+      secure: true,
+      sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.redirect(FRONTEND_URL);
   } catch (err) {
-    console.error("Google OAuth error:", err);
+    console.error("OAuth error:", err);
     res.redirect(FRONTEND_URL);
   }
 });
 
-// --------------------
-// 3️⃣ Protected route
-// --------------------
+// 3️⃣ /me route
 router.get("/me", (req, res) => {
   const token = req.cookies?.authToken;
   if (!token) return res.status(401).json({ error: "Not logged in" });
@@ -90,9 +77,7 @@ router.get("/me", (req, res) => {
   }
 });
 
-// --------------------
 // 4️⃣ Logout
-// --------------------
 router.post("/signout", (req, res) => {
   res.clearCookie("authToken", {
     httpOnly: true,
