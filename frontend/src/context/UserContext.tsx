@@ -1,9 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import axios from "axios";
 
-// -----------------------------
-// Types
-// -----------------------------
 interface User {
   id: string;
   name: string;
@@ -18,29 +15,24 @@ interface UserContextType {
   signOut: () => void;
 }
 
+const UserContext = createContext<UserContextType | undefined>(undefined);
+
 interface Props {
   children: ReactNode;
 }
 
-// -----------------------------
-// Context
-// -----------------------------
-const UserContext = createContext<UserContextType | undefined>(undefined);
-
-export const UserProvider: React.FC<Props> = ({ children }) => {
+export const UserProvider = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "https://euonroia-secured.onrender.com";
+  // ✅ Backend is proxied via Nginx at /auth
+  const BACKEND_URL = "/auth";
 
-  // -----------------------------
-  // Fetch current user
-  // -----------------------------
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const res = await axios.get<{ user: User }>(`${BACKEND_URL}/auth/me`, {
-        withCredentials: true,
+      const res = await axios.get(`${BACKEND_URL}/me`, {
+        withCredentials: true, // cookies sent automatically
       });
       setUser(res.data.user);
     } catch {
@@ -54,19 +46,14 @@ export const UserProvider: React.FC<Props> = ({ children }) => {
     fetchUser();
   }, []);
 
-  // -----------------------------
-  // Sign in
-  // -----------------------------
   const signInWithGoogle = () => {
-    window.location.href = `${BACKEND_URL}/auth/google`;
+    // Redirect user to backend Google OAuth route
+    window.location.href = `${BACKEND_URL}/google`;
   };
 
-  // -----------------------------
-  // Sign out
-  // -----------------------------
   const signOut = async () => {
     try {
-      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+      await axios.post(`${BACKEND_URL}/signout`, {}, { withCredentials: true });
       setUser(null);
     } catch (err) {
       console.error("Sign out failed:", err);
@@ -80,10 +67,7 @@ export const UserProvider: React.FC<Props> = ({ children }) => {
   );
 };
 
-// -----------------------------
-// Hook
-// -----------------------------
-export const useUser = (): UserContextType => {
+export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) throw new Error("useUser must be used within a UserProvider");
   return context;
