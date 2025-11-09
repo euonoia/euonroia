@@ -49,28 +49,32 @@ router.get("/google/callback", async (req, res) => {
     const code = req.query.code;
     if (!code) return res.redirect(FRONTEND_URL);
 
-    // Get tokens from Google
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
-    // Get user info
     const { data } = await client.request({
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
 
     const { id, name, email, picture } = data;
 
-    // Save or update user in Firestore
     await admin.firestore().collection("users").doc(id).set(
       { id, name, email, picture, lastLogin: new Date() },
       { merge: true }
     );
 
-    // Create JWT for frontend
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
-    // Redirect to frontend with token
-    res.redirect(`${FRONTEND_URL}/oauth-callback?token=${token}`);
+    // Set token in httpOnly cookie
+    res.cookie("authToken", token, {
+      httpOnly: true,       
+      secure: isProduction,    
+      sameSite: "Strict",     
+      maxAge: 7 * 24 * 60 * 60 * 1000, 
+    });
+
+    // Redirect to frontend without token in URL
+    res.redirect(FRONTEND_URL);
   } catch (err) {
     console.error("Google OAuth error:", err);
     res.redirect(FRONTEND_URL);
@@ -81,12 +85,9 @@ router.get("/google/callback", async (req, res) => {
 // 3️⃣ Protected route: /me
 // -----------------------------
 router.get("/me", (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Not logged in" });
-  }
+  const token = req.cookies.authToken;  
+  if (!token) return res.status(401).json({ error: "Not logged in" });
 
-  const token = authHeader.split(" ")[1];
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     res.json({ user: decoded });
@@ -95,13 +96,19 @@ router.get("/me", (req, res) => {
   }
 });
 
+
 // -----------------------------
 // 4️⃣ Logout route
 // -----------------------------
 router.post("/signout", (req, res) => {
-  // JWT is stateless, just tell frontend to remove token
-  res.json({ success: true, message: "Logged out" });
+  res.clearCookie("authToken", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: "Strict",
+  });
+  res.json({ success: true });
 });
+
 
 export default router;
 
