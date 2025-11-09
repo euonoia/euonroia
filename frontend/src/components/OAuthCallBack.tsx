@@ -5,6 +5,7 @@ export default function OAuthCallback() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Cookie is already set by backend, just redirect
     window.history.replaceState({}, document.title, "/");
     navigate("/dashboard");
   }, [navigate]);
