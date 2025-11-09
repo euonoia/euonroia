@@ -66,10 +66,11 @@ router.get("/google/callback", async (req, res) => {
     // ✅ Set cookie without domain (works for backend domain)
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: isProduction, // secure only in production (https)
-      sameSite: "None",     // allow cross-site
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      secure: true,            // HTTPS in prod
+      sameSite: "None",        // Required for cross-site
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
+
 
     // Redirect to frontend
     res.redirect(FRONTEND_URL);
