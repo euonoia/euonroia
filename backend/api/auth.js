@@ -65,12 +65,11 @@ router.get("/google/callback", async (req, res) => {
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
     // ✅ Set secure cookie (httpOnly so JS can't access it)
-      res.cookie("authToken", token, {
+    res.cookie("authToken", token, {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      domain: ".onrender.com",
+      secure: isProduction, // HTTPS only in prod
+      sameSite: isProduction ? "None" : "Lax", // Allow cross-site cookies in prod
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     // Redirect to frontend (no token in URL)
