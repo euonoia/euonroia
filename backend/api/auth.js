@@ -64,15 +64,20 @@ router.get("/google/callback", async (req, res) => {
     // Create JWT
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
-    // ✅ Set secure cookie (httpOnly so JS can't access it)
+    // -----------------------------
+    // ✅ Set cross-site safe cookie
+    // -----------------------------
     res.cookie("authToken", token, {
-      httpOnly: true,
-      secure: isProduction, // HTTPS only in prod
-      sameSite: isProduction ? "None" : "Lax", // Allow cross-site cookies in prod
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      httpOnly: true,             // JS cannot access
+      secure: true,               // HTTPS only
+      sameSite: "None",           // allows cross-site
+      path: "/",                  // available on all paths
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // Redirect to frontend (no token in URL)
+    // -----------------------------
+    // Redirect to frontend dashboard
+    // -----------------------------
     res.redirect(`${FRONTEND_URL}/dashboard`);
   } catch (err) {
     console.error("Google OAuth error:", err);
