@@ -20,8 +20,7 @@ export function protectBackend(req, res, next) {
 
   // --- 2️⃣ Protect API endpoints ---
   if (req.path.startsWith("/api")) {
-    // Block requests from unauthorized origins
-    if (origin && !allowedOrigins.some((o) => origin.startsWith(o))) {
+    if (!origin || !allowedOrigins.some((o) => origin.startsWith(o))) {
       return res.status(403).send("❌ Access forbidden: invalid origin");
     }
 
