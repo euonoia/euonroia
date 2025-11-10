@@ -41,16 +41,13 @@ export const UserProvider = ({ children }: Props) => {
     } catch (err: any) {
       setUser(null);
 
-      // Detect if the user just returned from Google login
+      // 🔍 Detect if user just returned from Google login but cookies are blocked
       const url = new URL(window.location.href);
       const fromGoogle = url.searchParams.has("code") || url.searchParams.has("state");
 
       if (fromGoogle) {
-        console.warn("Google login likely failed — cookies or Brave Shield may be blocking auth.");
-        setLoginError(true);
-
-        // 🧹 Clean the URL to remove ?code and ?state for better UX
-        window.history.replaceState({}, document.title, window.location.pathname);
+        console.warn("Google login may have failed — cookies likely blocked.");
+        setLoginError(true); // ✅ Show LoginWarning
       }
     } finally {
       setLoading(false);
