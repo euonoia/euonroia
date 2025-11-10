@@ -15,7 +15,7 @@ export default function LoginWarning() {
     if (neverShow) {
       localStorage.setItem("hideLoginWarning", "true");
     }
-    setLoginError(false); // ✅ Always close after storing preference
+    setLoginError(false);
   };
 
   if (!loginError || neverShow) return null;
@@ -37,7 +37,7 @@ export default function LoginWarning() {
         style={{
           position: "relative",
           width: "100%",
-          maxWidth: "420px",
+          maxWidth: "440px",
           backgroundColor: "#fff8e1",
           border: "2px dashed #f39c12",
           borderRadius: "0.75rem",
@@ -66,16 +66,25 @@ export default function LoginWarning() {
           ×
         </button>
 
-        <h3 style={{ color: "#e67e22", marginBottom: "1rem" }}>⚠️ Login Issue Detected</h3>
-        <p style={{ margin: "0.5rem 0 1rem", lineHeight: 1.5 }}>
-          It looks like your Google login didn’t go through — this can happen if{" "}
-          <strong>Brave Shield</strong> or your browser’s privacy settings block cookies.
-          <br /><br />
-          I’m a college student building this site to help others learn coding — totally free.
-          <br /><br />
-          Please try turning off Brave Shield or allowing third-party cookies temporarily.
-          <br /><br />
-          You can also check out my open-source work at{" "}
+        <h3 style={{ color: "#e67e22", marginBottom: "1rem" }}>
+          ⚠️ Login Issue Detected
+        </h3>
+
+        <p style={{ margin: "0.5rem 0 1rem", lineHeight: 1.6 }}>
+          Hey there! 👋 Before you continue, I want to be transparent with you.  
+          This site is something I’m building as a <strong>college student</strong> who dreams of
+          helping others learn to code — especially those who don’t have access to laptops or expensive tools.
+          <br />
+          <br />
+          Since I don’t have a paid domain yet (everything here is hosted for free),
+          some browsers like <strong>Brave</strong> or certain privacy settings may block the login system.
+          <br />
+          <br />
+          To make everything work smoothly, please temporarily turn off{" "}
+          <strong>Brave Shield</strong> or allow third-party cookies in your browser.
+          <br />
+          <br />
+          You can also check my work on GitHub at{" "}
           <a
             href="https://github.com/euonoia"
             target="_blank"
@@ -83,8 +92,23 @@ export default function LoginWarning() {
             style={{ color: "#e67e22", fontWeight: "bold" }}
           >
             github.com/euonoia
-          </a>{" "}
-          💛
+          </a>
+          — everything here is open-source and built with genuine care for fellow learners.
+          <br />
+          <br />
+          Thank you for trusting this small project. 💛
+          You’re not just helping me — you’re helping a growing community of students
+          who want to learn and build together. 🙏
+        </p>
+
+        <p
+          style={{
+            margin: "1rem 0 0.75rem",
+            fontSize: "0.95rem",
+            textAlign: "center",
+          }}
+        >
+          After adjusting your settings, please try logging in again:
         </p>
 
         <button
@@ -115,6 +139,17 @@ export default function LoginWarning() {
             Don’t show this again
           </label>
         </div>
+
+        <p
+          style={{
+            fontSize: "0.85rem",
+            color: "#666",
+            marginTop: "1rem",
+            lineHeight: 1.4,
+          }}
+        >
+          Don’t worry — this only affects login, and your account stays safe! 😊
+        </p>
       </div>
     </div>
   );
