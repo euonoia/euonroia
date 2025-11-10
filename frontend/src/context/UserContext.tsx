@@ -38,20 +38,23 @@ export const UserProvider = ({ children }: Props) => {
         withCredentials: true,
       });
       setUser(res.data.user || null);
-      setLoginError(false); // ✅ Clear error if user fetch succeeds
+      setLoginError(false); // ✅ clear warning if cookies/auth works
     } catch (err: any) {
       console.warn("Auth check failed:", err?.response?.status || err.message);
       setUser(null);
 
-      // Check if the user came from Google login (failed due to blocked cookies)
       const url = new URL(window.location.href);
       const fromGoogle = url.searchParams.has("code") || url.searchParams.has("state");
 
-      // ✅ Always show LoginWarning if auth/me failed
-      setLoginError(true);
+      // ✅ Detect cookie issues or blocked auth
+      const isCookieBlocked =
+        !err.response || err.response.status === 401 || err.response.status === 403;
 
-      if (fromGoogle) {
-        console.warn("Google login likely failed — blocked cookies.");
+      if (fromGoogle && isCookieBlocked) {
+        console.warn("Google login likely failed — blocked cookies or Brave Shield.");
+        setLoginError(true);
+      } else {
+        setLoginError(false);
       }
     } finally {
       setLoading(false);
