@@ -26,7 +26,7 @@ export const UserProvider = ({ children }: Props) => {
   const [loading, setLoading] = useState(true);
 
   // ✅ Backend is proxied via Nginx at /auth
-  const BACKEND_URL = "/auth";
+ const BACKEND_URL = "https://euonroia-secured.onrender.com/auth";
 
   const fetchUser = async () => {
     setLoading(true);
