@@ -1,3 +1,4 @@
+// src/components/LoginWarning.tsx
 import { useEffect, useState } from "react";
 import { checkThirdPartyCookies } from "../../utils/checkCookies";
 import { useUser } from "../../context/UserContext";
@@ -5,15 +6,29 @@ import { useUser } from "../../context/UserContext";
 export default function LoginWarning() {
   const { signInWithGoogle } = useUser();
   const [blocked, setBlocked] = useState(false);
-  const [visible, setVisible] = useState(true); // track if user closed it
-
-  const checkCookies = async () => {
-    const allowed = await checkThirdPartyCookies();
-    setBlocked(!allowed);
-  };
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    checkCookies();
+    let interval: number;
+
+    const check = async () => {
+      const allowed = await checkThirdPartyCookies();
+      if (allowed) {
+        setBlocked(false);
+        setVisible(false);
+        clearInterval(interval);
+      } else {
+        setBlocked(true);
+      }
+    };
+
+    // Initial check
+    check();
+
+    // Poll every 3 seconds in case user toggles Brave Shield or privacy settings
+    interval = window.setInterval(check, 3000);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (!blocked || !visible) return null;
@@ -21,15 +36,20 @@ export default function LoginWarning() {
   return (
     <div
       style={{
-        position: "relative",
-        padding: "1rem 1.5rem",
-        margin: "1rem 0",
+        position: "fixed",
+        top: "20%",
+        left: "50%",
+        transform: "translateX(-50%)",
+        maxWidth: "400px",
+        padding: "1.5rem",
         border: "2px dashed #f39c12",
         backgroundColor: "#fff8e1",
         borderRadius: "0.5rem",
         textAlign: "center",
         fontFamily: "Arial, sans-serif",
         color: "#333",
+        zIndex: 9999,
+        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
       }}
     >
       {/* Close Button */}
