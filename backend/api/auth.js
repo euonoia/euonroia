@@ -7,7 +7,7 @@ const router = Router();
 const isProduction = process.env.NODE_ENV === "production";
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Determine frontend callback URL
+// Frontend URL
 const FRONTEND_URL = isProduction
   ? "https://euonroia.onrender.com"
   : "http://localhost:5173";
@@ -40,34 +40,33 @@ router.get("/google/callback", async (req, res) => {
     const code = req.query.code;
     if (!code) return res.redirect(FRONTEND_URL);
 
-    // Exchange code for tokens
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
-    // Get user info
     const { data } = await client.request({
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
 
     const { id, name, email, picture } = data;
 
-    // Save to Firebase
+    // Save/update user in Firebase
     await admin.firestore().collection("users").doc(id).set(
       { id, name, email, picture, lastLogin: new Date() },
       { merge: true }
     );
 
-    // Create JWT token
-    const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
+    // --- 3️⃣ Create JWT (short-lived access token) ---
+    const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, {
+      expiresIn: "15m", // Short-lived
+    });
 
-    // Set HTTP-only cookie
-   res.cookie("authToken", token, {
+    // --- 4️⃣ Set HTTP-only cookie ---
+    res.cookie("authToken", token, {
       httpOnly: true,
-      secure: true,            
-      sameSite: "None",         
-      domain: ".onrender.com",  
-      path: "/",               
-      maxAge: 7 * 24 * 60 * 60 * 1000,
+      secure: true,          // must be HTTPS
+      sameSite: "None",      // cross-domain cookie
+      path: "/",
+      maxAge: 15 * 60 * 1000, // 15 minutes
     });
 
     res.redirect(`${FRONTEND_URL}/dashboard`);
@@ -77,11 +76,12 @@ router.get("/google/callback", async (req, res) => {
   }
 });
 
-// --- 3️⃣ Protected route ---
+// --- 5️⃣ Protected route ---
 router.get("/me", (req, res) => {
   try {
     const token = req.cookies?.authToken;
     if (!token) return res.status(401).json({ error: "Not logged in" });
+
     const decoded = jwt.verify(token, JWT_SECRET);
     res.json({ user: decoded });
   } catch {
@@ -89,16 +89,15 @@ router.get("/me", (req, res) => {
   }
 });
 
-// --- 4️⃣ Logout ---
+// --- 6️⃣ Logout ---
 router.post("/signout", (req, res) => {
+  // Clear cookie completely
   res.clearCookie("authToken", {
-  httpOnly: true,
-  secure: true,
-  sameSite: "None",
-  domain: ".onrender.com",
-  path: "/",
-});
-
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    path: "/",
+  });
   res.json({ success: true });
 });
 
