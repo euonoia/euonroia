@@ -1,4 +1,3 @@
-// src/components/LoginWarning.tsx
 import { useEffect, useState } from "react";
 import { checkThirdPartyCookies } from "../../utils/checkCookies";
 import { useUser } from "../../context/UserContext";
@@ -93,26 +92,46 @@ export default function LoginWarning() {
           ⚠️ Login Issue Detected
         </h3>
 
-        <p style={{ margin: "0.5rem 0 1rem", lineHeight: 1.4 }}>
-          It looks like your browser is blocking login cookies.  
-          This often happens when <strong>Brave Shield</strong> or privacy blockers are active.
-        </p>
-
-        <ul
+        <p
           style={{
-            textAlign: "left",
-            display: "inline-block",
+            margin: "0.5rem 0 1rem",
+            lineHeight: 1.5,
             fontSize: "0.95rem",
-            lineHeight: "1.5",
-            paddingLeft: "1rem",
+            textAlign: "left",
           }}
         >
-          <li>Turn off Brave Shield temporarily for this site.</li>
-          <li>Or allow third-party cookies in your browser settings.</li>
-        </ul>
+          Hey there! 👋 Before you continue, I want to be transparent with you.  
+          This site is something I’m building as a <strong>college student</strong> who dreams of
+          helping others learn to code — especially those who don’t have access to laptops or expensive tools.
+          <br />
+          <br />
+          Since I don’t have a paid domain yet (everything here is hosted for free),
+          some browsers like <strong>Brave</strong> or certain privacy settings may block the login system.
+          <br />
+          <br />
+          To make everything work smoothly, please temporarily turn off{" "}
+          <strong>Brave Shield</strong> or allow third-party cookies in your browser.
+          <br />
+          <br />
+          You can also check my work on GitHub at{" "}
+          <a
+            href="https://github.com/euonoia"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#e67e22", fontWeight: "bold" }}
+          >
+            github.com/euonoia
+          </a>
+          — everything here is open-source and built with genuine care for fellow learners.
+          <br />
+          <br />
+          Thank you for trusting this small project. 💛
+          You’re not just helping me — you’re helping a growing community of students
+          who want to learn and build together. 🙏
+        </p>
 
-        <p style={{ margin: "1rem 0 0.75rem", fontSize: "0.95rem" }}>
-          After updating your settings, try logging in again:
+        <p style={{ margin: "1rem 0 0.75rem", fontSize: "0.95rem", textAlign: "center" }}>
+          After adjusting your settings, please try logging in again:
         </p>
 
         <button
