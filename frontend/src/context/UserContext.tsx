@@ -38,16 +38,20 @@ export const UserProvider = ({ children }: Props) => {
         withCredentials: true,
       });
       setUser(res.data.user || null);
+      setLoginError(false); // ✅ Clear error if user fetch succeeds
     } catch (err: any) {
+      console.warn("Auth check failed:", err?.response?.status || err.message);
       setUser(null);
 
-      // 🔍 Detect if user just returned from Google login but cookies are blocked
+      // Check if the user came from Google login (failed due to blocked cookies)
       const url = new URL(window.location.href);
       const fromGoogle = url.searchParams.has("code") || url.searchParams.has("state");
 
+      // ✅ Always show LoginWarning if auth/me failed
+      setLoginError(true);
+
       if (fromGoogle) {
-        console.warn("Google login may have failed — cookies likely blocked.");
-        setLoginError(true); // ✅ Show LoginWarning
+        console.warn("Google login likely failed — blocked cookies.");
       }
     } finally {
       setLoading(false);
@@ -68,7 +72,7 @@ export const UserProvider = ({ children }: Props) => {
       await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
       setUser(null);
     } catch (err) {
-      console.error(err);
+      console.error("Sign out failed:", err);
     }
   };
 
