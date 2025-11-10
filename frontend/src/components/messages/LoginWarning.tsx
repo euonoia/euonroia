@@ -1,56 +1,34 @@
+// src/components/LoginWarning.tsx
 import { useEffect, useState } from "react";
-import { checkThirdPartyCookies } from "../../utils/checkCookies";
 import { useUser } from "../../context/UserContext";
 
 export default function LoginWarning() {
-  const { signInWithGoogle } = useUser();
-  const [blocked, setBlocked] = useState(false);
-  const [visible, setVisible] = useState(false);
+  const { loginError, setLoginError, signInWithGoogle } = useUser();
   const [neverShow, setNeverShow] = useState(false);
 
   useEffect(() => {
-    // Check if user previously chose to hide the warning
-    const userPref = localStorage.getItem("hideLoginWarning");
-    if (userPref === "true") {
-      setNeverShow(true);
-      return;
-    }
-
-    const check = async () => {
-      const allowed = await checkThirdPartyCookies();
-      if (!allowed) {
-        setBlocked(true);
-        setVisible(true);
-      }
-    };
-
-    check();
+    const pref = localStorage.getItem("hideLoginWarning");
+    if (pref === "true") setNeverShow(true);
   }, []);
 
   const handleClose = () => {
-    setVisible(false);
-    if (neverShow) {
-      localStorage.setItem("hideLoginWarning", "true");
-    }
+    setLoginError(false);
+    if (neverShow) localStorage.setItem("hideLoginWarning", "true");
   };
 
-  if (!blocked || !visible || neverShow) return null;
+  if (!loginError || neverShow) return null;
 
   return (
     <div
       style={{
         position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
+        inset: 0,
         backgroundColor: "rgba(0, 0, 0, 0.45)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         zIndex: 9999,
         padding: "1rem",
-        boxSizing: "border-box",
       }}
     >
       <div
@@ -63,14 +41,13 @@ export default function LoginWarning() {
           borderRadius: "0.75rem",
           padding: "1.5rem 1.25rem",
           textAlign: "center",
-          fontFamily: "Arial, sans-serif",
+          fontFamily: "Inter, Arial, sans-serif",
           color: "#333",
           boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
           overflowY: "auto",
           maxHeight: "90vh",
         }}
       >
-        {/* Close Button */}
         <button
           onClick={handleClose}
           style={{
@@ -83,37 +60,20 @@ export default function LoginWarning() {
             cursor: "pointer",
             color: "#333",
           }}
-          aria-label="Close warning"
         >
           ×
         </button>
 
-        <h3 style={{ marginBottom: "0.5rem", color: "#e67e22" }}>
-          ⚠️ Login Issue Detected
-        </h3>
-
-        <p
-          style={{
-            margin: "0.5rem 0 1rem",
-            lineHeight: 1.5,
-            fontSize: "0.95rem",
-            textAlign: "left",
-          }}
-        >
-          Hey there! 👋 Before you continue, I want to be transparent with you.  
-          This site is something I’m building as a <strong>college student</strong> who dreams of
-          helping others learn to code — especially those who don’t have access to laptops or expensive tools.
-          <br />
-          <br />
-          Since I don’t have a paid domain yet (everything here is hosted for free),
-          some browsers like <strong>Brave</strong> or certain privacy settings may block the login system.
-          <br />
-          <br />
-          To make everything work smoothly, please temporarily turn off{" "}
-          <strong>Brave Shield</strong> or allow third-party cookies in your browser.
-          <br />
-          <br />
-          You can also check my work on GitHub at{" "}
+        <h3 style={{ color: "#e67e22", marginBottom: "1rem" }}>⚠️ Login Issue Detected</h3>
+        <p style={{ margin: "0.5rem 0 1rem", lineHeight: 1.5 }}>
+          It looks like your Google login didn’t go through — this can happen if{" "}
+          <strong>Brave Shield</strong> or your browser’s privacy settings block cookies.
+          <br /><br />
+          I’m a college student building this site to help others learn coding — totally free.
+          <br /><br />
+          Please try turning off Brave Shield or allowing third-party cookies temporarily.
+          <br /><br />
+          You can also check out my open-source work at{" "}
           <a
             href="https://github.com/euonoia"
             target="_blank"
@@ -121,17 +81,8 @@ export default function LoginWarning() {
             style={{ color: "#e67e22", fontWeight: "bold" }}
           >
             github.com/euonoia
-          </a>
-          — everything here is open-source and built with genuine care for fellow learners.
-          <br />
-          <br />
-          Thank you for trusting this small project. 💛
-          You’re not just helping me — you’re helping a growing community of students
-          who want to learn and build together. 🙏
-        </p>
-
-        <p style={{ margin: "1rem 0 0.75rem", fontSize: "0.95rem", textAlign: "center" }}>
-          After adjusting your settings, please try logging in again:
+          </a>{" "}
+          💛
         </p>
 
         <button
@@ -162,10 +113,6 @@ export default function LoginWarning() {
             Don’t show this again
           </label>
         </div>
-
-        <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "1rem" }}>
-          Don’t worry — this only affects login, and your account stays safe! 😊
-        </p>
       </div>
     </div>
   );
