@@ -6,8 +6,8 @@ const OAuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const [message, setMessage] = useState("Completing sign in...");
 
-  // ✅ Your backend endpoint (Render backend)
-  const BACKEND_URL = "https://euonroia-secured.onrender.com";
+  // ✅ Use Vite environment variable (fallback to production URL if missing)
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://euonroia-secured.onrender.com";
 
   useEffect(() => {
     let mounted = true;
@@ -16,9 +16,9 @@ const OAuthCallback: React.FC = () => {
       try {
         setMessage("Checking authentication...");
 
-        // ✅ Directly call your backend (include cookies!)
+        // ✅ Call backend using environment variable
         const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-          withCredentials: true, // very important for HTTP-only cookies
+          withCredentials: true, // include HTTP-only cookies
           timeout: 5000,
         });
 
@@ -26,7 +26,7 @@ const OAuthCallback: React.FC = () => {
 
         if (res.data?.user) {
           setMessage("Login successful — redirecting...");
-          // short delay for smooth UX
+          // Short delay for smooth user experience
           setTimeout(() => navigate("/dashboard"), 800);
         } else {
           setMessage("Login failed — redirecting to home...");
@@ -45,7 +45,7 @@ const OAuthCallback: React.FC = () => {
     return () => {
       mounted = false;
     };
-  }, [navigate]);
+  }, [navigate, BACKEND_URL]);
 
   return (
     <div style={{ padding: "2rem", textAlign: "center" }}>
