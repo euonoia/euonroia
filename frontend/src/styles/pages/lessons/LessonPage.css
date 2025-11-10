@@ -4,27 +4,27 @@
 .lesson-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;  /* Ensures container fills the screen height */
+  min-height: 100vh;
   font-family: var(--font-family-base);
   background-color: var(--bg-main);
   color: var(--text-primary);
-  padding-top: 80px; /* Padding for header */
-  padding-bottom: 20px; /* Space for footer */
+  padding-top: 80px; /* Header height */
+  padding-bottom: 20px; /* Footer space */
 }
 
 .lesson-main {
-  flex-grow: 1;  /* This makes the main content grow and push the footer down */
+  flex: 1;
   margin-top: 2rem;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow-x: hidden;  /* Prevents horizontal scroll */
-  overflow-y: auto;  /* Allow vertical scrolling */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* -------------------------
-   Lesson Content Layout (Left & Right Sections)
+   Lesson Content Layout
 ------------------------- */
 .lesson-content {
   display: flex;
@@ -35,32 +35,30 @@
   justify-content: space-between;
 }
 
-/* Left Section (Text Content) */
-.lesson-left {
-  flex: 1 1 48%;
-  min-width: 280px;
-  padding: 1rem;
-}
-
-/* Right Section (Code Blocks) */
+/* Left & Right Sections */
+.lesson-left,
 .lesson-right {
   flex: 1 1 48%;
   min-width: 280px;
+  max-width: 100%;
   padding: 1rem;
-  overflow-y: auto; /* Ensure the code blocks section can scroll if necessary */
+  box-sizing: border-box;
+}
+
+.lesson-right {
+  overflow-y: auto;
 }
 
 /* -------------------------
-   Code Blocks Layout (2 Columns, 4 Rows)
+   Code Blocks Layout
 ------------------------- */
 .code-blocks {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2 columns */
-  grid-template-rows: repeat(4, auto); /* 4 rows */
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   width: 100%;
   padding: 1rem;
-  box-sizing: border-box; /* Ensures padding doesn't affect the width */
+  box-sizing: border-box;
 }
 
 .code-block {
@@ -75,12 +73,12 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  box-sizing: border-box; /* Ensures padding doesn't cause overflow */
+  box-sizing: border-box;
 }
 
 .code-block:hover {
   transform: scale(1.03);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 /* -------------------------
@@ -96,77 +94,122 @@
   flex-wrap: wrap;
   gap: var(--space-3);
   box-shadow: var(--shadow-sm);
-  font-family: var(--font-family-base);
   text-align: center;
-  margin-top: auto;  /* This ensures footer stays at the bottom when there's not enough content */
+  margin-top: auto;
 }
 
 .footer-left p {
-  font-size: var(--font-size-sm);
+  font-size: clamp(0.9rem, 2vw, 1rem);
   margin: 0;
+}
+
+/* =========================
+   Error Message
+========================= */
+.error-message {
+  background-color: #ffe0e0;
+  color: #d00000;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: clamp(0.85rem, 2vw, 0.95rem);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+/* =========================
+   Congratulations Overlay
+========================= */
+.congrats-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeIn 0.5s ease;
+  padding: 1rem; /* ensures small screens fit */
+}
+
+.congrats-box {
+  background-color: #fff;
+  color: #2e7d32;
+  padding: 2rem 3rem;
+  border-radius: 16px;
+  font-size: clamp(1.2rem, 4vw, 1.5rem);
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  animation: popIn 0.5s ease;
+  max-width: 90%;
 }
 
 /* =========================
    Responsive Design
 ========================= */
 
-/* Mobile: stack top columns and cards */
+/* Tablet & small screens */
 @media (max-width: 768px) {
   .lesson-content {
     flex-direction: column;
-    gap: 1rem;  /* Reduce gap between the sections on smaller screens */
+    gap: 1rem;
   }
 
   .lesson-left,
   .lesson-right {
     min-width: 100%;
-    max-width: 100%; /* Make sure the sections use full width */
+    max-width: 100%;
   }
 
   .code-blocks {
-    grid-template-columns: 1fr; /* 1 column on small screens */
-    padding: 0.5rem;  /* Less padding on smaller screens */
+    grid-template-columns: 1fr;
+    padding: 0.5rem;
   }
 
   .lesson-title {
-    font-size: 1.5rem;  /* Adjust title size on smaller screens */
-  }
-
-  .section-title {
-    font-size: 1.2rem;  /* Adjust section titles */
+    font-size: clamp(1.5rem, 5vw, 1.8rem);
   }
 }
 
-/* Small screens: footer stacks */
+/* Mobile: footer stacks vertically */
 @media (max-width: 480px) {
   .footer {
     flex-direction: column;
     align-items: center;
     gap: var(--space-2);
   }
-  
-  .footer-left p {
-    font-size: 1rem;  /* Increase font size for small screens */
-  }
 }
 
-/* For very small screens or mobile phones (landscape) */
+/* Very small screens / landscape phones */
 @media (max-width: 400px) {
   .lesson-left,
   .lesson-right {
-    flex: 1 1 100%;  /* Ensure both sections are stacked vertically */
+    flex: 1 1 100%;
   }
 
   .code-blocks {
-    grid-template-columns: 1fr; /* One column */
-    padding: 0.5rem; /* Reducing padding */
+    grid-template-columns: 1fr;
+    padding: 0.5rem;
   }
 
   .lesson-title {
-    font-size: 1.2rem;  /* Adjust title for smaller screens */
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
   }
+}
 
-  .section-title {
-    font-size: 1rem;  /* Adjust section titles */
-  }
+/* =========================
+   Animations
+========================= */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes popIn {
+  0% { transform: scale(0); }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
