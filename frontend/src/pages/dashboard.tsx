@@ -1,16 +1,24 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import DashboardStats from "../components/DashboardStats";
 import { useUser } from "../context/UserContext";
 import { useTheme } from "../context/ThemeContext";
+import { useEffect } from "react";
 import "../styles/pages/Dashboard.css";
 
 export default function Dashboard() {
-  const { user, loading } = useUser(); // Get user + loading state
+  const { user, loading } = useUser();
   const { theme } = useTheme();
+  const navigate = useNavigate();
 
-  // You can still show loading if you want
+  // Redirect to home if user signs out (user becomes null)
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/", { replace: true });
+    }
+  }, [user, loading, navigate]);
+
   if (loading) {
     return (
       <div className={`dashboard-page ${theme}`}>
@@ -23,7 +31,7 @@ export default function Dashboard() {
     );
   }
 
-  // Remove the redirect completely, so page renders even if user is null
+  // Optional: show Guest dashboard if user is null
   const lessons = [
     { id: "html-basics", title: "HTML Basics", progress: 100 },
     { id: "css-intro", title: "Intro to CSS", progress: 60 },
