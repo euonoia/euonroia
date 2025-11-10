@@ -1,19 +1,19 @@
 // src/utils/checkCookies.ts
 export async function checkThirdPartyCookies(): Promise<boolean> {
-  return new Promise((resolve) => {
-    const iframe = document.createElement("iframe");
-    iframe.src = "https://euonroia-secured.onrender.com/auth/me";
-    iframe.style.display = "none";
-    document.body.appendChild(iframe);
+  try {
+    const res = await fetch("https://euonroia-secured.onrender.com/auth/me", {
+      method: "GET",
+      credentials: "include", // sends cookies
+      mode: "cors",           // cross-origin
+    });
 
-    setTimeout(() => {
-      try {
-        resolve(true); // cookies probably allowed
-      } catch {
-        resolve(false); // blocked
-      } finally {
-        document.body.removeChild(iframe);
-      }
-    }, 1000);
-  });
+    // If status is 200, cookies work
+    if (res.status === 200) return true;
+
+    // If 401 or other, cookies may be blocked or no login
+    return false;
+  } catch (err) {
+    // Network errors or blocked cookies
+    return false;
+  }
 }

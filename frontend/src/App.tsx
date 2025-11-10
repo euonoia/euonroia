@@ -13,6 +13,7 @@ import HTMLelements from "./pages/lessons/learn-html-basics/HTMLelements";
 import HTMLexam from "./pages/lessons/learn-html-basics/HTMLexam";
 
 import { useUser } from "./context/UserContext";
+import LoginWarning from "./components/messages/LoginWarning";
 
 function AppContent() {
   const { loading } = useUser();
@@ -20,19 +21,24 @@ function AppContent() {
   if (loading) return <p style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</p>;
 
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/about" element={<AboutPage />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/users" element={<UserList />} />
-      <Route path="/homepage" element={<Homepage />} />
-      <Route path="/oauth-callback" element={<OAuthCallback />} />
-      <Route path="/lessons/greetings" element={<Greetings />} />
-      <Route path="/lessons/html-basics" element={<HTMLdocument />} />
-      <Route path="/lessons/html-elements" element={<HTMLelements />} />
-      <Route path="/lessons/html-exam" element={<HTMLexam />} />
-      <Route path="*" element={<p>Page not found</p>} />
-    </Routes>
+    <>
+      {/* Login warning for blocked cookies */}
+      <LoginWarning />
+
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/users" element={<UserList />} />
+        <Route path="/homepage" element={<Homepage />} />
+        <Route path="/oauth-callback" element={<OAuthCallback />} />
+        <Route path="/lessons/greetings" element={<Greetings />} />
+        <Route path="/lessons/html-basics" element={<HTMLdocument />} />
+        <Route path="/lessons/html-elements" element={<HTMLelements />} />
+        <Route path="/lessons/html-exam" element={<HTMLexam />} />
+        <Route path="*" element={<p>Page not found</p>} />
+      </Routes>
+    </>
   );
 }
 

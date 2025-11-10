@@ -1,14 +1,19 @@
 // src/components/LoginWarning.tsx
 import { useEffect, useState } from "react";
 import { checkThirdPartyCookies } from "../../utils/checkCookies";
+import { useUser } from "../../context/UserContext";
 
 export default function LoginWarning() {
+  const { signInWithGoogle } = useUser(); // reuse existing login function
   const [blocked, setBlocked] = useState(false);
 
+  const checkCookies = async () => {
+    const allowed = await checkThirdPartyCookies();
+    setBlocked(!allowed);
+  };
+
   useEffect(() => {
-    checkThirdPartyCookies().then((allowed) => {
-      setBlocked(!allowed);
-    });
+    checkCookies();
   }, []);
 
   if (!blocked) return null;
@@ -24,16 +29,36 @@ export default function LoginWarning() {
         textAlign: "center",
         fontFamily: "Arial, sans-serif",
         color: "#333",
-        lineHeight: 1.5,
       }}
     >
-      🌟 Hi coder! It looks like your browser’s privacy settings are a bit strict right now.  
+      🌟 Hi there! It looks like your browser is blocking login cookies.  
       <br />
-      To log in and continue learning for free, please temporarily turn off Brave Shield or other privacy blockers.  
+      This may be due to Brave Shield or other privacy settings.  
+      <br /><br />
+      To log in and continue learning to code:
+      <ul style={{ textAlign: "left", display: "inline-block", marginTop: "0.5rem" }}>
+        <li>Temporarily turn off Brave Shield for this site.</li>
+        <li>Or allow third-party cookies in your browser settings.</li>
+      </ul>
       <br />
-      Don’t worry—this is just for login, and your progress and account are completely safe! 😊
-      <br />
-      <em>Keep learning, even without a laptop—you’re doing amazing! 💪</em>
+      Once you’ve updated your settings, try logging in again:
+      <br /><br />
+      <button
+        onClick={signInWithGoogle}
+        style={{
+          padding: "0.5rem 1rem",
+          borderRadius: "0.5rem",
+          border: "none",
+          backgroundColor: "#f39c12",
+          color: "#fff",
+          cursor: "pointer",
+          fontWeight: "bold",
+        }}
+      >
+        🔑 Try Login Again
+      </button>
+      <br /><br />
+      Don’t worry—this only affects login, and your account stays safe! 😊
     </div>
   );
 }
