@@ -1,3 +1,4 @@
+// src/components/LoginWarning.tsx
 import { useEffect, useState } from "react";
 import { checkThirdPartyCookies } from "../../utils/checkCookies";
 import { useUser } from "../../context/UserContext";
@@ -9,34 +10,22 @@ export default function LoginWarning() {
   const [neverShow, setNeverShow] = useState(false);
 
   useEffect(() => {
-    // Check if the user already chose "never show again"
+    // Check if user previously chose to hide the warning
     const userPref = localStorage.getItem("hideLoginWarning");
     if (userPref === "true") {
       setNeverShow(true);
       return;
     }
 
-    let interval: number;
-
     const check = async () => {
       const allowed = await checkThirdPartyCookies();
-      if (allowed) {
-        setBlocked(false);
-        setVisible(false);
-        clearInterval(interval);
-      } else {
+      if (!allowed) {
         setBlocked(true);
         setVisible(true);
       }
     };
 
-    // Initial check
     check();
-
-    // Poll every 3 seconds in case Brave Shield or privacy settings change
-    interval = window.setInterval(check, 3000);
-
-    return () => clearInterval(interval);
   }, []);
 
   const handleClose = () => {
@@ -56,7 +45,7 @@ export default function LoginWarning() {
         left: 0,
         width: "100%",
         height: "100%",
-        backgroundColor: "rgba(0, 0, 0, 0.4)",
+        backgroundColor: "rgba(0, 0, 0, 0.45)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -79,7 +68,7 @@ export default function LoginWarning() {
           color: "#333",
           boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
           overflowY: "auto",
-          maxHeight: "90vh", // makes sure modal scrolls properly on small screens
+          maxHeight: "90vh",
         }}
       >
         {/* Close Button */}
@@ -100,13 +89,24 @@ export default function LoginWarning() {
           ×
         </button>
 
-        <h3 style={{ marginBottom: "0.5rem", color: "#e67e22" }}>⚠️ Login Issue Detected</h3>
+        <h3 style={{ marginBottom: "0.5rem", color: "#e67e22" }}>
+          ⚠️ Login Issue Detected
+        </h3>
+
         <p style={{ margin: "0.5rem 0 1rem", lineHeight: 1.4 }}>
           It looks like your browser is blocking login cookies.  
-          This often happens when <strong>Brave Shield</strong> or other privacy blockers are active.
+          This often happens when <strong>Brave Shield</strong> or privacy blockers are active.
         </p>
 
-        <ul style={{ textAlign: "left", display: "inline-block", fontSize: "0.95rem", lineHeight: "1.5" }}>
+        <ul
+          style={{
+            textAlign: "left",
+            display: "inline-block",
+            fontSize: "0.95rem",
+            lineHeight: "1.5",
+            paddingLeft: "1rem",
+          }}
+        >
           <li>Turn off Brave Shield temporarily for this site.</li>
           <li>Or allow third-party cookies in your browser settings.</li>
         </ul>
