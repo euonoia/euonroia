@@ -12,8 +12,10 @@ export default function LoginWarning() {
   }, []);
 
   const handleClose = () => {
-    setLoginError(false);
-    if (neverShow) localStorage.setItem("hideLoginWarning", "true");
+    if (neverShow) {
+      localStorage.setItem("hideLoginWarning", "true");
+    }
+    setLoginError(false); // ✅ Always close after storing preference
   };
 
   if (!loginError || neverShow) return null;

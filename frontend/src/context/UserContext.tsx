@@ -14,8 +14,8 @@ interface UserContextType {
   loading: boolean;
   signInWithGoogle: () => void;
   signOut: () => void;
-  loginError: boolean; // ⚠️ NEW
-  setLoginError: (value: boolean) => void; // ⚠️ NEW
+  loginError: boolean;
+  setLoginError: (value: boolean) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -27,7 +27,7 @@ interface Props {
 export const UserProvider = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [loginError, setLoginError] = useState(false); // ⚠️ NEW
+  const [loginError, setLoginError] = useState(false);
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -38,8 +38,20 @@ export const UserProvider = ({ children }: Props) => {
         withCredentials: true,
       });
       setUser(res.data.user || null);
-    } catch {
+    } catch (err: any) {
       setUser(null);
+
+      // Detect if the user just returned from Google login
+      const url = new URL(window.location.href);
+      const fromGoogle = url.searchParams.has("code") || url.searchParams.has("state");
+
+      if (fromGoogle) {
+        console.warn("Google login likely failed — cookies or Brave Shield may be blocking auth.");
+        setLoginError(true);
+
+        // 🧹 Clean the URL to remove ?code and ?state for better UX
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     } finally {
       setLoading(false);
     }
@@ -49,15 +61,9 @@ export const UserProvider = ({ children }: Props) => {
     fetchUser();
   }, []);
 
-  const signInWithGoogle = async () => {
-    try {
-      setLoginError(false);
-      // Redirect to your backend for Google Auth
-      window.location.href = `${BACKEND_URL}/auth/google`;
-    } catch (err) {
-      console.error("Google login failed:", err);
-      setLoginError(true);
-    }
+  const signInWithGoogle = () => {
+    setLoginError(false);
+    window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
   const signOut = async () => {
