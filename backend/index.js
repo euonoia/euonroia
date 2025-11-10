@@ -9,15 +9,18 @@ import authRoutes from "./api/auth.js";
 const app = express();
 const isProduction = ENV.NODE_ENV === "production";
 
-// -----------------------------
-// Middleware
-// -----------------------------
+// Determine frontend origin
+const FRONTEND_URL = isProduction
+  ? "https://euonroia.onrender.com"
+  : "http://localhost:5173";
+
 app.set("trust proxy", 1);
 app.use(securityMiddleware);
 
+// ✅ CORS for cross-origin cookies
 app.use(
   cors({
-    origin: ["https://euonroia.onrender.com"], // allow your frontend
+    origin: FRONTEND_URL,
     credentials: true,
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -27,16 +30,11 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-// -----------------------------
 // Routes
-// -----------------------------
 app.use("/auth", authRoutes);
 
 app.get("/", (req, res) => res.send("✅ Backend running securely"));
 
-// -----------------------------
-// Start server
-// -----------------------------
 app.listen(ENV.PORT, () => {
   console.log(`🚀 Backend running on port ${ENV.PORT}`);
 });

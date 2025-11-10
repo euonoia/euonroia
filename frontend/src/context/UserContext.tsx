@@ -25,17 +25,19 @@ export const UserProvider = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Use Vite environment variable
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://euonroia-secured.onrender.com";
+  // ✅ Backend URL from Vite environment
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+  // Fetch currently logged-in user
   const fetchUser = async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-        withCredentials: true, // include cookies
+        withCredentials: true, // ✅ required for HTTP-only cookies
       });
-      setUser(res.data.user);
-    } catch {
+      setUser(res.data.user || null);
+    } catch (err) {
+      console.error("Fetch user failed:", err);
       setUser(null);
     } finally {
       setLoading(false);
@@ -47,7 +49,7 @@ export const UserProvider = ({ children }: Props) => {
   }, []);
 
   const signInWithGoogle = () => {
-    // Redirect to Google OAuth via backend
+    // Redirect user to backend Google OAuth route
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
