@@ -32,34 +32,32 @@ export const UserProvider = ({ children }: Props) => {
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   const fetchUser = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-        withCredentials: true,
-      });
-      setUser(res.data.user || null);
-      setLoginError(false); // ✅ clear warning if cookies/auth works
-    } catch (err: any) {
-      console.warn("Auth check failed:", err?.response?.status || err.message);
-      setUser(null);
+  setLoading(true);
+  try {
+    const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+      withCredentials: true,
+    });
+    setUser(res.data.user || null);
+    setLoginError(false); // clear warning if auth works
+  } catch (err: any) {
+    console.warn("Auth check failed:", err?.response?.status || err.message);
+    setUser(null);
 
-      const url = new URL(window.location.href);
-      const fromGoogle = url.searchParams.has("code") || url.searchParams.has("state");
+    // detect blocked cookies / unauthorized
+    const isCookieBlocked =
+      !err.response || err.response.status === 401 || err.response.status === 403;
 
-      // ✅ Detect cookie issues or blocked auth
-      const isCookieBlocked =
-        !err.response || err.response.status === 401 || err.response.status === 403;
-
-      if (fromGoogle && isCookieBlocked) {
-        console.warn("Google login likely failed — blocked cookies or Brave Shield.");
-        setLoginError(true);
-      } else {
-        setLoginError(false);
-      }
-    } finally {
-      setLoading(false);
+    if (isCookieBlocked) {
+      console.warn("Login likely failed — blocked cookies or Brave Shield.");
+      setLoginError(true);
+    } else {
+      setLoginError(false);
     }
-  };
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchUser();
