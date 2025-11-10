@@ -63,7 +63,7 @@ router.get("/google/callback", async (req, res) => {
     });
 
 
-    res.redirect(`${FRONTEND_URL}`);
+    res.redirect(`${FRONTEND_URL}/dashboard`);
   } catch (err) {
     console.error(err);
     res.redirect(FRONTEND_URL);
