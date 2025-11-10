@@ -4,8 +4,10 @@ export default function redirectBrowser(req, res, next) {
   const ua = (req.headers["user-agent"] || "").toLowerCase();
   const isBrowser = !ua.includes("axios") && !ua.includes("fetch");
 
+  // Redirect non-API, non-auth browser requests to frontend
   if (isBrowser && !req.path.startsWith("/auth") && !req.path.startsWith("/api")) {
     return res.redirect(ENV.FRONTEND_URL);
   }
+
   next();
 }
