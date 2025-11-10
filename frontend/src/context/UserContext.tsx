@@ -25,14 +25,14 @@ export const UserProvider = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Backend is proxied via Nginx at /auth
-  const BACKEND_URL = "/auth";
+  // ✅ Use Vite environment variable
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://euonroia-secured.onrender.com";
 
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${BACKEND_URL}/me`, {
-        withCredentials: true, // cookies sent automatically
+      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+        withCredentials: true, // include cookies
       });
       setUser(res.data.user);
     } catch {
@@ -47,13 +47,13 @@ export const UserProvider = ({ children }: Props) => {
   }, []);
 
   const signInWithGoogle = () => {
-    // Redirect user to backend Google OAuth route
-    window.location.href = `${BACKEND_URL}/google`;
+    // Redirect to Google OAuth via backend
+    window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
   const signOut = async () => {
     try {
-      await axios.post(`${BACKEND_URL}/signout`, {}, { withCredentials: true });
+      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
       setUser(null);
     } catch (err) {
       console.error("Sign out failed:", err);

@@ -15,10 +15,14 @@ const isProduction = ENV.NODE_ENV === "production";
 app.set("trust proxy", 1);
 app.use(securityMiddleware);
 
-app.use(cors({
-  origin: ENV.FRONTEND_URL, // only frontend domain
-  credentials: true,         // send cookies cross-origin
-}));
+app.use(
+  cors({
+    origin: ["https://euonroia.onrender.com"], // allow your frontend
+    credentials: true,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 
 app.use(cookieParser());
 app.use(express.json());
@@ -29,11 +33,6 @@ app.use(express.json());
 app.use("/auth", authRoutes);
 
 app.get("/", (req, res) => res.send("✅ Backend running securely"));
-
-// -----------------------------
-// Catch-all (optional)
-// -----------------------------
-app.use((req, res) => res.status(404).send("Not found"));
 
 // -----------------------------
 // Start server

@@ -53,15 +53,17 @@ router.get("/google/callback", async (req, res) => {
 
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
-    // ✅ httpOnly cookie
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "None" : "Lax",
+      secure: true,           // must be true for HTTPS
+      sameSite: "None",       // cross-site cookie allowed
+      domain: ".onrender.com", // <— this is key!
+      path: "/",              // applies globally
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.redirect(`${FRONTEND_URL}/dashboard`);
+
+    res.redirect(`${FRONTEND_URL}`);
   } catch (err) {
     console.error(err);
     res.redirect(FRONTEND_URL);
