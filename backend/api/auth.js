@@ -6,10 +6,13 @@ import jwt from "jsonwebtoken";
 const router = Router();
 const isProduction = process.env.NODE_ENV === "production";
 const JWT_SECRET = process.env.JWT_SECRET;
+
+// Determine frontend callback URL
 const FRONTEND_URL = isProduction
   ? "https://euonroia.onrender.com"
   : "http://localhost:5173";
 
+// Google OAuth client
 const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
@@ -37,35 +40,40 @@ router.get("/google/callback", async (req, res) => {
     const code = req.query.code;
     if (!code) return res.redirect(FRONTEND_URL);
 
+    // Exchange code for tokens
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
+    // Get user info
     const { data } = await client.request({
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
 
     const { id, name, email, picture } = data;
 
+    // Save to Firebase
     await admin.firestore().collection("users").doc(id).set(
       { id, name, email, picture, lastLogin: new Date() },
       { merge: true }
     );
 
+    // Create JWT token
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
+    // Set HTTP-only cookie
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: true,           // must be true for HTTPS
-      sameSite: "None",       // cross-site cookie allowed
-      domain: ".onrender.com", // <— this is key!
-      path: "/",              // applies globally
+      secure: isProduction,         // must be true in production (HTTPS)
+      sameSite: isProduction ? "None" : "Lax", 
+      path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
+    console.log("✅ Cookie set — redirecting to:", `${FRONTEND_URL}/dashboard`);
 
     res.redirect(`${FRONTEND_URL}/dashboard`);
   } catch (err) {
-    console.error(err);
+    console.error("❌ OAuth callback error:", err);
     res.redirect(FRONTEND_URL);
   }
 });
@@ -88,6 +96,7 @@ router.post("/signout", (req, res) => {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "None" : "Lax",
+    path: "/",
   });
   res.json({ success: true });
 });
