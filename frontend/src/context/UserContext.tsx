@@ -1,3 +1,4 @@
+// src/context/UserContext.tsx
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import axios from "axios";
 
@@ -13,6 +14,8 @@ interface UserContextType {
   loading: boolean;
   signInWithGoogle: () => void;
   signOut: () => void;
+  loginError: boolean; // ⚠️ NEW
+  setLoginError: (value: boolean) => void; // ⚠️ NEW
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -24,6 +27,7 @@ interface Props {
 export const UserProvider = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loginError, setLoginError] = useState(false); // ⚠️ NEW
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -31,7 +35,7 @@ export const UserProvider = ({ children }: Props) => {
     setLoading(true);
     try {
       const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-        withCredentials: true, // ✅ HTTP-only cookie
+        withCredentials: true,
       });
       setUser(res.data.user || null);
     } catch {
@@ -45,21 +49,37 @@ export const UserProvider = ({ children }: Props) => {
     fetchUser();
   }, []);
 
-  const signInWithGoogle = () => {
-    window.location.href = `${BACKEND_URL}/auth/google`;
+  const signInWithGoogle = async () => {
+    try {
+      setLoginError(false);
+      // Redirect to your backend for Google Auth
+      window.location.href = `${BACKEND_URL}/auth/google`;
+    } catch (err) {
+      console.error("Google login failed:", err);
+      setLoginError(true);
+    }
   };
 
   const signOut = async () => {
     try {
       await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
-      setUser(null); // guest state
+      setUser(null);
     } catch (err) {
       console.error(err);
     }
   };
 
   return (
-    <UserContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
+    <UserContext.Provider
+      value={{
+        user,
+        loading,
+        signInWithGoogle,
+        signOut,
+        loginError,
+        setLoginError,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );
