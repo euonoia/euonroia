@@ -11,25 +11,25 @@ import authRoutes from "./api/auth.js";
 const app = express();
 const isProduction = ENV.NODE_ENV === "production";
 
-// ✅ Allow production frontend + localhost for development
+// ✅ Allowed frontends
 const FRONTEND_URLS = isProduction
   ? ["https://euonroia.onrender.com"]
   : ["http://localhost:5173", "http://127.0.0.1:5173"];
 
-// Trust proxies (for secure cookies behind load balancers)
+// Trust proxies for secure cookies
 app.set("trust proxy", 1);
 
 // Security middleware (helmet, rate limiting, etc.)
 app.use(securityMiddleware);
 
-// ✅ CORS for frontend(s) only, with cookies
+// ✅ CORS: allow frontend origins only, with cookies
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin || FRONTEND_URLS.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        callback(new Error("❌ Not allowed by CORS"));
       }
     },
     credentials: true,
@@ -39,16 +39,16 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-// Protect backend routes
-app.use(protectBackend);
-
-// Auth routes
+// 1️⃣ Auth routes first (Google OAuth login & callback)
 app.use("/auth", authRoutes);
 
-// Redirect browser requests for non-API/auth paths
+// 2️⃣ Protect sensitive backend routes (API + /auth/me + /auth/signout)
+app.use(protectBackend);
+
+// 3️⃣ Redirect browser requests for non-API/auth paths
 app.use(redirectBrowser);
 
-// Default route
+// 4️⃣ Root route
 app.get("/", (req, res) => res.send("✅ Backend running securely"));
 
 // Start server
