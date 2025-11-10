@@ -70,8 +70,6 @@ router.get("/google/callback", async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    console.log("✅ Cookie set — redirecting to:", `${FRONTEND_URL}/dashboard`);
-
     res.redirect(`${FRONTEND_URL}/dashboard`);
   } catch (err) {
     console.error("❌ OAuth callback error:", err);
