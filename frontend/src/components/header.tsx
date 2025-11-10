@@ -3,11 +3,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { useTheme } from "../context/ThemeContext";
+import LoginWarning from "../components/messages/LoginWarning"; // ✅ import the new component
 import "../styles/components/header.css";
 
 interface HeaderProps {
-  hideUser?: boolean;          // hides nav links if true
-  showLoginButton?: boolean;   // shows login button even if hideUser is true
+  hideUser?: boolean;
+  showLoginButton?: boolean;
 }
 
 export default function Header({
@@ -24,7 +25,10 @@ export default function Header({
     <header className={`header ${theme}`}>
       <h2 className="logo">Euonroia</h2>
 
-      {/* Desktop nav links (hidden if hideUser is true) */}
+      {/* Show login warning if cookies are blocked */}
+      <LoginWarning />
+
+      {/* Desktop nav links */}
       {!loading && user && !hideUser && (
         <nav className="nav-links desktop-only">
           <Link to="/dashboard">Dashboard</Link>
@@ -35,7 +39,6 @@ export default function Header({
 
       {/* Header buttons */}
       <div className="header-actions">
-        {/* Show login button if user is not logged in OR forced by landing page */}
         {!loading && (!user || showLoginButton) && (
           <button className="btn" onClick={signInWithGoogle}>
             Continue with Google
@@ -47,7 +50,6 @@ export default function Header({
           {theme === "light" ? "🌙 Dark" : "☀️ Light"}
         </button>
 
-        {/* Hamburger menu for logged-in users */}
         {!loading && user && !hideUser && (
           <button className="hamburger" onClick={toggleMenu}>
             ☰
@@ -55,7 +57,7 @@ export default function Header({
         )}
       </div>
 
-      {/* Dropdown menu for mobile */}
+      {/* Mobile dropdown */}
       {!loading && user && !hideUser && (
         <div className={`header-right ${menuOpen ? "open" : ""}`}>
           <div className="user-info">
