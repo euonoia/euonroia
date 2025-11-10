@@ -3,7 +3,7 @@ import { ENV } from "../config/env.js";
 
 export function protectBackend(req, res, next) {
   const token = req.cookies?.authToken;
-  const origin = req.get("origin") || req.get("referer") || "";
+  const origin = (req.get("origin") || req.get("referer") || "").toLowerCase();
 
   const allowedOrigins =
     ENV.NODE_ENV === "production"
@@ -20,7 +20,8 @@ export function protectBackend(req, res, next) {
 
   // --- 2️⃣ Protect API endpoints ---
   if (req.path.startsWith("/api")) {
-    if (!origin || !allowedOrigins.some((o) => origin.startsWith(o))) {
+    // Block requests from unauthorized origins safely
+    if (origin && !allowedOrigins.some((o) => origin.startsWith(o.toLowerCase()))) {
       return res.status(403).send("❌ Access forbidden: invalid origin");
     }
 
@@ -36,10 +37,7 @@ export function protectBackend(req, res, next) {
   }
 
   // --- 3️⃣ Protect sensitive /auth endpoints (me, signout) ---
-  if (
-    req.path.startsWith("/auth/me") ||
-    req.path.startsWith("/auth/signout")
-  ) {
+  if (req.path.startsWith("/auth/me") || req.path.startsWith("/auth/signout")) {
     if (!token) return res.status(401).json({ error: "Not logged in" });
 
     try {
@@ -50,6 +48,6 @@ export function protectBackend(req, res, next) {
     }
   }
 
-  // --- 4️⃣ Allow all other routes (e.g., homepage) ---
+  // --- 4️⃣ Allow all other routes (homepage, etc.) ---
   next();
 }
