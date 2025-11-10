@@ -61,11 +61,12 @@ router.get("/google/callback", async (req, res) => {
     const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, { expiresIn: "7d" });
 
     // Set HTTP-only cookie
-    res.cookie("authToken", token, {
+   res.cookie("authToken", token, {
       httpOnly: true,
-      secure: isProduction,         // must be true in production (HTTPS)
-      sameSite: isProduction ? "None" : "Lax", 
-      path: "/",
+      secure: true,            
+      sameSite: "None",         
+      domain: ".onrender.com",  
+      path: "/",               
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -93,11 +94,13 @@ router.get("/me", (req, res) => {
 // --- 4️⃣ Logout ---
 router.post("/signout", (req, res) => {
   res.clearCookie("authToken", {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "None" : "Lax",
-    path: "/",
-  });
+  httpOnly: true,
+  secure: true,
+  sameSite: "None",
+  domain: ".onrender.com",
+  path: "/",
+});
+
   res.json({ success: true });
 });
 
