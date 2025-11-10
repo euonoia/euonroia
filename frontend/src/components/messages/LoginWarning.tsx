@@ -1,11 +1,11 @@
-// src/components/LoginWarning.tsx
 import { useEffect, useState } from "react";
 import { checkThirdPartyCookies } from "../../utils/checkCookies";
 import { useUser } from "../../context/UserContext";
 
 export default function LoginWarning() {
-  const { signInWithGoogle } = useUser(); // reuse existing login function
+  const { signInWithGoogle } = useUser();
   const [blocked, setBlocked] = useState(false);
+  const [visible, setVisible] = useState(true); // track if user closed it
 
   const checkCookies = async () => {
     const allowed = await checkThirdPartyCookies();
@@ -16,12 +16,13 @@ export default function LoginWarning() {
     checkCookies();
   }, []);
 
-  if (!blocked) return null;
+  if (!blocked || !visible) return null;
 
   return (
     <div
       style={{
-        padding: "1rem",
+        position: "relative",
+        padding: "1rem 1.5rem",
         margin: "1rem 0",
         border: "2px dashed #f39c12",
         backgroundColor: "#fff8e1",
@@ -31,6 +32,23 @@ export default function LoginWarning() {
         color: "#333",
       }}
     >
+      {/* Close Button */}
+      <button
+        onClick={() => setVisible(false)}
+        style={{
+          position: "absolute",
+          top: "0.25rem",
+          right: "0.5rem",
+          background: "transparent",
+          border: "none",
+          fontSize: "1.2rem",
+          cursor: "pointer",
+        }}
+        aria-label="Close warning"
+      >
+        ×
+      </button>
+
       🌟 Hi there! It looks like your browser is blocking login cookies.  
       <br />
       This may be due to Brave Shield or other privacy settings.  

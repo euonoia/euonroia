@@ -4,6 +4,7 @@ import { FaLaptopCode, FaGlobe, FaUsers } from "react-icons/fa";
 import Header from '../components/header';
 import Footer from '../components/footer';
 import { useUser } from '../context/UserContext';
+import LoginWarning from '../components/messages/LoginWarning';
 import "../styles/pages/LandingPage.css";
 
 const LandingPage: FC = () => {
@@ -21,6 +22,9 @@ const LandingPage: FC = () => {
     <div className="landing-container">
       {/* Hide user info in Header for landing page */}
       <Header hideUser={true} />
+
+      {/* Login warning for blocked cookies */}
+      <LoginWarning />
 
       <main className="landing-main">
         {/* Hero Section */}

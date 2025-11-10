@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { useTheme } from "../context/ThemeContext";
-import LoginWarning from "../components/messages/LoginWarning"; // ✅ import the new component
 import "../styles/components/header.css";
 
 interface HeaderProps {
@@ -26,7 +25,6 @@ export default function Header({
       <h2 className="logo">Euonroia</h2>
 
       {/* Show login warning if cookies are blocked */}
-      <LoginWarning />
 
       {/* Desktop nav links */}
       {!loading && user && !hideUser && (
