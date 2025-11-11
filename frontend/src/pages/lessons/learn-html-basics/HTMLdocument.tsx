@@ -1,14 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CodeBlock from "../../../components/lessons/CodeBlock";
 import Header from "../../../components/header";
 import Footer from "../../../components/footer";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
+import axios from "axios";
 
 const HTMLdocument: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
+
+  const [checkingAuth, setCheckingAuth] = useState(true); // Loading while checking
+  const [userValid, setUserValid] = useState(false);      // Token check
 
   const [doctypeAdded, setDoctypeAdded] = useState(false);
   const [htmlAdded, setHtmlAdded] = useState(false);
@@ -22,46 +26,58 @@ const HTMLdocument: React.FC = () => {
     body: '',
   });
 
+  // --- SECURITY: check JWT cookie on mount ---
+  useEffect(() => {
+    const verifyToken = async () => {
+      try {
+        await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, {
+          withCredentials: true,
+        });
+        setUserValid(true);
+      } catch {
+        setUserValid(false);
+        navigate("/"); // redirect to login or home
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
+    verifyToken();
+  }, []);
+
+  if (checkingAuth) {
+    return <div>Checking authentication...</div>;
+  }
+
+  if (!userValid) return null; // Will redirect automatically
+
   const handleBlockClick = (tag: string) => {
     if (tag === "DOCTYPE") {
       if (!doctypeAdded) {
         setDoctypeAdded(true);
-        setDescriptions((prev) => ({
+        setDescriptions(prev => ({
           ...prev,
           doctype: "<!DOCTYPE html> specifies the document type and version (HTML5).",
         }));
       }
       return;
     }
-
     if (tag === "html") {
       if (!htmlAdded) {
         setHtmlAdded(true);
-        setDescriptions((prev) => ({
-          ...prev,
-          html: "<html> is the root element of the page.",
-        }));
+        setDescriptions(prev => ({ ...prev, html: "<html> is the root element of the page." }));
       }
       return;
     }
-
     if (tag === "head") {
       setHeadAdded(true);
       if (!htmlAdded) setHtmlAdded(true);
-      setDescriptions((prev) => ({
-        ...prev,
-        head: "<head> contains meta-information about the document.",
-      }));
+      setDescriptions(prev => ({ ...prev, head: "<head> contains meta-information about the document." }));
       return;
     }
-
     if (tag === "body") {
       setBodyAdded(true);
       if (!htmlAdded) setHtmlAdded(true);
-      setDescriptions((prev) => ({
-        ...prev,
-        body: "<body> contains the content that is visible to users.",
-      }));
+      setDescriptions(prev => ({ ...prev, body: "<body> contains the content that is visible to users." }));
       return;
     }
   };
@@ -72,24 +88,24 @@ const HTMLdocument: React.FC = () => {
     const lines: string[] = [];
 
     if (doctypeAdded) {
-      lines.push("<!-- " + descriptions.doctype + " -->");
+      lines.push(`<!-- ${descriptions.doctype} -->`);
       lines.push("<!DOCTYPE html>");
     }
 
     if (htmlAdded) {
       lines.push("<html>");
-      lines.push("    <!-- " + descriptions.html + " -->");
+      lines.push(`    <!-- ${descriptions.html} -->`);
     }
 
     if (headAdded) {
       lines.push("    <head>");
-      lines.push("        <!-- " + descriptions.head + " -->");
+      lines.push(`        <!-- ${descriptions.head} -->`);
       lines.push("    </head>");
     }
 
     if (bodyAdded) {
       lines.push("    <body>");
-      lines.push("        <!-- " + descriptions.body + " -->");
+      lines.push(`        <!-- ${descriptions.body} -->`);
       lines.push("    </body>");
     }
 
@@ -109,73 +125,47 @@ const HTMLdocument: React.FC = () => {
   return (
     <div className={`lesson-container ${theme}`}>
       <Header />
-
       <main className="lesson-main">
         <div className="lesson-content">
-          {/* Left Section */}
           <div className="lesson-left">
             <h1 className="lesson-title">Learn HTML Basics</h1>
             <p className="lesson-description">
-              In this lesson, you’ll learn about the basic structure of an HTML document. Tap the blocks to build it.
+              Tap the blocks to build the basic structure of an HTML document.
             </p>
 
             <h2 className="section-title">HTML DOCUMENT STRUCTURE</h2>
-
             <div className="code-blocks">
-              <CodeBlock
-                tag="DOCTYPE"
-                onClick={handleBlockClick}
-                doctypeAdded={doctypeAdded}
-                htmlAdded={htmlAdded}
-                headAdded={headAdded}
-                bodyAdded={bodyAdded}
-              />
-              <CodeBlock
-                tag="html"
-                onClick={handleBlockClick}
-                doctypeAdded={doctypeAdded}
-                htmlAdded={htmlAdded}
-                headAdded={headAdded}
-                bodyAdded={bodyAdded}
-              />
-              <CodeBlock
-                tag="head"
-                onClick={handleBlockClick}
-                doctypeAdded={doctypeAdded}
-                htmlAdded={htmlAdded}
-                headAdded={headAdded}
-                bodyAdded={bodyAdded}
-              />
-              <CodeBlock
-                tag="body"
-                onClick={handleBlockClick}
-                doctypeAdded={doctypeAdded}
-                htmlAdded={htmlAdded}
-                headAdded={headAdded}
-                bodyAdded={bodyAdded}
-              />
+              {["DOCTYPE","html","head","body"].map(tag => (
+                <CodeBlock
+                  key={tag}
+                  tag={tag}
+                  onClick={handleBlockClick}
+                  doctypeAdded={doctypeAdded}
+                  htmlAdded={htmlAdded}
+                  headAdded={headAdded}
+                  bodyAdded={bodyAdded}
+                />
+              ))}
             </div>
           </div>
 
-          {/* Right Section */}
           <div className="lesson-right">
-            <div className="html-output">
-              <h3 className="output-title">HTML Output:</h3>
-              <pre>{htmlOutput || "Click blocks to build your HTML structure"}</pre>
-            </div>
+            <h3 className="output-title">HTML Output:</h3>
+            <pre>{htmlOutput || "Click blocks to build your HTML structure"}</pre>
           </div>
 
-            <div className="next-btn-container">
-              <button
-                className="next-btn"
-                onClick={handleNextLesson}
-                disabled={!doctypeAdded || !htmlAdded || !headAdded || !bodyAdded}
-              >
-                Next Lesson
-              </button>
-            </div>
+          <div className="next-btn-container">
+            <button
+              className="next-btn"
+              onClick={handleNextLesson}
+              disabled={!doctypeAdded || !htmlAdded || !headAdded || !bodyAdded}
+            >
+              Next Lesson
+            </button>
+          </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

@@ -4,7 +4,8 @@ import Footer from "../components/footer";
 import DashboardStats from "../components/DashboardStats";
 import { useUser } from "../context/UserContext";
 import { useTheme } from "../context/ThemeContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 import "../styles/pages/Dashboard.css";
 
 export default function Dashboard() {
@@ -12,12 +13,50 @@ export default function Dashboard() {
   const { theme } = useTheme();
   const navigate = useNavigate();
 
-  // Redirect to home if user signs out (user becomes null)
+  const [progressData, setProgressData] = useState({
+    displayName: "",
+    currentLesson: "",
+    htmlBasicsProgress: 0,
+  });
+  const [lessons, setLessons] = useState([
+    { id: "html-basics", title: "HTML Basics", progress: 0 },
+    { id: "css-intro", title: "Intro to CSS", progress: 0 },
+    { id: "js-start", title: "JavaScript for Beginners", progress: 0 },
+  ]);
+
+  // Redirect to home if user signs out
   useEffect(() => {
     if (!loading && !user) {
       navigate("/", { replace: true });
     }
   }, [user, loading, navigate]);
+
+  // Fetch progress from backend
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/dashboard/progress`, {
+          withCredentials: true, // send JWT cookie
+        });
+        const data = res.data;
+        setProgressData(data);
+
+        // Update lessons progress dynamically
+        setLessons((prev) =>
+          prev.map((lesson) => {
+            if (lesson.id === "html-basics") {
+              return { ...lesson, progress: data.htmlBasicsProgress };
+            }
+            return lesson;
+          })
+        );
+      } catch (err) {
+        console.error("Failed to fetch progress:", err);
+      }
+    };
+
+    if (user) fetchProgress();
+  }, [user]);
 
   if (loading) {
     return (
@@ -31,13 +70,6 @@ export default function Dashboard() {
     );
   }
 
-  // Optional: show Guest dashboard if user is null
-  const lessons = [
-    { id: "html-basics", title: "HTML Basics", progress: 100 },
-    { id: "css-intro", title: "Intro to CSS", progress: 60 },
-    { id: "js-start", title: "JavaScript for Beginners", progress: 0 },
-  ];
-
   return (
     <div className={`dashboard-page ${theme}`}>
       <Header />
@@ -45,14 +77,14 @@ export default function Dashboard() {
       <main className="dashboard-main">
         <div className="dashboard-top">
           <div className="dashboard-left">
-            <h1>Welcome back, {user?.name || "Guest"}!</h1>
+            <h1>Welcome back, {progressData.displayName || "Guest"}!</h1>
             <p>Ready to continue your coding journey?</p>
 
             <DashboardStats
-              lessonsCompleted={2}
-              totalLessons={10}
-              streak={3}
-              xp={450}
+              lessonsCompleted={lessons.filter((l) => l.progress === 100).length}
+              totalLessons={lessons.length}
+              streak={3} // replace with real streak from user data if available
+              xp={450} // replace with real xp if available
             />
           </div>
 
@@ -60,9 +92,12 @@ export default function Dashboard() {
             <h2>Continue Learning</h2>
             <div className="continue-learning-card">
               <p>
-                <strong>Next Lesson:</strong> Build Your First HTML Page
+                <strong>Next Lesson:</strong>{" "}
+                {progressData.currentLesson === "html-basics"
+                  ? "Build Your First HTML Page"
+                  : "Continue your lessons"}
               </p>
-              <Link to="/lessons/html-basics">
+              <Link to={`/lessons/${progressData.currentLesson || "html-basics"}`}>
                 <button className="start-lesson-btn">Start Lesson</button>
               </Link>
             </div>
@@ -94,6 +129,8 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

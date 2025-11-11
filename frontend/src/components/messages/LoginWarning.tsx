@@ -148,7 +148,7 @@ export default function LoginWarning() {
             lineHeight: 1.4,
           }}
         >
-          Don’t worry — this only affects login, and your account stays safe! 😊
+          It's better to use an email address that is not your main one for extra security.😊
         </p>
       </div>
     </div>
