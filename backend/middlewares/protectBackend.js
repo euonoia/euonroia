@@ -29,36 +29,38 @@ export function protectBackend(req, res, next) {
     if (!token) return res.status(401).json({ error: "Not logged in" });
 
     try {
-      jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded; // attach payload to req.user
       return next();
     } catch {
       return res.status(401).json({ error: "Invalid or expired token" });
     }
   }
 
-  // --- 3️⃣ Protect sensitive /auth endpoints (me, signout) ---
-  if (req.path.startsWith("/auth/me") || req.path.startsWith("/auth/signout")) {
-    if (!token) return res.status(401).json({ error: "Not logged in" });
-
-    try {
-      jwt.verify(token, process.env.JWT_SECRET);
-      return next();
-    } catch {
-      return res.status(401).json({ error: "Invalid or expired token" });
-    }
-  }
-
-  // --- 4️⃣ Protect /auth/me and /auth/signout with JWT ---
-  if (req.path.startsWith("/auth/me") || req.path.startsWith("/auth/signout")) {
+  // --- 3️⃣ Protect sensitive /auth/me endpoint ---
+  if (req.path.startsWith("/auth/me")) {
     if (!token) return res.status(401).json({ error: "Not logged in" });
     try {
-      jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
       return next();
     } catch {
       return res.status(401).json({ error: "Invalid or expired token" });
     }
   }
 
-  // --- 5️⃣ Other routes are safe ---
+  // --- 4️⃣ Protect sensitive /auth/signout endpoint ---
+  if (req.path.startsWith("/auth/signout")) {
+    if (!token) return res.status(401).json({ error: "Not logged in" });
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
+      return next();
+    } catch {
+      return res.status(401).json({ error: "Invalid or expired token" });
+    }
+  }
+
+  // --- 5️⃣ All other routes are safe ---
   next();
 }

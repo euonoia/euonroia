@@ -70,7 +70,7 @@ router.get("/google/callback", async (req, res) => {
       photoURL: picture,
     });
 
-    // ✅ NEW: Ensure Google is shown as provider in Firebase Auth console
+    // ✅ Ensure Google provider appears in Firebase Auth console
     const user = await admin.auth().getUser(userRecord.uid);
     if (!user.providerData.some((p) => p.providerId === "google.com")) {
       await admin.auth().updateUser(userRecord.uid, {
@@ -87,17 +87,44 @@ router.get("/google/callback", async (req, res) => {
       });
     }
 
-    // ✅ Save or update Firestore profile
-    await admin.firestore().collection("users").doc(userRecord.uid).set(
-      {
-        uid: userRecord.uid,
-        name,
-        email,
-        picture,
-        lastLogin: new Date(),
-      },
-      { merge: true }
-    );
+    // ✅ Firestore user document setup
+    const userRef = admin.firestore().collection("users").doc(userRecord.uid);
+    const userSnap = await userRef.get();
+
+    const now = new Date().toISOString();
+
+    if (!userSnap.exists) {
+      // Create new user profile with defaults
+      await userRef.set(
+        {
+          uid: userRecord.uid,
+          displayName: name,
+          email,
+          photoURL: picture,
+          createdAt: now,
+          xp: 0,
+          streak: 0,
+          level: 1,
+          badges: [],
+          currentLesson: "html-basics",
+          lastActive: now,
+          lastLogin: now,
+        },
+        { merge: true }
+      );
+    } else {
+      // Update only activity + profile changes
+      await userRef.set(
+        {
+          displayName: name,
+          email,
+          photoURL: picture,
+          lastLogin: now,
+          lastActive: now,
+        },
+        { merge: true }
+      );
+    }
 
     // ✅ Create a secure short-lived session (custom JWT)
     const token = jwt.sign(

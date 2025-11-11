@@ -7,6 +7,8 @@ import { securityMiddleware } from "./config/security.js";
 import redirectBrowser from "./middlewares/redirectBrowser.js";
 import { protectBackend } from "./middlewares/protectBackend.js";
 import authRoutes from "./api/auth.js";
+import lessonsRoutes from "./api/lessons.js";
+import dashboardRoutes from "./api/dashboard.js";
 
 const app = express();
 const isProduction = ENV.NODE_ENV === "production";
@@ -48,8 +50,13 @@ app.use(protectBackend);
 // 3️⃣ Redirect browser requests for non-API/auth paths
 app.use(redirectBrowser);
 
+
+app.use("/api/lessons", lessonsRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+
 // 4️⃣ Root route
 app.get("/", (req, res) => res.send("✅ Backend running securely"));
+
 
 // Start server
 app.listen(ENV.PORT, () => {
