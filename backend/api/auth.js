@@ -40,33 +40,83 @@ router.get("/google/callback", async (req, res) => {
     const code = req.query.code;
     if (!code) return res.redirect(FRONTEND_URL);
 
+    // Exchange code for tokens
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
+    // Get user info from Google
     const { data } = await client.request({
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
 
     const { id, name, email, picture } = data;
 
-    // Save/update user in Firebase
-    await admin.firestore().collection("users").doc(id).set(
-      { id, name, email, picture, lastLogin: new Date() },
+    // ✅ Check if user exists in Firebase Auth
+    let userRecord;
+    try {
+      userRecord = await admin.auth().getUserByEmail(email);
+    } catch (err) {
+      // Create user if doesn't exist
+      userRecord = await admin.auth().createUser({
+        email,
+        displayName: name,
+        photoURL: picture,
+      });
+    }
+
+    // Optional: update info if changed
+    await admin.auth().updateUser(userRecord.uid, {
+      displayName: name,
+      photoURL: picture,
+    });
+
+    // ✅ NEW: Ensure Google is shown as provider in Firebase Auth console
+    const user = await admin.auth().getUser(userRecord.uid);
+    if (!user.providerData.some((p) => p.providerId === "google.com")) {
+      await admin.auth().updateUser(userRecord.uid, {
+        providerData: [
+          ...(user.providerData || []),
+          {
+            providerId: "google.com",
+            displayName: name,
+            email,
+            photoURL: picture,
+            uid: id,
+          },
+        ],
+      });
+    }
+
+    // ✅ Save or update Firestore profile
+    await admin.firestore().collection("users").doc(userRecord.uid).set(
+      {
+        uid: userRecord.uid,
+        name,
+        email,
+        picture,
+        lastLogin: new Date(),
+      },
       { merge: true }
     );
 
-    // --- 3️⃣ Create JWT (short-lived access token) ---
-    const token = jwt.sign({ id, name, email, picture }, JWT_SECRET, {
-      expiresIn: "15m", // Short-lived
-    });
+    // ✅ Create a secure short-lived session (custom JWT)
+    const token = jwt.sign(
+      {
+        uid: userRecord.uid,
+        name,
+        email,
+        picture,
+      },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
-    // --- 4️⃣ Set HTTP-only cookie ---
     res.cookie("authToken", token, {
       httpOnly: true,
-      secure: true,          // must be HTTPS
-      sameSite: "None",      // cross-domain cookie
+      secure: true,
+      sameSite: "None",
       path: "/",
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 60 * 60 * 1000, // 1 hour
     });
 
     res.redirect(`${FRONTEND_URL}/dashboard`);
@@ -76,22 +126,35 @@ router.get("/google/callback", async (req, res) => {
   }
 });
 
+
 // --- 5️⃣ Protected route ---
-router.get("/me", (req, res) => {
+router.get("/me", async (req, res) => {
   try {
     const token = req.cookies?.authToken;
     if (!token) return res.status(401).json({ error: "Not logged in" });
 
     const decoded = jwt.verify(token, JWT_SECRET);
-    res.json({ user: decoded });
-  } catch {
+
+    // Double-check user still exists in Firebase
+    const userRecord = await admin.auth().getUser(decoded.uid);
+
+    res.json({
+      user: {
+        id: userRecord.uid,
+        name: userRecord.displayName,
+        email: userRecord.email,
+        picture: userRecord.photoURL,
+      },
+    });
+  } catch (err) {
+    console.error("Auth check failed:", err);
     res.status(401).json({ error: "Invalid token" });
   }
 });
 
+
 // --- 6️⃣ Logout ---
 router.post("/signout", (req, res) => {
-  // Clear cookie completely
   res.clearCookie("authToken", {
     httpOnly: true,
     secure: true,
@@ -100,5 +163,6 @@ router.post("/signout", (req, res) => {
   });
   res.json({ success: true });
 });
+
 
 export default router;
