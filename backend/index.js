@@ -7,7 +7,7 @@ import { securityMiddleware } from "./config/security.js";
 import redirectBrowser from "./middlewares/redirectBrowser.js";
 import { protectBackend } from "./middlewares/protectBackend.js";
 import authRoutes from "./api/auth.js";
-import lessonsRoutes from "./api/lessons.js";
+import lessonsRoutes from "./api/lessons/html-basics.js";
 import dashboardRoutes from "./api/dashboard.js";
 
 const app = express();
