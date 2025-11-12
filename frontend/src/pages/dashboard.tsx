@@ -17,7 +17,9 @@ export default function Dashboard() {
     displayName: "",
     currentLesson: "",
     htmlBasicsProgress: 0,
+    cssIntroProgress: 0, // ✅ added for Intro to CSS
   });
+
   const [lessons, setLessons] = useState([
     { id: "html-basics", title: "HTML Basics", progress: 0 },
     { id: "css-intro", title: "Intro to CSS", progress: 0 },
@@ -41,11 +43,14 @@ export default function Dashboard() {
         const data = res.data;
         setProgressData(data);
 
-        // Update lessons progress dynamically
+        // ✅ Update lessons progress dynamically
         setLessons((prev) =>
           prev.map((lesson) => {
             if (lesson.id === "html-basics") {
               return { ...lesson, progress: data.htmlBasicsProgress };
+            }
+            if (lesson.id === "css-intro") {
+              return { ...lesson, progress: data.cssIntroProgress };
             }
             return lesson;
           })
@@ -70,6 +75,21 @@ export default function Dashboard() {
     );
   }
 
+  // ✅ Logic to determine the "next lesson"
+  const nextLesson =
+    progressData.htmlBasicsProgress < 100
+      ? "html-basics"
+      : progressData.cssIntroProgress < 100
+      ? "css-intro"
+      : "js-start";
+
+  const nextLessonTitle =
+    nextLesson === "html-basics"
+      ? "HTML Basics"
+      : nextLesson === "css-intro"
+      ? "Intro to CSS"
+      : "JavaScript for Beginners";
+
   return (
     <div className={`dashboard-page ${theme}`}>
       <Header />
@@ -83,8 +103,8 @@ export default function Dashboard() {
             <DashboardStats
               lessonsCompleted={lessons.filter((l) => l.progress === 100).length}
               totalLessons={lessons.length}
-              streak={3} // replace with real streak from user data if available
-              xp={450} // replace with real xp if available
+              streak={3} // placeholder, can connect later
+              xp={450} // placeholder, can connect later
             />
           </div>
 
@@ -92,12 +112,9 @@ export default function Dashboard() {
             <h2>Continue Learning</h2>
             <div className="continue-learning-card">
               <p>
-                <strong>Next Lesson:</strong>{" "}
-                {progressData.currentLesson === "html-basics"
-                  ? "Build Your First HTML Page"
-                  : "Continue your lessons"}
+                <strong>Next Lesson:</strong> {nextLessonTitle}
               </p>
-              <Link to={`/lessons/${progressData.currentLesson || "html-basics"}`}>
+              <Link to={`/lessons/${nextLesson}`}>
                 <button className="start-lesson-btn">Start Lesson</button>
               </Link>
             </div>
