@@ -130,11 +130,11 @@ const CSSExam: React.FC = () => {
       <main className="lesson-main">
         <div className="lesson-content">
           <div className="lesson-left">
-            <h2 className="lesson-title">🔥 Click-the-Highlighted CSS Quiz</h2>
+            <h2 className="lesson-title">CSS QUIZ</h2>
             <p className="lesson-description">
-              Click the highlighted block to fill it. The live preview updates instantly!
+              let's test your memory
             </p>
-            <h2 className="section-title">Blocks</h2>
+            <h2 className="section-title">Choose the correct Blocks</h2>
             <div className="code-blocks" style={{ display: "flex", flexWrap: "wrap" }}>
               {shuffledBlocks.map((tag) => {
                 const labelMap: Record<string, string> = {
@@ -195,7 +195,7 @@ const CSSExam: React.FC = () => {
           </div>
         </div>
       </main>
-      <Footer />
+      
     </div>
   );
 };

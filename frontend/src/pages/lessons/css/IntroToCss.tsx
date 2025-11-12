@@ -154,7 +154,6 @@ const buildCssOutput = (): string | null => {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 };
