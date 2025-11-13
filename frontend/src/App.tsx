@@ -39,6 +39,7 @@ function AppContent() {
         <Route path="/homepage" element={<Homepage />} />
         <Route path="/oauth-callback" element={<OAuthCallback />} />
         <Route path="/lessons/greetings" element={<Greetings />} />
+        
         <Route path="/lessons/html-basics" element={<HTMLdocument />} />
         <Route path="/lessons/html-elements" element={<HTMLelements />} />
         <Route path="/lessons/html-exam" element={<HTMLexam />} />
