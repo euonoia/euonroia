@@ -25,19 +25,19 @@ export default function Dashboard() {
     {
       id: "html-basics",
       title: "HTML Basics",
-      path: "html-basics", // /lessons/html-basics
+      path: "html-basics", 
       progress: 0,
     },
     {
       id: "css-intro",
       title: "CSS Basics",
-      path: "css-intro", // /lessons/css-intro
+      path: "css-intro",
       progress: 0,
     },
     {
       id: "js-start",
       title: "JavaScript for Beginners",
-      path: "greetings", // placeholder until JS lessons exist
+      path: "js-basics", 
       progress: 0,
     },
   ]);

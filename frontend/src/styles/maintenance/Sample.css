@@ -1,0 +1,118 @@
+@import "../theme.css";
+
+/* =========================
+   Page Layout
+========================= */
+.sample-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  padding: var(--space-6);
+  font-family: var(--font-family-base);
+  text-align: center;
+}
+
+/* =========================
+   Card Container
+========================= */
+.sample-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  padding: var(--space-6);
+  max-width: 480px;
+  width: 100%;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* =========================
+   Header + Icon
+========================= */
+.sample-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.sample-icon {
+  font-size: 3rem;
+  color: var(--accent);
+  animation: bounce 2s infinite;
+}
+
+.sample-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* =========================
+   Message Text
+========================= */
+.sample-message {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-5);
+  line-height: 1.6;
+}
+
+/* =========================
+   Status Section
+========================= */
+.sample-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--text-tertiary);
+  gap: var(--space-2);
+}
+
+.sample-hourglass {
+  font-size: 1.75rem;
+  animation: spin 3s linear infinite;
+}
+
+/* =========================
+   Animations
+========================= */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================
+   Responsive Design
+========================= */
+@media (max-width: 480px) {
+  .sample-card {
+    padding: var(--space-4);
+  }
+
+  .sample-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .sample-message {
+    font-size: 1rem;
+  }
+}

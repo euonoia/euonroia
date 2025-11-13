@@ -18,6 +18,9 @@ import Sample from "./pages/lessons/css/Sample";
 import CSSMultipleElements from "./pages/lessons/css/CSSMultipleElements";
 import CSSExam from "./pages/lessons/css/CSSExam";
 
+import JavaScriptBasics from "./pages/lessons/javascript/JavaScriptBasics";
+import Maintenance from "./pages/lessons/javascript/Sample";
+
 import { useUser } from "./context/UserContext";
 import LoginWarning from "./components/messages/LoginWarning";
 
@@ -39,7 +42,7 @@ function AppContent() {
         <Route path="/homepage" element={<Homepage />} />
         <Route path="/oauth-callback" element={<OAuthCallback />} />
         <Route path="/lessons/greetings" element={<Greetings />} />
-        
+
         <Route path="/lessons/html-basics" element={<HTMLdocument />} />
         <Route path="/lessons/html-elements" element={<HTMLelements />} />
         <Route path="/lessons/html-exam" element={<HTMLexam />} />
@@ -48,6 +51,9 @@ function AppContent() {
         <Route path="/lessons/css-sample" element={<Sample />} />
         <Route path="/lessons/css-multiple-elements" element={<CSSMultipleElements />} />
         <Route path="/lessons/css-exam" element={<CSSExam />} />
+
+        <Route path="/lessons/js-basics" element={<JavaScriptBasics />} />
+        <Route path="/lessons/js-maintenance" element={<Maintenance />} />
 
         <Route path="*" element={<p>Page not found</p>} />
       </Routes>
