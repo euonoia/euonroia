@@ -24,7 +24,7 @@ const Sample: React.FC = () => {
         </div>
 
         <p className="sample-message text-gray-700 text-lg mb-8">
-          We’re currently making improvements to Euonoia.  
+          We’re currently making improvements to Euonroia.  
           Your learning experience is our priority.  
           Thank you for your understanding. Tap anywhere to return to the dashboard.
         </p>
