@@ -17,13 +17,29 @@ export default function Dashboard() {
     displayName: "",
     currentLesson: "",
     htmlBasicsProgress: 0,
-    cssBasicsProgress: 0, // ✅ updated field for CSS Basics
+    cssBasicsProgress: 0,
   });
 
+  // ✅ Lessons mapped to ACTUAL routes in App.tsx
   const [lessons, setLessons] = useState([
-    { id: "html-basics", title: "HTML Basics", progress: 0 },
-    { id: "css-basics", title: "CSS Basics", progress: 0 },
-    { id: "js-start", title: "JavaScript for Beginners", progress: 0 },
+    {
+      id: "html-basics",
+      title: "HTML Basics",
+      path: "html-basics", // /lessons/html-basics
+      progress: 0,
+    },
+    {
+      id: "css-intro",
+      title: "CSS Basics",
+      path: "css-intro", // /lessons/css-intro
+      progress: 0,
+    },
+    {
+      id: "js-start",
+      title: "JavaScript for Beginners",
+      path: "greetings", // placeholder until JS lessons exist
+      progress: 0,
+    },
   ]);
 
   // Redirect to home if user signs out
@@ -39,19 +55,19 @@ export default function Dashboard() {
       try {
         const res = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/api/dashboard/progress`,
-          { withCredentials: true } // send JWT cookie
+          { withCredentials: true }
         );
 
         const data = res.data;
         setProgressData(data);
 
-        // ✅ Update lessons progress dynamically
+        // Update progress dynamically
         setLessons((prev) =>
           prev.map((lesson) => {
             if (lesson.id === "html-basics") {
               return { ...lesson, progress: data.htmlBasicsProgress };
             }
-            if (lesson.id === "css-basics") {
+            if (lesson.id === "css-intro") {
               return { ...lesson, progress: data.cssBasicsProgress };
             }
             return lesson;
@@ -77,20 +93,13 @@ export default function Dashboard() {
     );
   }
 
-  // ✅ Logic to determine the "next lesson"
+  // ✅ Determine next lesson by progress
   const nextLesson =
     progressData.htmlBasicsProgress < 100
-      ? "html-basics"
+      ? lessons.find((l) => l.id === "html-basics")
       : progressData.cssBasicsProgress < 100
-      ? "css-basics"
-      : "js-start";
-
-  const nextLessonTitle =
-    nextLesson === "html-basics"
-      ? "HTML Basics"
-      : nextLesson === "css-basics"
-      ? "CSS Basics"
-      : "JavaScript for Beginners";
+      ? lessons.find((l) => l.id === "css-intro")
+      : lessons.find((l) => l.id === "js-start");
 
   return (
     <div className={`dashboard-page ${theme}`}>
@@ -105,8 +114,8 @@ export default function Dashboard() {
             <DashboardStats
               lessonsCompleted={lessons.filter((l) => l.progress === 100).length}
               totalLessons={lessons.length}
-              streak={3} // placeholder for future streak tracking
-              xp={450} // placeholder for XP system
+              streak={3}
+              xp={450}
             />
           </div>
 
@@ -114,11 +123,14 @@ export default function Dashboard() {
             <h2>Continue Learning</h2>
             <div className="continue-learning-card">
               <p>
-                <strong>Next Lesson:</strong> {nextLessonTitle}
+                <strong>Next Lesson:</strong>{" "}
+                {nextLesson?.title || "All lessons completed!"}
               </p>
-              <Link to={`/lessons/${nextLesson}`}>
-                <button className="start-lesson-btn">Start Lesson</button>
-              </Link>
+              {nextLesson && (
+                <Link to={`/lessons/${nextLesson.path}`}>
+                  <button className="start-lesson-btn">Start Lesson</button>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -127,7 +139,11 @@ export default function Dashboard() {
           <h2>Your Lessons</h2>
           <div className="lessons-grid">
             {lessons.map((lesson) => (
-              <Link key={lesson.id} to={`/lessons/${lesson.id}`} className="lesson-link">
+              <Link
+                key={lesson.id}
+                to={`/lessons/${lesson.path}`}
+                className="lesson-link"
+              >
                 <div className="lesson-card">
                   <h3>{lesson.title}</h3>
                   <progress value={lesson.progress} max={100} />
