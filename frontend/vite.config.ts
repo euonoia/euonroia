@@ -8,7 +8,7 @@ export default ({ mode }: ConfigEnv) => {
     plugins: [react()],
     server: {
       port: 5173,
-      open: true,
+      open: false,
       fs: {
         strict: false,
       },
