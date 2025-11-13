@@ -9,7 +9,7 @@ import { protectBackend } from "./middlewares/protectBackend.js";
 import authRoutes from "./api/auth.js";
 import lessonsRoutes from "./api/lessons/html-basics.js";
 import dashboardRoutes from "./api/dashboard.js";
-
+import cssLessonsRouter from "./api/lessons/cssBasics.js";
 const app = express();
 const isProduction = ENV.NODE_ENV === "production";
 
@@ -52,6 +52,7 @@ app.use(redirectBrowser);
 
 
 app.use("/api/lessons", lessonsRoutes);
+app.use("/api/lessons", cssLessonsRouter);
 app.use("/api/dashboard", dashboardRoutes);
 
 // 4️⃣ Root route

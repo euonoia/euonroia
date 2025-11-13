@@ -17,12 +17,12 @@ export default function Dashboard() {
     displayName: "",
     currentLesson: "",
     htmlBasicsProgress: 0,
-    cssIntroProgress: 0, // ✅ added for Intro to CSS
+    cssBasicsProgress: 0, // ✅ updated field for CSS Basics
   });
 
   const [lessons, setLessons] = useState([
     { id: "html-basics", title: "HTML Basics", progress: 0 },
-    { id: "css-intro", title: "Intro to CSS", progress: 0 },
+    { id: "css-basics", title: "CSS Basics", progress: 0 },
     { id: "js-start", title: "JavaScript for Beginners", progress: 0 },
   ]);
 
@@ -37,9 +37,11 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchProgress = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/api/dashboard/progress`, {
-          withCredentials: true, // send JWT cookie
-        });
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/dashboard/progress`,
+          { withCredentials: true } // send JWT cookie
+        );
+
         const data = res.data;
         setProgressData(data);
 
@@ -49,8 +51,8 @@ export default function Dashboard() {
             if (lesson.id === "html-basics") {
               return { ...lesson, progress: data.htmlBasicsProgress };
             }
-            if (lesson.id === "css-intro") {
-              return { ...lesson, progress: data.cssIntroProgress };
+            if (lesson.id === "css-basics") {
+              return { ...lesson, progress: data.cssBasicsProgress };
             }
             return lesson;
           })
@@ -79,15 +81,15 @@ export default function Dashboard() {
   const nextLesson =
     progressData.htmlBasicsProgress < 100
       ? "html-basics"
-      : progressData.cssIntroProgress < 100
-      ? "css-intro"
+      : progressData.cssBasicsProgress < 100
+      ? "css-basics"
       : "js-start";
 
   const nextLessonTitle =
     nextLesson === "html-basics"
       ? "HTML Basics"
-      : nextLesson === "css-intro"
-      ? "Intro to CSS"
+      : nextLesson === "css-basics"
+      ? "CSS Basics"
       : "JavaScript for Beginners";
 
   return (
@@ -103,8 +105,8 @@ export default function Dashboard() {
             <DashboardStats
               lessonsCompleted={lessons.filter((l) => l.progress === 100).length}
               totalLessons={lessons.length}
-              streak={3} // placeholder, can connect later
-              xp={450} // placeholder, can connect later
+              streak={3} // placeholder for future streak tracking
+              xp={450} // placeholder for XP system
             />
           </div>
 
@@ -129,6 +131,7 @@ export default function Dashboard() {
                 <div className="lesson-card">
                   <h3>{lesson.title}</h3>
                   <progress value={lesson.progress} max={100} />
+                  <span>{lesson.progress}%</span>
                 </div>
               </Link>
             ))}

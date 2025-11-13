@@ -7,13 +7,13 @@ import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
 import { useUser } from "../../../context/UserContext";
 import confetti from "canvas-confetti";
+import axios from "axios";
 
 const CSSExam: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
   const { user, loading } = useUser();
 
-  // ✅ Shared and compact blank order
   const blankOrder = ["style", "h1", "property", "valueColor", "propertyFont", "valueFont", "p"];
 
   const blankNumberMap: Record<string, number> = blankOrder.reduce((acc, tag, idx) => {
@@ -26,13 +26,12 @@ const CSSExam: React.FC = () => {
   );
 
   const [activeIndex, setActiveIndex] = useState(0);
-
-  // Shared value pools
-  const colors = ["red", "blue", "green", "orange"];
-  const fontSizes = ["15px", "20px", "24px", "30px"];
   const [colorValue, setColorValue] = useState("red");
   const [fontSizeValue, setFontSizeValue] = useState("20px");
   const [shuffledBlocks, setShuffledBlocks] = useState(blankOrder);
+
+  const colors = ["red", "blue", "green", "orange"];
+  const fontSizes = ["15px", "20px", "24px", "30px"];
 
   useEffect(() => {
     setShuffledBlocks([...blankOrder].sort(() => Math.random() - 0.5));
@@ -43,7 +42,6 @@ const CSSExam: React.FC = () => {
 
     setBlanks((prev) => ({ ...prev, [tag]: true }));
 
-    // Shared dynamic updates
     if (tag === "valueColor") {
       setColorValue((prev) => colors[(colors.indexOf(prev) + 1) % colors.length]);
     }
@@ -68,50 +66,48 @@ const CSSExam: React.FC = () => {
   const highlightStyle = "background-color:#fff3cd; border-radius:3px; padding:0 2px;";
 
   const buildSkeletonOutput = () => {
-  const userName = user?.name || "_____";
-  const currentTag = blankOrder[activeIndex];
-  const highlight = (tag: string, content: string) =>
-    `<span style="${currentTag === tag ? highlightStyle : ""}">${content}</span>`;
+    const userName = user?.name || "_____";
+    const currentTag = blankOrder[activeIndex];
+    const highlight = (tag: string, content: string) =>
+      `<span style="${currentTag === tag ? highlightStyle : ""}">${content}</span>`;
 
-  return `
+    return `
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
-    &lt;head&gt;
-        &lt;meta charset="UTF-8" /&gt;
-        &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
-        &lt;title&gt;Euonroia&lt;/title&gt;
-        &lt;${highlight("style", showValue("style", "style"))}&gt;
-            ${highlight("h1", showValue("h1", "h1"))} {
-                ${highlight("property", showValue("property", "color"))}: ${highlight(
-    "valueColor",
-    showValue("valueColor", colorValue)
-  )};
-                ${highlight("propertyFont", showValue("propertyFont", "font-size"))}: ${highlight(
-    "valueFont",
-    showValue("valueFont", fontSizeValue)
-  )};
-            }
-            ${highlight("p", showValue("p", "p"))} {
-                ${highlight("property", showValue("property", "color"))}: ${highlight(
-    "valueColor",
-    showValue("valueColor", colorValue)
-  )};
-                ${highlight("propertyFont", showValue("propertyFont", "font-size"))}: ${highlight(
-    "valueFont",
-    showValue("valueFont", fontSizeValue)
-  )};
-            }
-        &lt;/${highlight("style", showValue("style", "style"))}&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-        &lt;h1&gt;Hello, ${userName}&lt;/h1&gt;
-        &lt;p&gt;This is a styled paragraph&lt;/p&gt;
-    &lt;/body&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;Euonroia&lt;/title&gt;
+    &lt;${highlight("style", showValue("style", "style"))}&gt;
+      ${highlight("h1", showValue("h1", "h1"))} {
+        ${highlight("property", showValue("property", "color"))}: ${highlight(
+      "valueColor",
+      showValue("valueColor", colorValue)
+    )};
+        ${highlight("propertyFont", showValue("propertyFont", "font-size"))}: ${highlight(
+      "valueFont",
+      showValue("valueFont", fontSizeValue)
+    )};
+      }
+      ${highlight("p", showValue("p", "p"))} {
+        ${highlight("property", showValue("property", "color"))}: ${highlight(
+      "valueColor",
+      showValue("valueColor", colorValue)
+    )};
+        ${highlight("propertyFont", showValue("propertyFont", "font-size"))}: ${highlight(
+      "valueFont",
+      showValue("valueFont", fontSizeValue)
+    )};
+      }
+    &lt;/${highlight("style", showValue("style", "style"))}&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Hello, ${userName}&lt;/h1&gt;
+    &lt;p&gt;This is a styled paragraph&lt;/p&gt;
+  &lt;/body&gt;
 &lt;/html&gt;
-  `;
-};
-
-
+    `;
+  };
 
   const buildLivePreview = () => `
 <h1 style="color: ${blanks.valueColor ? colorValue : "black"}; font-size: ${
@@ -122,6 +118,33 @@ const CSSExam: React.FC = () => {
   }">This is a styled paragraph.</p>
 `;
 
+  // ✅ Detect exam completion
+  const isExamComplete = activeIndex >= blankOrder.length;
+
+  // ✅ Save to backend when complete
+  useEffect(() => {
+    if (isExamComplete) {
+      // 🎉 Run confetti animation
+      const duration = 3000;
+      const end = Date.now() + duration;
+      (function frame() {
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+
+      // 💾 Save quiz result to backend
+      const htmlOutput = buildSkeletonOutput();
+      axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/lessons/css-basics/quizzes`,
+        { htmlOutput },
+        { withCredentials: true }
+      )
+      .then((res) => console.log("CSS quiz saved:", res.data))
+      .catch((err) => console.error("Failed to save CSS quiz:", err));
+    }
+  }, [isExamComplete]);
+
   if (loading) return <div>Loading user data...</div>;
 
   return (
@@ -131,9 +154,7 @@ const CSSExam: React.FC = () => {
         <div className="lesson-content">
           <div className="lesson-left">
             <h2 className="lesson-title">CSS QUIZ</h2>
-            <p className="lesson-description">
-              let's test your memory
-            </p>
+            <p className="lesson-description">Let's test your memory</p>
             <h2 className="section-title">Choose the correct Blocks</h2>
             <div className="code-blocks" style={{ display: "flex", flexWrap: "wrap" }}>
               {shuffledBlocks.map((tag) => {
@@ -195,7 +216,7 @@ const CSSExam: React.FC = () => {
           </div>
         </div>
       </main>
-      
+      <Footer />
     </div>
   );
 };
