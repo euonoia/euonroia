@@ -5,14 +5,13 @@ import Footer from "../../../components/footer";
 import CodeBlockCSSExam from "../../../components/lessons/CodeBlockCSSExam";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
-import { useUser } from "../../../context/UserContext";
 import confetti from "canvas-confetti";
 import axios from "axios";
+import VerifyToken from "../../../components/auth/VerifyToken";
 
-const CSSExam: React.FC = () => {
+const CSSExamContent: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const { user, loading } = useUser();
 
   const blankOrder = ["style", "h1", "property", "valueColor", "propertyFont", "valueFont", "p"];
 
@@ -66,7 +65,7 @@ const CSSExam: React.FC = () => {
   const highlightStyle = "background-color:#fff3cd; border-radius:3px; padding:0 2px;";
 
   const buildSkeletonOutput = () => {
-    const userName = user?.name || "_____";
+    const userName = "Student"; // Can be dynamic if VerifyToken passes user context
     const currentTag = blankOrder[activeIndex];
     const highlight = (tag: string, content: string) =>
       `<span style="${currentTag === tag ? highlightStyle : ""}">${content}</span>`;
@@ -112,19 +111,16 @@ const CSSExam: React.FC = () => {
   const buildLivePreview = () => `
 <h1 style="color: ${blanks.valueColor ? colorValue : "black"}; font-size: ${
     blanks.valueFont ? fontSizeValue : "20px"
-  }">Hello, ${user?.name || "Student"}!</h1>
+  }">Hello, Student!</h1>
 <p style="color: ${blanks.valueColor ? colorValue : "black"}; font-size: ${
     blanks.valueFont ? fontSizeValue : "16px"
   }">This is a styled paragraph.</p>
 `;
 
-  // ✅ Detect exam completion
   const isExamComplete = activeIndex >= blankOrder.length;
 
-  // ✅ Save to backend when complete
   useEffect(() => {
     if (isExamComplete) {
-      // 🎉 Run confetti animation
       const duration = 3000;
       const end = Date.now() + duration;
       (function frame() {
@@ -133,7 +129,6 @@ const CSSExam: React.FC = () => {
         if (Date.now() < end) requestAnimationFrame(frame);
       })();
 
-      // 💾 Save quiz result to backend
       const htmlOutput = buildSkeletonOutput();
       axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/lessons/css-basics/quizzes`,
@@ -144,8 +139,6 @@ const CSSExam: React.FC = () => {
       .catch((err) => console.error("Failed to save CSS quiz:", err));
     }
   }, [isExamComplete]);
-
-  if (loading) return <div>Loading user data...</div>;
 
   return (
     <div className={`lesson-container ${theme}`}>
@@ -181,6 +174,15 @@ const CSSExam: React.FC = () => {
                 <p style={{ marginTop: "1rem", color: "green" }}>🎉 All blocks completed!</p>
               )}
             </div>
+            <div className="next-btn-container">
+            <button
+              className="next-btn"
+              onClick={() => navigate("/dashboard")}
+              disabled={activeIndex < blankOrder.length}
+            >
+              FINISH EXAM
+            </button>
+          </div>
           </div>
 
           <div className="lesson-right">
@@ -204,21 +206,17 @@ const CSSExam: React.FC = () => {
               dangerouslySetInnerHTML={{ __html: buildLivePreview() }}
             />
           </div>
-
-          <div className="next-btn-container">
-            <button
-              className="next-btn"
-              onClick={() => navigate("/dashboard")}
-              disabled={activeIndex < blankOrder.length}
-            >
-              FINISH EXAM
-            </button>
-          </div>
         </div>
       </main>
       <Footer />
     </div>
   );
 };
+
+const CSSExam: React.FC = () => (
+  <VerifyToken>
+    <CSSExamContent />
+  </VerifyToken>
+);
 
 export default CSSExam;

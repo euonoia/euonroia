@@ -81,7 +81,7 @@ export default function LoginWarning() {
           <br />
           <br />
           To make everything work smoothly, please temporarily turn off{" "}
-          <strong>Brave Shield</strong> or allow third-party cookies in your browser.
+          <strong>Brave Shield</strong> or open this at chrome.
           <br />
           <br />
           You can also check my work on GitHub at{" "}

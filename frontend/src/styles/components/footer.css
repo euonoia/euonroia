@@ -2,28 +2,31 @@
    Footer Styles
 ========================= */
 .footer {
+  position: fixed;         /* always at the bottom */
+  bottom: 0;
+  left: 0;
+  width: 100%;             /* full width like header */
   display: flex;
   justify-content: center; /* center content horizontally */
   align-items: center;     /* center content vertically */
   padding: var(--space-4);
   background-color: var(--bg-card);
   color: var(--text-secondary);
-  flex-wrap: wrap;         /* allow items to wrap on smaller screens */
   gap: var(--space-3);
   box-shadow: var(--shadow-sm);
   font-family: var(--font-family-base);
   text-align: center;      /* ensures text is centered */
-  margin-top: auto;        /* ensures the footer stays at the bottom */
+  z-index: 50;             /* behind header but above content if needed */
+  flex-wrap: wrap;         /* wrap items on smaller screens */
 }
 
+/* Footer text */
 .footer-left p {
-  font-size: var(--font-size-sm);
   margin: 0;
+  font-size: var(--font-size-sm);
 }
 
-/* -------------------
-   Responsive Design
-------------------- */
+/* Responsive Design */
 @media (max-width: 768px) {
   .footer {
     flex-direction: column;

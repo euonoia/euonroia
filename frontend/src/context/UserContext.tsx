@@ -69,13 +69,16 @@ export const UserProvider = ({ children }: Props) => {
   };
 
   const signOut = async () => {
-    try {
-      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
-      setUser(null);
-    } catch (err) {
-      console.error("Sign out failed:", err);
-    }
-  };
+  try {
+    await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+    setUser(null);
+    // Redirect to homepage
+    window.location.href = '/';
+  } catch (err) {
+    console.error("Sign out failed:", err);
+  }
+};
+
 
   return (
     <UserContext.Provider

@@ -19,7 +19,12 @@ import CSSMultipleElements from "./pages/lessons/css/CSSMultipleElements";
 import CSSExam from "./pages/lessons/css/CSSExam";
 
 import JavaScriptBasics from "./pages/lessons/javascript/JavaScriptBasics";
-import Maintenance from "./pages/lessons/javascript/Sample";
+import JavascriptSample from "./pages/lessons/javascript/JavasScriptProgram";
+import JavaScriptConditions from "./pages/lessons/javascript/JavaScriptConditions";
+import JavaScriptDisplay from "./pages/lessons/javascript/JavaScriptDisplay";
+
+import MaintenanceMessage from "./components/messages/Maintenance";
+import AddingFeature from "./components/messages/AddingFeature";
 
 import { useUser } from "./context/UserContext";
 import LoginWarning from "./components/messages/LoginWarning";
@@ -53,7 +58,14 @@ function AppContent() {
         <Route path="/lessons/css-exam" element={<CSSExam />} />
 
         <Route path="/lessons/js-basics" element={<JavaScriptBasics />} />
-        <Route path="/lessons/js-maintenance" element={<Maintenance />} />
+        <Route path="/lessons/js-conditions" element={<JavaScriptConditions />} />
+        <Route path="/lessons/js-sample" element={<JavascriptSample />} />
+        <Route path="/lessons/js-display" element={<JavaScriptDisplay />} />
+
+
+        {/*maintenance message*/}
+        <Route path="/maintenance" element={<MaintenanceMessage />} />
+        <Route path="/adding-feature" element={<AddingFeature />} />
 
         <Route path="*" element={<p>Page not found</p>} />
       </Routes>
