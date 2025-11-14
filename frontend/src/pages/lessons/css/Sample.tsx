@@ -1,5 +1,4 @@
-// src/pages/lessons/css/Sample.tsx
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../../components/header";
 import Footer from "../../../components/footer";
@@ -7,11 +6,12 @@ import CodeBlockCSS from "../../../components/lessons/CodeBlockCSS";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
 import { useUser } from "../../../context/UserContext";
+import VerifyToken from "../../../components/auth/VerifyToken";
 
-const Sample: React.FC = () => {
+const SampleContent: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const { user, loading } = useUser(); // ✅ get user
+  const { user, loading } = useUser();
 
   const [styleAdded, setStyleAdded] = useState(false);
   const [pAdded, setPAdded] = useState(false);
@@ -29,7 +29,7 @@ const Sample: React.FC = () => {
     "Tap the blocks to build a simple HTML page that uses the <style> tag."
   );
 
-  // ✅ Detect when all blocks are added
+  // Update message when all blocks are completed
   useEffect(() => {
     if (styleAdded && pAdded && propertyAdded && valueAdded) {
       setMessage("Whooah! It changes me too!");
@@ -37,40 +37,43 @@ const Sample: React.FC = () => {
   }, [styleAdded, pAdded, propertyAdded, valueAdded]);
 
   const handleBlockClick = (tag: string) => {
-    if (tag === "style" && !styleAdded) {
-      setStyleAdded(true);
-      setDescriptions((prev) => ({
-        ...prev,
-        style: "The <style> tag contains CSS that affects the HTML document.",
-      }));
-      return;
-    }
-
-    if (tag === "p" && !pAdded) {
-      setPAdded(true);
-      setDescriptions((prev) => ({
-        ...prev,
-        p: "The <p> tag defines a paragraph in HTML.",
-      }));
-      return;
-    }
-
-    if (tag === "property" && !propertyAdded) {
-      setPropertyAdded(true);
-      setDescriptions((prev) => ({
-        ...prev,
-        property: "CSS properties define what aspect of an element to style.",
-      }));
-      return;
-    }
-
-    if (tag === "value" && !valueAdded) {
-      setValueAdded(true);
-      setDescriptions((prev) => ({
-        ...prev,
-        value: "Values specify how a property should appear (e.g., red).",
-      }));
-      return;
+    switch (tag) {
+      case "style":
+        if (!styleAdded) {
+          setStyleAdded(true);
+          setDescriptions((prev) => ({
+            ...prev,
+            style: "The <style> tag contains CSS that affects the HTML document.",
+          }));
+        }
+        break;
+      case "p":
+        if (!pAdded) {
+          setPAdded(true);
+          setDescriptions((prev) => ({
+            ...prev,
+            p: "The <p> tag defines a paragraph in HTML.",
+          }));
+        }
+        break;
+      case "property":
+        if (!propertyAdded) {
+          setPropertyAdded(true);
+          setDescriptions((prev) => ({
+            ...prev,
+            property: "CSS properties define what aspect of an element to style.",
+          }));
+        }
+        break;
+      case "value":
+        if (!valueAdded) {
+          setValueAdded(true);
+          setDescriptions((prev) => ({
+            ...prev,
+            value: "Values specify how a property should appear (e.g., red).",
+          }));
+        }
+        break;
     }
   };
 
@@ -103,7 +106,7 @@ const Sample: React.FC = () => {
 
     if (pAdded) {
       lines.push(`    <!-- ${descriptions.p} -->`);
-      lines.push(`    <p>Hello, ${user?.name || "Student"}!</p>`); // ✅ use logged-in name
+      lines.push(`    <p>Hello, ${user?.name || "Student"}!</p>`);
     }
 
     lines.push("  </body>");
@@ -113,10 +116,7 @@ const Sample: React.FC = () => {
   };
 
   const htmlOutput = buildOutput();
-
-  const handleNextLesson = () => {
-    navigate("/lessons/css-multiple-elements");
-  };
+  const handleNextLesson = () => navigate("/lessons/css-multiple-elements");
 
   if (loading) return <div>Loading user data...</div>;
 
@@ -148,7 +148,7 @@ const Sample: React.FC = () => {
                   tag={tag}
                   onClick={handleBlockClick}
                   styleAdded={styleAdded}
-                  pAdded={pAdded} // ✅ element block now correctly uses pAdded
+                  pAdded={pAdded}
                   propertyAdded={propertyAdded}
                   valueAdded={valueAdded}
                 />
@@ -196,8 +196,15 @@ const Sample: React.FC = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };
+
+const Sample: React.FC = () => (
+  <VerifyToken>
+    <SampleContent />
+  </VerifyToken>
+);
 
 export default Sample;

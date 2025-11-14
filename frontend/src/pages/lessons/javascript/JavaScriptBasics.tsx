@@ -1,20 +1,18 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CodeBlockJavascript from "../../../components/lessons/CodeBlockJavascript";
 import Header from "../../../components/header";
 import Footer from "../../../components/footer";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
-import { useUser } from "../../../context/UserContext"; // ✅ Import your user context
+import { useUser } from "../../../context/UserContext";
+import VerifyToken from "../../../components/auth/VerifyToken";
 import axios from "axios";
 
-const JavaScriptBasics: React.FC = () => {
+const JavaScriptBasicsContent: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-  const { user, loading } = useUser(); // ✅ Get logged-in user
-
-  const [checkingAuth, setCheckingAuth] = useState(true);
-  const [userValid, setUserValid] = useState(false);
+  const { user, loading } = useUser();
 
   const [letUsed, setLetUsed] = useState(false);
   const [constUsed, setConstUsed] = useState(false);
@@ -30,25 +28,7 @@ const JavaScriptBasics: React.FC = () => {
     console: "",
   });
 
-  useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, {
-          withCredentials: true,
-        });
-        setUserValid(true);
-      } catch {
-        setUserValid(false);
-        navigate("/");
-      } finally {
-        setCheckingAuth(false);
-      }
-    };
-    verifyToken();
-  }, [navigate]);
-
-  if (checkingAuth || loading) return <div>Checking authentication...</div>;
-  if (!userValid) return null;
+  if (loading) return <div>Loading user data...</div>;
 
   const handleBlockClick = (block: string) => {
     if (block === "let" && !letUsed) {
@@ -82,7 +62,7 @@ const JavaScriptBasics: React.FC = () => {
         console: "console.log() prints information to the browser console.",
       }));
 
-      // ✅ Simulate JS output using logged-in user's name
+      // ✅ Simulate JS output
       setTimeout(() => {
         const name = user?.name || "Student";
         const age = 20;
@@ -95,7 +75,7 @@ const JavaScriptBasics: React.FC = () => {
   const buildJsOutput = (): string | null => {
     if (!letUsed && !constUsed && !functionUsed && !consoleUsed) return null;
 
-    const nameValue = user?.name || "Student"; // ✅ Use user name in code text
+    const nameValue = user?.name || "Student";
     const lines: string[] = [];
 
     if (letUsed) {
@@ -127,10 +107,7 @@ const JavaScriptBasics: React.FC = () => {
   };
 
   const jsOutput = buildJsOutput();
-
-  const handleNextLesson = () => {
-    navigate("/lessons/js-maintenance");
-  };
+  const handleNextLesson = () => navigate("/lessons/js-conditions");
 
   return (
     <div className={`lesson-container ${theme}`}>
@@ -203,5 +180,11 @@ const JavaScriptBasics: React.FC = () => {
     </div>
   );
 };
+
+const JavaScriptBasics: React.FC = () => (
+  <VerifyToken>
+    <JavaScriptBasicsContent />
+  </VerifyToken>
+);
 
 export default JavaScriptBasics;

@@ -1,132 +1,66 @@
-import React from 'react';
+import React from "react";
 
 type CodeBlockProps = {
-  tag: string; // Tag like <html>, <head>, <body>, etc.
-  onClick: (tag: string) => void; // Callback when a block is clicked/tapped
-  doctypeAdded: boolean; // Whether DOCTYPE has been added to show description
-  htmlAdded: boolean;
-  headAdded: boolean;
-  bodyAdded: boolean;
-  headingsAdded?: boolean; // Make optional
-  paragraphsAdded?: boolean; // Make optional
-  linksAdded?: boolean; // Make optional
-  imagesAdded?: boolean; // Make optional
+  tag: string;
+  onClick: (tag: string) => void;
+  doctypeAdded?: boolean;
+  htmlAdded?: boolean;
+  headAdded?: boolean;
+  bodyAdded?: boolean;
+  headingsAdded?: boolean;
+  paragraphsAdded?: boolean;
+  linksAdded?: boolean;
+  imagesAdded?: boolean;
 };
 
 const CodeBlock: React.FC<CodeBlockProps> = ({
   tag,
   onClick,
-  doctypeAdded,
-  htmlAdded,
-  headAdded,
-  bodyAdded,
-  headingsAdded,
-  paragraphsAdded,
-  linksAdded,
-  imagesAdded
+  doctypeAdded = false,
+  htmlAdded = false,
+  headAdded = false,
+  bodyAdded = false,
+  headingsAdded = false,
+  paragraphsAdded = false,
+  linksAdded = false,
+  imagesAdded = false,
 }) => {
-  // For HTMLelements, handle additional cases
-  if (tag === 'headings' && !headingsAdded) {
-    return (
-      <div
-        className="code-block"
-        onClick={() => onClick(tag)}
-        style={{
-          border: '1px solid #ddd',
-          padding: '10px',
-          margin: '5px',
-          cursor: 'pointer',
-          borderRadius: '4px',
-          backgroundColor: '#f8f8f8',
-        }}
-      >
-        <span>{`<h1>, <h2>, <h3>`}</span>
-      </div>
-    );
-  }
+  const isAdded =
+    (tag === "DOCTYPE" && doctypeAdded) ||
+    (tag === "html" && htmlAdded) ||
+    (tag === "head" && headAdded) ||
+    (tag === "body" && bodyAdded) ||
+    (tag === "headings" && headingsAdded) ||
+    (tag === "paragraphs" && paragraphsAdded) ||
+    (tag === "links" && linksAdded) ||
+    (tag === "images" && imagesAdded);
 
-  if (tag === 'paragraphs' && !paragraphsAdded) {
-    return (
-      <div
-        className="code-block"
-        onClick={() => onClick(tag)}
-        style={{
-          border: '1px solid #ddd',
-          padding: '10px',
-          margin: '5px',
-          cursor: 'pointer',
-          borderRadius: '4px',
-          backgroundColor: '#f8f8f8',
-        }}
-      >
-        <span>{`<p>`}</span>
-      </div>
-    );
-  }
+  const displayText = () => {
+    switch (tag) {
+      case "DOCTYPE":
+        return "<!DOCTYPE html>";
+      case "html":
+        return "<html>";
+      case "head":
+        return "<head>";
+      case "body":
+        return "<body>";
+      case "headings":
+        return "<h1>, <h2>, <h3>";
+      case "paragraphs":
+        return "<p>";
+      case "links":
+        return "<a>";
+      case "images":
+        return "<img>";
+      default:
+        return `<${tag}>`;
+    }
+  };
 
-  if (tag === 'links' && !linksAdded) {
-    return (
-      <div
-        className="code-block"
-        onClick={() => onClick(tag)}
-        style={{
-          border: '1px solid #ddd',
-          padding: '10px',
-          margin: '5px',
-          cursor: 'pointer',
-          borderRadius: '4px',
-          backgroundColor: '#f8f8f8',
-        }}
-      >
-        <span>{`<a>`}</span>
-      </div>
-    );
-  }
-
-  if (tag === 'images' && !imagesAdded) {
-    return (
-      <div
-        className="code-block"
-        onClick={() => onClick(tag)}
-        style={{
-          border: '1px solid #ddd',
-          padding: '10px',
-          margin: '5px',
-          cursor: 'pointer',
-          borderRadius: '4px',
-          backgroundColor: '#f8f8f8',
-        }}
-      >
-        <span>{`<img>`}</span>
-      </div>
-    );
-  }
-
-  // Original code for handling DOCTYPE, html, head, body for HTMLdocument
   return (
-    <div
-      className="code-block"
-      onClick={() => onClick(tag)}
-      style={{
-        border: '1px solid #ddd',
-        padding: '10px',
-        margin: '5px',
-        cursor: 'pointer',
-        borderRadius: '4px',
-        backgroundColor: '#f8f8f8', // Light background for the block
-      }}
-    >
-      {tag === 'DOCTYPE' && !doctypeAdded ? (
-        <span>{`<!DOCTYPE html>`}</span>
-      ) : tag === 'html' && !htmlAdded ? (
-        <span>{`<html>`}</span>
-      ) : tag === 'head' && !headAdded ? (
-        <span>{`<head>`}</span>
-      ) : tag === 'body' && !bodyAdded ? (
-        <span>{`<body>`}</span>
-      ) : (
-        <span>{`<${tag}>`}</span> // Show the tag if added
-      )}
+    <div className={`code-block ${isAdded ? "active" : ""}`} onClick={() => onClick(tag)}>
+      {displayText()}
     </div>
   );
 };

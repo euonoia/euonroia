@@ -1,16 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import CodeBlock from '../../../components/lessons/CodeBlock';
 import Header from '../../../components/header';
 import Footer from '../../../components/footer';
 import "../../../styles/pages/lessons/LessonPage.css";
+import VerifyToken from '../../../components/auth/VerifyToken';
 
-const HTMLelements: React.FC = () => {
+const HTMLelementsContent: React.FC = () => {
   const navigate = useNavigate();
-
-  const [userValid, setUserValid] = useState(false); // ✅ Token check
-  const [checkingAuth, setCheckingAuth] = useState(true); // Loading while checking
 
   // Blocks
   const [headingsAdded, setHeadingsAdded] = useState(false);
@@ -24,31 +21,6 @@ const HTMLelements: React.FC = () => {
     links: '',
     images: '',
   });
-
-  // --- SECURITY: Check token on mount ---
-  useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        // Your backend endpoint that returns user info if JWT cookie is valid
-        await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, {
-          withCredentials: true,
-        });
-        setUserValid(true);
-      } catch {
-        setUserValid(false);
-        navigate("/"); // redirect to login or homepage
-      } finally {
-        setCheckingAuth(false);
-      }
-    };
-    verifyToken();
-  }, []);
-
-  if (checkingAuth) {
-    return <div>Checking authentication...</div>;
-  }
-
-  if (!userValid) return null; // page will redirect automatically
 
   // --- BLOCK HANDLING ---
   const handleBlockClick = (tag: string) => {
@@ -136,6 +108,14 @@ const HTMLelements: React.FC = () => {
       </main>
       <Footer />
     </div>
+  );
+};
+
+const HTMLelements: React.FC = () => {
+  return (
+    <VerifyToken>
+      <HTMLelementsContent />
+    </VerifyToken>
   );
 };
 

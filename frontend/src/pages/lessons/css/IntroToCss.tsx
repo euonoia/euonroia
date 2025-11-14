@@ -1,19 +1,15 @@
-// src/pages/lessons/css/IntroToCSS.tsx
-import { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CodeBlockCSS from "../../../components/lessons/CodeBlockCSS";
 import Header from "../../../components/header";
 import Footer from "../../../components/footer";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
-import axios from "axios";
+import VerifyToken from "../../../components/auth/VerifyToken";
 
-const IntroToCSS: React.FC = () => {
+const IntroToCSSContent: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-
-  const [checkingAuth, setCheckingAuth] = useState(true);
-  const [userValid, setUserValid] = useState(false);
 
   const [selectorAdded, setSelectorAdded] = useState(false);
   const [propertyAdded, setPropertyAdded] = useState(false);
@@ -25,27 +21,6 @@ const IntroToCSS: React.FC = () => {
     value: "",
   });
 
-  // --- Check JWT cookie on mount ---
-  useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, {
-          withCredentials: true,
-        });
-        setUserValid(true);
-      } catch {
-        setUserValid(false);
-        navigate("/");
-      } finally {
-        setCheckingAuth(false);
-      }
-    };
-    verifyToken();
-  }, []);
-
-  if (checkingAuth) return <div>Checking authentication...</div>;
-  if (!userValid) return null;
-
   const handleBlockClick = (tag: string) => {
     if (tag === "selector" && !selectorAdded) {
       setSelectorAdded(true);
@@ -55,7 +30,6 @@ const IntroToCSS: React.FC = () => {
       }));
       return;
     }
-
     if (tag === "property" && !propertyAdded) {
       setPropertyAdded(true);
       setDescriptions((prev) => ({
@@ -64,7 +38,6 @@ const IntroToCSS: React.FC = () => {
       }));
       return;
     }
-
     if (tag === "value" && !valueAdded) {
       setValueAdded(true);
       setDescriptions((prev) => ({
@@ -75,42 +48,37 @@ const IntroToCSS: React.FC = () => {
     }
   };
 
-const buildCssOutput = (): string | null => {
-  if (!selectorAdded && !propertyAdded && !valueAdded) return null;
+  const buildCssOutput = (): string | null => {
+    if (!selectorAdded && !propertyAdded && !valueAdded) return null;
 
-  const lines: string[] = [];
+    const lines: string[] = [];
 
-  if (selectorAdded) {
-    lines.push(`/* ${descriptions.selector} */`);
-    lines.push("p {");
-  }
-
-  if (propertyAdded) {
-    if (valueAdded) {
-      // When both property and value are added
-      lines.push(
-        `  /* ${descriptions.property} */`,
-        `  color: red; /* ${descriptions.value} */`
-      );
-    } else {
-      // Only property added so far
-      lines.push(`  /* ${descriptions.property} */`, "  color:");
+    if (selectorAdded) {
+      lines.push(`/* ${descriptions.selector} */`);
+      lines.push("p {");
     }
-  } else if (valueAdded) {
-    // Edge case: value added before property
-    lines.push(`  /* ${descriptions.value} */`, "  red;");
-  }
 
-  if (selectorAdded) lines.push("}");
+    if (propertyAdded) {
+      if (valueAdded) {
+        lines.push(
+          `  /* ${descriptions.property} */`,
+          `  color: red; /* ${descriptions.value} */`
+        );
+      } else {
+        lines.push(`  /* ${descriptions.property} */`, "  color:");
+      }
+    } else if (valueAdded) {
+      lines.push(`  /* ${descriptions.value} */`, "  red;");
+    }
 
-  return lines.join("\n");
-};
+    if (selectorAdded) lines.push("}");
+
+    return lines.join("\n");
+  };
 
   const cssOutput = buildCssOutput();
 
-  const handleNextLesson = () => {
-    navigate("/lessons/css-sample"); // or your next CSS lesson route
-  };
+  const handleNextLesson = () => navigate("/lessons/css-sample");
 
   return (
     <div className={`lesson-container ${theme}`}>
@@ -154,8 +122,16 @@ const buildCssOutput = (): string | null => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };
+
+// Wrap with VerifyToken for centralized authentication
+const IntroToCSS: React.FC = () => (
+  <VerifyToken>
+    <IntroToCSSContent />
+  </VerifyToken>
+);
 
 export default IntroToCSS;

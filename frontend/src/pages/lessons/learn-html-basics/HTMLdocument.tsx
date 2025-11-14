@@ -1,18 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CodeBlock from "../../../components/lessons/CodeBlock";
 import Header from "../../../components/header";
 import Footer from "../../../components/footer";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
-import axios from "axios";
+import VerifyToken from "../../../components/auth/VerifyToken";
 
-const HTMLdocument: React.FC = () => {
+const HTMLdocumentContent: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-
-  const [checkingAuth, setCheckingAuth] = useState(true); // Loading while checking
-  const [userValid, setUserValid] = useState(false);      // Token check
 
   const [doctypeAdded, setDoctypeAdded] = useState(false);
   const [htmlAdded, setHtmlAdded] = useState(false);
@@ -20,35 +17,11 @@ const HTMLdocument: React.FC = () => {
   const [bodyAdded, setBodyAdded] = useState(false);
 
   const [descriptions, setDescriptions] = useState({
-    doctype: '',
-    html: '',
-    head: '',
-    body: '',
+    doctype: "",
+    html: "",
+    head: "",
+    body: "",
   });
-
-  // --- SECURITY: check JWT cookie on mount ---
-  useEffect(() => {
-    const verifyToken = async () => {
-      try {
-        await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/me`, {
-          withCredentials: true,
-        });
-        setUserValid(true);
-      } catch {
-        setUserValid(false);
-        navigate("/"); // redirect to login or home
-      } finally {
-        setCheckingAuth(false);
-      }
-    };
-    verifyToken();
-  }, []);
-
-  if (checkingAuth) {
-    return <div>Checking authentication...</div>;
-  }
-
-  if (!userValid) return null; // Will redirect automatically
 
   const handleBlockClick = (tag: string) => {
     if (tag === "DOCTYPE") {
@@ -135,7 +108,7 @@ const HTMLdocument: React.FC = () => {
 
             <h2 className="section-title">HTML DOCUMENT STRUCTURE</h2>
             <div className="code-blocks">
-              {["DOCTYPE","html","head","body"].map(tag => (
+              {["DOCTYPE", "html", "head", "body"].map(tag => (
                 <CodeBlock
                   key={tag}
                   tag={tag}
@@ -167,6 +140,14 @@ const HTMLdocument: React.FC = () => {
       </main>
       <Footer />
     </div>
+  );
+};
+
+const HTMLdocument: React.FC = () => {
+  return (
+    <VerifyToken>
+      <HTMLdocumentContent />
+    </VerifyToken>
   );
 };
 

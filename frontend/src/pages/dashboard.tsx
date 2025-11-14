@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import DashboardStats from "../components/DashboardStats";
@@ -7,11 +7,11 @@ import { useTheme } from "../context/ThemeContext";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/pages/Dashboard.css";
+import VerifyToken from "../components/auth/VerifyToken";
 
-export default function Dashboard() {
+function DashboardContent() {
   const { user, loading } = useUser();
   const { theme } = useTheme();
-  const navigate = useNavigate();
 
   const [progressData, setProgressData] = useState({
     displayName: "",
@@ -20,34 +20,11 @@ export default function Dashboard() {
     cssBasicsProgress: 0,
   });
 
-  // ✅ Lessons mapped to ACTUAL routes in App.tsx
   const [lessons, setLessons] = useState([
-    {
-      id: "html-basics",
-      title: "HTML Basics",
-      path: "html-basics", 
-      progress: 0,
-    },
-    {
-      id: "css-intro",
-      title: "CSS Basics",
-      path: "css-intro",
-      progress: 0,
-    },
-    {
-      id: "js-start",
-      title: "JavaScript for Beginners",
-      path: "js-basics", 
-      progress: 0,
-    },
+    { id: "html-basics", title: "HTML Basics", path: "html-basics", progress: 0 },
+    { id: "css-intro", title: "CSS Basics", path: "css-intro", progress: 0 },
+    { id: "js-start", title: "JavaScript for Beginners", path: "js-basics", progress: 0 },
   ]);
-
-  // Redirect to home if user signs out
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate("/", { replace: true });
-    }
-  }, [user, loading, navigate]);
 
   // Fetch progress from backend
   useEffect(() => {
@@ -57,19 +34,13 @@ export default function Dashboard() {
           `${import.meta.env.VITE_BACKEND_URL}/api/dashboard/progress`,
           { withCredentials: true }
         );
-
         const data = res.data;
         setProgressData(data);
 
-        // Update progress dynamically
-        setLessons((prev) =>
-          prev.map((lesson) => {
-            if (lesson.id === "html-basics") {
-              return { ...lesson, progress: data.htmlBasicsProgress };
-            }
-            if (lesson.id === "css-intro") {
-              return { ...lesson, progress: data.cssBasicsProgress };
-            }
+        setLessons(prev =>
+          prev.map(lesson => {
+            if (lesson.id === "html-basics") return { ...lesson, progress: data.htmlBasicsProgress };
+            if (lesson.id === "css-intro") return { ...lesson, progress: data.cssBasicsProgress };
             return lesson;
           })
         );
@@ -93,18 +64,16 @@ export default function Dashboard() {
     );
   }
 
-  // ✅ Determine next lesson by progress
   const nextLesson =
     progressData.htmlBasicsProgress < 100
-      ? lessons.find((l) => l.id === "html-basics")
+      ? lessons.find(l => l.id === "html-basics")
       : progressData.cssBasicsProgress < 100
-      ? lessons.find((l) => l.id === "css-intro")
-      : lessons.find((l) => l.id === "js-start");
+      ? lessons.find(l => l.id === "css-intro")
+      : lessons.find(l => l.id === "js-start");
 
   return (
     <div className={`dashboard-page ${theme}`}>
       <Header />
-
       <main className="dashboard-main">
         <div className="dashboard-top">
           <div className="dashboard-left">
@@ -112,7 +81,7 @@ export default function Dashboard() {
             <p>Ready to continue your coding journey?</p>
 
             <DashboardStats
-              lessonsCompleted={lessons.filter((l) => l.progress === 100).length}
+              lessonsCompleted={lessons.filter(l => l.progress === 100).length}
               totalLessons={lessons.length}
               streak={3}
               xp={450}
@@ -123,8 +92,7 @@ export default function Dashboard() {
             <h2>Continue Learning</h2>
             <div className="continue-learning-card">
               <p>
-                <strong>Next Lesson:</strong>{" "}
-                {nextLesson?.title || "All lessons completed!"}
+                <strong>Next Lesson:</strong> {nextLesson?.title || "All lessons completed!"}
               </p>
               {nextLesson && (
                 <Link to={`/lessons/${nextLesson.path}`}>
@@ -138,12 +106,8 @@ export default function Dashboard() {
         <section className="lessons-overview">
           <h2>Your Lessons</h2>
           <div className="lessons-grid">
-            {lessons.map((lesson) => (
-              <Link
-                key={lesson.id}
-                to={`/lessons/${lesson.path}`}
-                className="lesson-link"
-              >
+            {lessons.map(lesson => (
+              <Link key={lesson.id} to={`/lessons/${lesson.path}`} className="lesson-link">
                 <div className="lesson-card">
                   <h3>{lesson.title}</h3>
                   <progress value={lesson.progress} max={100} />
@@ -165,8 +129,15 @@ export default function Dashboard() {
           </div>
         </div>
       </main>
-
       <Footer />
     </div>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <VerifyToken>
+      <DashboardContent />
+    </VerifyToken>
   );
 }

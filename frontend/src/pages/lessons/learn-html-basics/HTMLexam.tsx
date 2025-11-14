@@ -6,8 +6,9 @@ import CodeBlock from '../../../components/lessons/CodeBlock';
 import Header from '../../../components/header';
 import Footer from '../../../components/footer';
 import "../../../styles/pages/lessons/LessonPage.css";
+import VerifyToken from '../../../components/auth/VerifyToken';
 
-const HTMLexam: React.FC = () => {
+const HTMLexamContent: React.FC = () => {
   const navigate = useNavigate();
 
   const [doctypeAdded, setDoctypeAdded] = useState(false);
@@ -75,12 +76,11 @@ const HTMLexam: React.FC = () => {
   const htmlOutput = buildHtmlOutput();
   const isExamComplete = doctypeAdded && htmlAdded && headAdded && bodyAdded && headingsAdded && paragraphsAdded && linksAdded && imagesAdded;
 
-  // Save to backend + show confetti
   useEffect(() => {
     if (isExamComplete) {
       setShowCongrats(true);
 
-      // Save to backend Firestore
+      // Save to backend
       axios.post(`${import.meta.env.VITE_BACKEND_URL}/api/lessons/html-basics/quizzes`, { htmlOutput }, { withCredentials: true })
         .then(res => console.log("Quiz saved:", res.data))
         .catch(err => console.error("Failed to save quiz:", err));
@@ -129,6 +129,14 @@ const HTMLexam: React.FC = () => {
       </main>
       <Footer />
     </div>
+  );
+};
+
+const HTMLexam: React.FC = () => {
+  return (
+    <VerifyToken>
+      <HTMLexamContent />
+    </VerifyToken>
   );
 };
 

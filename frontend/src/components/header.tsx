@@ -1,8 +1,8 @@
-// src/components/Header.tsx
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { useTheme } from "../context/ThemeContext";
+import { FiMenu, FiSun, FiMoon, FiHome, FiBook, FiCode, FiLogOut } from "react-icons/fi";
 import "../styles/components/header.css";
 
 interface HeaderProps {
@@ -10,32 +10,21 @@ interface HeaderProps {
   showLoginButton?: boolean;
 }
 
-export default function Header({
-  hideUser = false,
-  showLoginButton = false,
-}: HeaderProps) {
+export default function Header({ hideUser = false, showLoginButton = false }: HeaderProps) {
   const { user, signOut, signInWithGoogle, loading } = useUser();
   const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
+  const location = useLocation(); // get current route
 
   const toggleMenu = () => setMenuOpen((prev) => !prev);
+
+  // Hide Sign Out if on a lesson page
+  const isLessonPage = location.pathname.startsWith("/lessons/");
 
   return (
     <header className={`header ${theme}`}>
       <h2 className="logo">Euonroia</h2>
 
-      {/* Show login warning if cookies are blocked */}
-
-      {/* Desktop nav links */}
-      {!loading && user && !hideUser && (
-        <nav className="nav-links desktop-only">
-          <Link to="/dashboard">Dashboard</Link>
-          <Link to="/lessons/html-basics">Lessons</Link>
-          <Link to="/playground">Playground</Link>
-        </nav>
-      )}
-
-      {/* Header buttons */}
       <div className="header-actions">
         {!loading && (!user || showLoginButton) && (
           <button className="btn" onClick={signInWithGoogle}>
@@ -43,32 +32,41 @@ export default function Header({
           </button>
         )}
 
-        {/* Theme toggle */}
-        <button className="btn theme-toggle" onClick={toggleTheme}>
-          {theme === "light" ? "🌙 Dark" : "☀️ Light"}
+        <button className="btn theme-toggle" onClick={toggleTheme} aria-label="Toggle Theme">
+          {theme === "light" ? <FiMoon /> : <FiSun />}
         </button>
 
         {!loading && user && !hideUser && (
-          <button className="hamburger" onClick={toggleMenu}>
-            ☰
+          <button className="hamburger" onClick={toggleMenu} aria-label="Toggle Menu">
+            <FiMenu size={24} />
           </button>
         )}
       </div>
 
-      {/* Mobile dropdown */}
       {!loading && user && !hideUser && (
         <div className={`header-right ${menuOpen ? "open" : ""}`}>
           <div className="user-info">
             {user.picture && <img src={user.picture} alt={user.name} className="user-avatar" />}
             <span className="user-name">{user.name}</span>
-            <button className="btn" onClick={signOut}>Sign Out</button>
           </div>
 
-          <nav className="nav-links mobile-only">
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/lessons/html-basics">Lessons</Link>
-            <Link to="/playground">Playground</Link>
+          <nav className="nav-links">
+            <Link to="/dashboard">
+              <FiHome style={{ marginRight: "0.25rem" }} /> Dashboard
+            </Link>
+            <Link to="/lessons/html-basics">
+              <FiBook style={{ marginRight: "0.25rem" }} /> Lessons
+            </Link>
+            <Link to="/playground">
+              <FiCode style={{ marginRight: "0.25rem" }} /> Playground
+            </Link>
           </nav>
+
+          {!isLessonPage && (
+            <button className="btn signout-btn" onClick={signOut} style={{ marginTop: "1rem" }}>
+              <FiLogOut style={{ marginRight: "0.25rem" }} /> Sign Out
+            </button>
+          )}
         </div>
       )}
     </header>
