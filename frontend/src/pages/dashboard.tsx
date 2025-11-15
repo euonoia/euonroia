@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { FaRocket, FaStar, FaTrophy, FaArrowRight } from "react-icons/fa";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import DashboardStats from "../components/DashboardStats";
@@ -26,7 +27,6 @@ function DashboardContent() {
     { id: "js-start", title: "JavaScript for Beginners", path: "js-basics", progress: 0 },
   ]);
 
-  // Fetch progress from backend
   useEffect(() => {
     const fetchProgress = async () => {
       try {
@@ -75,10 +75,12 @@ function DashboardContent() {
     <div className={`dashboard-page ${theme}`}>
       <Header />
       <main className="dashboard-main">
+        {/* Top Section */}
         <div className="dashboard-top">
+          {/* Greeting + Stats */}
           <div className="dashboard-left">
             <h1>Welcome back, {progressData.displayName || "Guest"}!</h1>
-            <p>Ready to continue your coding journey?</p>
+            <p>Continue your coding journey today </p>
 
             <DashboardStats
               lessonsCompleted={lessons.filter(l => l.progress === 100).length}
@@ -88,6 +90,7 @@ function DashboardContent() {
             />
           </div>
 
+          {/* Next Lesson Card */}
           <div className="dashboard-right">
             <h2>Continue Learning</h2>
             <div className="continue-learning-card">
@@ -96,13 +99,16 @@ function DashboardContent() {
               </p>
               {nextLesson && (
                 <Link to={`/lessons/${nextLesson.path}`}>
-                  <button className="start-lesson-btn">Start Lesson</button>
+                  <button className="start-lesson-btn">
+                    Start Lesson
+                  </button>
                 </Link>
               )}
             </div>
           </div>
         </div>
 
+        {/* Lessons Overview */}
         <section className="lessons-overview">
           <h2>Your Lessons</h2>
           <div className="lessons-grid">
@@ -118,14 +124,15 @@ function DashboardContent() {
           </div>
         </section>
 
+        {/* Bottom Section */}
         <div className="dashboard-bottom">
           <div className="dashboard-bottom-left">
             <h2>Achievements</h2>
-            <p>Your unlocked badges and milestones will appear here.</p>
+            <p>Track badges and milestones earned as you progress.</p>
           </div>
           <div className="dashboard-bottom-right">
-            <h2>Leaderboard</h2>
-            <p>See how you rank compared to other students.</p>
+            <h2><FaTrophy className="inline-icon" /> Leaderboard</h2>
+            <p>Check your rank and challenge yourself against peers.</p>
           </div>
         </div>
       </main>

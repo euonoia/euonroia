@@ -138,7 +138,7 @@ const HTMLdocumentContent: React.FC = () => {
           </div>
         </div>
       </main>
-      <Footer />
+      
     </div>
   );
 };

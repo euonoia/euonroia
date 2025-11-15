@@ -159,7 +159,6 @@ const SampleContent: React.FC = () => {
           </div>
         </div>
       </main>
-      <Footer />
 
       {/* MODAL */}
       {showModal && (

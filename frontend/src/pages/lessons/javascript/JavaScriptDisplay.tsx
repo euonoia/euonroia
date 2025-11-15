@@ -134,7 +134,7 @@ ${bodyContent}    <script>${scriptContent}
           </div>
         </div>
       </main>
-      <Footer />
+     
     </div>
   );
 };

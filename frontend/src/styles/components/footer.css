@@ -2,24 +2,19 @@
    Footer Styles
 ========================= */
 .footer {
-  position: fixed;         /* always at the bottom */
-  bottom: 0;
-  left: 0;
-  width: 100%;             /* full width like header */
+  width: 100%;
   display: flex;
-  justify-content: center; /* center content horizontally */
-  align-items: center;     /* center content vertically */
+  justify-content: center;
+  align-items: center;
   padding: var(--space-4);
   background-color: var(--bg-card);
   color: var(--text-secondary);
   gap: var(--space-3);
   box-shadow: var(--shadow-sm);
   font-family: var(--font-family-base);
-  text-align: center;      /* ensures text is centered */
-  z-index: 50;             /* behind header but above content if needed */
-  flex-wrap: wrap;         /* wrap items on smaller screens */
+  text-align: center;
+  flex-wrap: wrap;
 }
-
 /* Footer text */
 .footer-left p {
   margin: 0;

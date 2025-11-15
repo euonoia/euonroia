@@ -122,7 +122,7 @@ const IntroToCSSContent: React.FC = () => {
           </div>
         </div>
       </main>
-      <Footer />
+     
     </div>
   );
 };
