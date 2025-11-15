@@ -4,8 +4,8 @@
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding: var(--space-4) var(--space-6);
+  align-items: center;        /* vertically center everything */
+  padding: var(--space-3) var(--space-6); /* slightly smaller top/bottom padding */
   background-color: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
   position: fixed;
@@ -17,17 +17,32 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-/* Logo */
+/* Logo + Beta wrapper */
 .logo {
+  display: flex;
+  align-items: center;       /* vertical alignment */
+  gap: 0.5rem;
   font-size: var(--font-size-2xl);
   font-weight: 700;
   color: var(--accent);
 }
 
-/* Header buttons wrapper */
+/* Align Beta badge with text */
+.beta-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--bg-main);
+  background-color: var(--accent);
+  padding: 2px 6px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;       /* vertically center badge */
+}
+
+/* Header actions wrapper */
 .header-actions {
   display: flex;
-  align-items: center;
+  align-items: center;       /* vertical alignment with logo */
   gap: var(--space-3);
 }
 
@@ -61,8 +76,10 @@
   border: none;
   cursor: pointer;
   color: var(--text-primary);
-  display: block; /* always visible if user logged in */
+  display: block;
+  align-self: center;
 }
+
 
 /* ------------------------ */
 /* Dropdown / Hamburger Menu */
@@ -70,9 +87,10 @@
 .header-right {
   position: absolute;
   top: 100%;
-  right: 0; 
+  right: 0;
+  display: flex;
   flex-direction: column;
-  align-items: stretch; /* fill content width */
+  align-items: stretch;      /* fill content width */
   background-color: var(--bg-card);
   padding: var(--space-4);
   border-radius: 8px;
@@ -80,7 +98,7 @@
   box-shadow: var(--shadow-md);
   display: none;
   z-index: 200;
-  width: max-content; /* shrink to content size */
+  width: max-content;        /* shrink to content size */
   transition: all 0.3s ease;
 }
 
@@ -91,7 +109,7 @@
 /* User info */
 .user-info {
   display: flex;
-  align-items: center;
+  align-items: center;       /* vertical alignment */
   gap: var(--space-2);
   flex-direction: column;
 }
@@ -104,6 +122,7 @@
 
 .user-name {
   font-weight: 500;
+  text-align: center;
 }
 
 /* Nav links inside dropdown */
@@ -117,7 +136,7 @@
 .header-right .nav-links a {
   display: flex;
   align-items: center;
-  gap: 0.5rem; /* spacing between icon and text */
+  gap: 0.5rem;
   color: var(--text-primary);
   text-decoration: none;
   font-weight: 500;
@@ -139,7 +158,6 @@
 /* Responsive Adjustments   */
 /* ------------------------ */
 @media (max-width: 768px) {
-  /* Dropdown nav links are already stacked vertically */
   .header-right {
     right: var(--space-2);
     min-width: 180px;
@@ -152,7 +170,6 @@
 }
 
 @media (min-width: 769px) {
-  /* Desktop dropdown styling remains same */
   .header-right {
     right: var(--space-4);
   }

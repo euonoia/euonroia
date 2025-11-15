@@ -19,39 +19,46 @@ const LandingPage: FC = () => {
   }, [user, loading, navigate]);
 
   return (
-    <div className="landing-container">
-      {/* Hide user info in Header for landing page */}
+    <div className="app-wrapper">
       <Header hideUser={true} />
 
-      {/* Login warning for blocked cookies */}
-      <LoginWarning />
+      <main className="app-main">
+        <div className="landing-container">
+          <LoginWarning />
 
-      <main className="landing-main">
-        {/* Hero Section */}
-        <section className="hero-section">
-          <p>Learn to code, even without a laptop. Start your journey today!</p>
-        </section>
+          <div className="landing-main">
+            {/* Hero Section */}
+            <section className="hero-section">
+              <div className="hero-content">
+                <h1>Learn to code, even without a laptop.</h1>
+                <p>Start your journey today!</p>
+              </div>
+            </section>
 
-        {/* Features Section */}
-        <section className="features-section">
-          <div className="feature-card">
-            <div className="feature-icon"><FaLaptopCode /></div>
-            <h2>Learn Web Development</h2>
-            <p>Hands-on lessons on HTML, CSS, JavaScript, and more.</p>
+            {/* Features Section */}
+            <div className="features-section-container">
+              <section className="features-section">
+                <div className="feature-card">
+                  <div className="feature-icon"><FaLaptopCode /></div>
+                  <h2>Learn Web Development</h2>
+                  <p>Hands-on lessons on HTML, CSS, JavaScript, and more.</p>
+                </div>
+
+                <div className="feature-card">
+                  <div className="feature-icon"><FaGlobe /></div>
+                  <h2>Access Anywhere</h2>
+                  <p>All you need is a device with a browser. No powerful laptop required.</p>
+                </div>
+
+                <div className="feature-card">
+                  <div className="feature-icon"><FaUsers /></div>
+                  <h2>Community Support</h2>
+                  <p>Join a growing community of learners</p>
+                </div>
+              </section>
+            </div>
           </div>
-
-          <div className="feature-card">
-            <div className="feature-icon"><FaGlobe /></div>
-            <h2>Access Anywhere</h2>
-            <p>All you need is a device with a browser. No powerful laptop required.</p>
-          </div>
-
-          <div className="feature-card">
-            <div className="feature-icon"><FaUsers /></div>
-            <h2>Community Support</h2>
-            <p>Join a growing community of learners and mentors to guide you.</p>
-          </div>
-        </section>
+        </div>
       </main>
 
       <Footer />

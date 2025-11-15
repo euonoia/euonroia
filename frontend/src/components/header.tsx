@@ -23,7 +23,9 @@ export default function Header({ hideUser = false, showLoginButton = false }: He
 
   return (
     <header className={`header ${theme}`}>
-      <h2 className="logo">Euonroia</h2>
+      <h2 className="logo">
+       Euonroia <span className="beta-badge">BETA</span>
+      </h2>
 
       <div className="header-actions">
         {!loading && (!user || showLoginButton) && (
