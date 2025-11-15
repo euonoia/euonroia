@@ -64,13 +64,29 @@ const CSSExamContent: React.FC = () => {
 
   const highlightStyle = "background-color:#fff3cd; border-radius:3px; padding:0 2px;";
 
-  const buildSkeletonOutput = () => {
-    const userName = "Student"; // Can be dynamic if VerifyToken passes user context
-    const currentTag = blankOrder[activeIndex];
-    const highlight = (tag: string, content: string) =>
-      `<span style="${currentTag === tag ? highlightStyle : ""}">${content}</span>`;
+  // ---- Skeleton Output (with live preview merged) ----
+const buildSkeletonOutput = () => {
+  const userName = "Student";
+  const currentTag = blankOrder[activeIndex];
 
-    return `
+  const highlight = (tag: string, content: string) =>
+    `<span style="${currentTag === tag ? highlightStyle : ""}">${content}</span>`;
+
+  
+  const h1Content = blanks.h1 ? `Hello, ${userName}` : "2";
+  const pContent = blanks.p ? "This is a styled paragraph" : "7"; 
+
+  
+ const h1TagDisplay = blanks.h1
+  ? `&lt;h1&gt;${h1Content}&lt;/h1&gt;`
+  : `&lt;2&gt;${h1Content}&lt;/2&gt;`;
+
+const pTagDisplay = blanks.p
+  ? `&lt;p&gt;${pContent}&lt;/p&gt;`
+  : `&lt;7&gt;${pContent}&lt;/7&gt;`;
+
+
+  return `
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
   &lt;head&gt;
@@ -80,42 +96,51 @@ const CSSExamContent: React.FC = () => {
     &lt;${highlight("style", showValue("style", "style"))}&gt;
       ${highlight("h1", showValue("h1", "h1"))} {
         ${highlight("property", showValue("property", "color"))}: ${highlight(
-      "valueColor",
-      showValue("valueColor", colorValue)
-    )};
+    "valueColor",
+    showValue("valueColor", colorValue)
+  )};
         ${highlight("propertyFont", showValue("propertyFont", "font-size"))}: ${highlight(
-      "valueFont",
-      showValue("valueFont", fontSizeValue)
-    )};
+    "valueFont",
+    showValue("valueFont", fontSizeValue)
+  )};
       }
       ${highlight("p", showValue("p", "p"))} {
         ${highlight("property", showValue("property", "color"))}: ${highlight(
-      "valueColor",
-      showValue("valueColor", colorValue)
-    )};
+    "valueColor",
+    showValue("valueColor", colorValue)
+  )};
         ${highlight("propertyFont", showValue("propertyFont", "font-size"))}: ${highlight(
-      "valueFont",
-      showValue("valueFont", fontSizeValue)
-    )};
+    "valueFont",
+    showValue("valueFont", fontSizeValue)
+  )};
       }
     &lt;/${highlight("style", showValue("style", "style"))}&gt;
   &lt;/head&gt;
   &lt;body&gt;
-    &lt;h1&gt;Hello, ${userName}&lt;/h1&gt;
-    &lt;p&gt;This is a styled paragraph&lt;/p&gt;
+    ${h1TagDisplay}
+    ${pTagDisplay}
   &lt;/body&gt;
 &lt;/html&gt;
-    `;
-  };
+  `;
+};
 
-  const buildLivePreview = () => `
-<h1 style="color: ${blanks.valueColor ? colorValue : "black"}; font-size: ${
-    blanks.valueFont ? fontSizeValue : "20px"
-  }">Hello, Student!</h1>
-<p style="color: ${blanks.valueColor ? colorValue : "black"}; font-size: ${
-    blanks.valueFont ? fontSizeValue : "16px"
-  }">This is a styled paragraph.</p>
-`;
+const buildLivePreview = () => {
+  const userName = "Student";
+
+  const h1Content = blanks.h1
+    ? `<h1 style="color: ${colorValue}; font-size: ${fontSizeValue};">Hello, ${userName}</h1>`
+    : ""; // empty until clicked
+
+  const pContent = blanks.p
+    ? `<p style="color: ${colorValue}; font-size: ${fontSizeValue};">This is a styled paragraph</p>`
+    : ""; // empty until clicked
+
+  return `
+    ${h1Content}
+    ${pContent}
+  `;
+};
+
 
   const isExamComplete = activeIndex >= blankOrder.length;
 
@@ -175,14 +200,14 @@ const CSSExamContent: React.FC = () => {
               )}
             </div>
             <div className="next-btn-container">
-            <button
-              className="next-btn"
-              onClick={() => navigate("/dashboard")}
-              disabled={activeIndex < blankOrder.length}
-            >
-              FINISH EXAM
-            </button>
-          </div>
+              <button
+                className="next-btn"
+                onClick={() => navigate("/dashboard")}
+                disabled={activeIndex < blankOrder.length}
+              >
+                FINISH EXAM
+              </button>
+            </div>
           </div>
 
           <div className="lesson-right">
@@ -206,9 +231,9 @@ const CSSExamContent: React.FC = () => {
               dangerouslySetInnerHTML={{ __html: buildLivePreview() }}
             />
           </div>
+
         </div>
       </main>
-     
     </div>
   );
 };

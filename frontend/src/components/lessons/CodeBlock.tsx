@@ -16,20 +16,12 @@ type CodeBlockProps = {
 const CodeBlock: React.FC<CodeBlockProps> = ({
   tag,
   onClick,
-  doctypeAdded = false,
-  htmlAdded = false,
-  headAdded = false,
-  bodyAdded = false,
   headingsAdded = false,
   paragraphsAdded = false,
   linksAdded = false,
   imagesAdded = false,
 }) => {
-  const isAdded =
-    (tag === "DOCTYPE" && doctypeAdded) ||
-    (tag === "html" && htmlAdded) ||
-    (tag === "head" && headAdded) ||
-    (tag === "body" && bodyAdded) ||
+  const isFontActive =
     (tag === "headings" && headingsAdded) ||
     (tag === "paragraphs" && paragraphsAdded) ||
     (tag === "links" && linksAdded) ||
@@ -37,29 +29,23 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
 
   const displayText = () => {
     switch (tag) {
-      case "DOCTYPE":
-        return "<!DOCTYPE html>";
-      case "html":
-        return "<html>";
-      case "head":
-        return "<head>";
-      case "body":
-        return "<body>";
-      case "headings":
-        return "<h1>, <h2>, <h3>";
-      case "paragraphs":
-        return "<p>";
-      case "links":
-        return "<a>";
-      case "images":
-        return "<img>";
-      default:
-        return `<${tag}>`;
+      case "headings": return "<h1>, <h2>, <h3>";
+      case "paragraphs": return "<p>";
+      case "links": return "<a>";
+      case "images": return "<img>";
+      case "DOCTYPE": return "<!DOCTYPE html>";
+      case "html": return "<html>";
+      case "head": return "<head>";
+      case "body": return "<body>";
+      default: return `<${tag}>`;
     }
   };
 
   return (
-    <div className={`code-block ${isAdded ? "active" : ""}`} onClick={() => onClick(tag)}>
+    <div
+      className={`code-block ${isFontActive ? "active-font" : ""}`}
+      onClick={() => onClick(tag)}
+    >
       {displayText()}
     </div>
   );

@@ -77,42 +77,96 @@ const SampleContent: React.FC = () => {
     }
   };
 
-  const buildOutput = (): string | null => {
-    if (!styleAdded && !pAdded && !propertyAdded && !valueAdded) return null;
-
-    const lines: string[] = [];
-    lines.push("<!DOCTYPE html>");
-    lines.push("<html>");
-    lines.push("  <head>");
-    lines.push('    <meta charset="UTF-8" />');
-    lines.push('    <meta name="viewport" content="width=device-width, initial-scale=1.0" />');
-    lines.push("    <title>Euonroia</title>");
-
+  const buildOutput = (): React.ReactNode[] => {
+    const lines: React.ReactNode[] = [];
+    
+    lines.push(<span key="doctype">{"<!DOCTYPE html>"}</span>);
+    lines.push(<br key="br1" />);
+    lines.push(<span key="html">{"<html>"}</span>);
+    lines.push(<br key="br2" />);
+    lines.push(<span key="head">{"  <head>"}</span>);
+    lines.push(<br key="br3" />);
+    lines.push(<span key="meta">{'    <meta charset="UTF-8" />'}</span>);
+    lines.push(<br key="br4" />);
+    lines.push(<span key="viewport">{'    <meta name="viewport" content="width=device-width, initial-scale=1.0" />'}</span>);
+    lines.push(<br key="br5" />);
+    lines.push(<span key="title">{"    <title>Euonroia</title>"}</span>);
+    lines.push(<br key="br6" />);
+   
     if (styleAdded) {
-      lines.push(`    <!-- ${descriptions.style} -->`);
-      lines.push("    <style>");
+      lines.push(<br key="br7" />);
+      lines.push(
+        <span key="style-comment" style={{ color: '#0a5300' }}>
+          {`    <!-- ${descriptions.style} -->`}
+        </span>
+      );
+      lines.push(<br key="br7" />);
+      lines.push(
+        <span key="style-open" style={{ color: '#0a5300' }}>
+          {"    <style>"}
+        </span>
+      );
+      lines.push(<br key="br8" />);
+      
       if (pAdded && propertyAdded && valueAdded) {
-        lines.push("      p { color: red; }");
+        lines.push(
+          <span key="style-rule" style={{ color: '#0a5300' }}>
+            {"      p { color: red; }"}
+          </span>
+        );
       } else if (pAdded && propertyAdded) {
-        lines.push("      p { color: ; }");
+        lines.push(
+          <span key="style-rule" style={{ color: '#0a5300' }}>
+            {"      p { color: ; }"}
+          </span>
+        );
       } else if (pAdded) {
-        lines.push("      p { }");
+        lines.push(
+          <span key="style-rule" style={{ color: '#0a5300' }}>
+            {"      p { }"}
+          </span>
+        );
       }
-      lines.push("    </style>");
+      lines.push(<br key="br9" />);
+      lines.push(
+        <span key="style-close" style={{ color: '#0a5300' }}>
+          {"    </style>"}
+        </span>
+      );
+      lines.push(<br key="br10" />);
+    } else {
+      lines.push(<span key="head-close">{"  </head>"}</span>);
+      lines.push(<br key="br11" />);
     }
 
-    lines.push("  </head>");
-    lines.push("  <body>");
+    if (!styleAdded) {
+      lines.push(<span key="head-close">{"  </head>"}</span>);
+      lines.push(<br key="br12" />);
+    }
+
+    lines.push(<span key="body">{"  <body>"}</span>);
+    lines.push(<br key="br13" />);
 
     if (pAdded) {
-      lines.push(`    <!-- ${descriptions.p} -->`);
-      lines.push(`    <p>Hello, ${user?.name || "Student"}!</p>`);
+      lines.push(
+        <span key="p-comment" style={{ color: '#0a5300' }}>
+          {`    <!-- ${descriptions.p} -->`}
+        </span>
+      );
+      lines.push(<br key="br14" />);
+      lines.push(
+        <span key="p-tag" style={{ color: '#0a5300' }}>
+          {`    <p>Hello, ${user?.name || "Student"}!</p>`}
+        </span>
+      );
+      lines.push(<br key="br15" />);
     }
 
-    lines.push("  </body>");
-    lines.push("</html>");
+    lines.push(<span key="body-close">{"  </body>"}</span>);
+    lines.push(<br key="br16" />);
+    lines.push(<span key="html-close">{"</html>"}</span>);
 
-    return lines.join("\n");
+    return lines;
   };
 
   const htmlOutput = buildOutput();
@@ -160,7 +214,7 @@ const SampleContent: React.FC = () => {
           <div className="lesson-right">
             <h3 className="output-title">HTML Output:</h3>
             <pre className="code-display">
-              {htmlOutput || "Click the blocks to build a CSS-in-head example"}
+              {htmlOutput}
             </pre>
 
             {styleAdded && (

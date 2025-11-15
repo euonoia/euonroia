@@ -9,65 +9,88 @@ import VerifyToken from '../../../components/auth/VerifyToken';
 const HTMLelementsContent: React.FC = () => {
   const navigate = useNavigate();
 
-  // Blocks
+  // Blocks state
   const [headingsAdded, setHeadingsAdded] = useState(false);
   const [paragraphsAdded, setParagraphsAdded] = useState(false);
   const [linksAdded, setLinksAdded] = useState(false);
   const [imagesAdded, setImagesAdded] = useState(false);
 
-  const [descriptions, setDescriptions] = useState({
-    headings: '',
-    paragraphs: '',
-    links: '',
-    images: '',
-  });
-
-  // --- BLOCK HANDLING ---
   const handleBlockClick = (tag: string) => {
     switch(tag) {
-      case 'headings':
-        setHeadingsAdded(true);
-        setDescriptions(prev => ({ ...prev, headings: 'Click to add headings.' }));
-        break;
-      case 'paragraphs':
-        setParagraphsAdded(true);
-        setDescriptions(prev => ({ ...prev, paragraphs: 'Click to add paragraphs.' }));
-        break;
-      case 'links':
-        setLinksAdded(true);
-        setDescriptions(prev => ({ ...prev, links: 'Click to add links.' }));
-        break;
-      case 'images':
-        setImagesAdded(true);
-        setDescriptions(prev => ({ ...prev, images: 'Click to add an image.' }));
-        break;
+      case 'headings': setHeadingsAdded(true); break;
+      case 'paragraphs': setParagraphsAdded(true); break;
+      case 'links': setLinksAdded(true); break;
+      case 'images': setImagesAdded(true); break;
     }
   };
 
   const buildHtmlOutput = () => {
-    const lines: string[] = [];
-    lines.push('<!DOCTYPE html>');
-    lines.push('<html>');
-    lines.push('    <head>');
-    lines.push('        <meta charset="UTF-8" />');
-    lines.push('        <meta name="viewport" content="width=device-width, initial-scale=1.0" />');
-    lines.push('        <title>Euonroia</title>');
-    lines.push('    </head>');
-    lines.push('    <body>');
-    if (headingsAdded) lines.push('        <h1>This is heading 1</h1><h2>This is heading 2</h2><h3>This is heading 3</h3>');
-    if (paragraphsAdded) lines.push('        <p>This is a paragraph.</p><p>This is another paragraph.</p>');
-    if (linksAdded) lines.push('        <a href="https://euonroia.onrender.com///">This is a link</a>');
-    if (imagesAdded) lines.push('        <img src="example.jpg" alt="example.com" width="104" height="142">');
-    lines.push('    </body>');
-    lines.push('</html>');
-    return lines.join('\n');
+    const lines: React.ReactNode[] = [];
+    
+    lines.push(<span key="doctype">&lt;!DOCTYPE html&gt;</span>);
+    lines.push(<br key="br1" />);
+    lines.push(<span key="html">&lt;html&gt;</span>);
+    lines.push(<br key="br2" />);
+    lines.push(<span key="head">&nbsp;&nbsp;&lt;head&gt;</span>);
+    lines.push(<br key="br3" />);
+    lines.push(<span key="meta">&nbsp;&nbsp;&nbsp;&nbsp;&lt;meta charset="UTF-8" /&gt;</span>);
+    lines.push(<br key="br4" />);
+    lines.push(<span key="viewport">&nbsp;&nbsp;&nbsp;&nbsp;&lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;</span>);
+    lines.push(<br key="br5" />);
+    lines.push(<span key="title">&nbsp;&nbsp;&nbsp;&nbsp;&lt;title&gt;Euonroia&lt;/title&gt;</span>);
+    lines.push(<br key="br6" />);
+    lines.push(<span key="headClose">&nbsp;&nbsp;&lt;/head&gt;</span>);
+    lines.push(<br key="br7" />);
+    lines.push(<span key="body">&nbsp;&nbsp;&lt;body&gt;</span>);
+    lines.push(<br key="br8" />);
+
+   if (headingsAdded) {
+      lines.push(
+        <span key="headings" style={{ color: '#0a5300' }}>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;h1&gt;This is heading 1&lt;/h1&gt;&lt;h2&gt;This is heading 2&lt;/h2&gt;&lt;h3&gt;This is heading 3&lt;/h3&gt;
+        </span>
+      );
+      lines.push(<br key="br9" />);
+    }
+
+    if (paragraphsAdded) {
+      lines.push(
+        <span key="paragraphs" style={{ color: '#0a5300' }}>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;p&gt;This is a paragraph.&lt;/p&gt;&lt;p&gt;This is another paragraph.&lt;/p&gt;
+        </span>
+      );
+      lines.push(<br key="br10" />);
+    }
+
+    if (linksAdded) {
+      lines.push(
+        <span key="links" style={{ color: '#0a5300' }}>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;a href="https://euonroia.onrender.com/"&gt;This is a link&lt;/a&gt;
+        </span>
+      );
+      lines.push(<br key="br11" />);
+    }
+
+    if (imagesAdded) {
+      lines.push(
+        <span key="images" style={{ color: '#0a5300' }}>
+          &nbsp;&nbsp;&nbsp;&nbsp;&lt;img src="example.jpg" alt="example.com" width="104" height="142" /&gt;
+        </span>
+      );
+      lines.push(<br key="br12" />);
+    }
+
+
+    lines.push(<span key="bodyClose">&nbsp;&nbsp;&lt;/body&gt;</span>);
+    lines.push(<br key="br13" />);
+    lines.push(<span key="htmlClose">&lt;/html&gt;</span>);
+
+    return lines;
   };
 
   const htmlOutput = buildHtmlOutput();
 
-  const handleNextLesson = () => {
-    navigate('/lessons/html-exam');
-  };
+  const handleNextLesson = () => navigate('/lessons/html-exam');
 
   return (
     <div className="lesson-container">
@@ -76,9 +99,8 @@ const HTMLelementsContent: React.FC = () => {
         <div className="lesson-content">
           <div className="lesson-left">
             <h1 className="lesson-title">Learn HTML: Headings, Paragraphs, Links & Images</h1>
-            <p className="lesson-description">
-              Tap on the blocks to build your HTML structure.
-            </p>
+            <p className="lesson-description">Tap on the blocks to build your HTML structure.</p>
+
             <div className="code-blocks">
               {['headings','paragraphs','links','images'].map(tag => (
                 <CodeBlock
@@ -89,34 +111,29 @@ const HTMLelementsContent: React.FC = () => {
                   paragraphsAdded={paragraphsAdded}
                   linksAdded={linksAdded}
                   imagesAdded={imagesAdded}
-                  doctypeAdded={true}
-                  htmlAdded={true}
-                  headAdded={true}
-                  bodyAdded={true}
                 />
               ))}
             </div>
           </div>
+
           <div className="lesson-right">
             <h3>HTML Output:</h3>
             <pre>{htmlOutput}</pre>
           </div>
+
           <div className="next-btn-container">
             <button className="next-btn" onClick={handleNextLesson}>READY FOR EXAM?</button>
           </div>
         </div>
       </main>
-     
     </div>
   );
 };
 
-const HTMLelements: React.FC = () => {
-  return (
-    <VerifyToken>
-      <HTMLelementsContent />
-    </VerifyToken>
-  );
-};
+const HTMLelements: React.FC = () => (
+  <VerifyToken>
+    <HTMLelementsContent />
+  </VerifyToken>
+);
 
 export default HTMLelements;

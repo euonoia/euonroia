@@ -26,21 +26,49 @@ const HTMLexamContent: React.FC = () => {
     doctype: '', html: '', head: '', body: '', headings: '', paragraphs: '', links: '', images: ''
   });
 
+  const [availableBlocks, setAvailableBlocks] = useState([
+    'DOCTYPE','html','head','body','headings','paragraphs','links','images'
+  ]);
+
   const handleBlockClick = (tag: string) => {
-    const toggle = (current: boolean, setter: any, descKey: keyof typeof descriptions, descText: string) => {
-      setter(!current);
-      setDescriptions(prev => ({ ...prev, [descKey]: !current ? descText : '' }));
+    const addBlock = (descKey: keyof typeof descriptions, descText: string, setter: React.Dispatch<React.SetStateAction<boolean>>) => {
+      setDescriptions(prev => ({ ...prev, [descKey]: descText }));
+      setter(true);
+      setAvailableBlocks(prev => prev.filter(block => block !== tag)); // remove the block from available
     };
 
     switch(tag) {
-      case 'DOCTYPE': toggle(doctypeAdded, setDoctypeAdded, 'doctype', '<!DOCTYPE html> specifies the document type.'); break;
-      case 'html': if(!doctypeAdded){ setErrorMessage('Add <!DOCTYPE html> first!'); return } toggle(htmlAdded, setHtmlAdded, 'html', '<html> is the root element.'); break;
-      case 'head': if(!htmlAdded){ setErrorMessage('Add <html> first!'); return } toggle(headAdded, setHeadAdded, 'head', '<head> contains meta info.'); break;
-      case 'body': if(!htmlAdded){ setErrorMessage('Add <html> first!'); return } toggle(bodyAdded, setBodyAdded, 'body', '<body> contains page content.'); break;
-      case 'headings': if(!bodyAdded){ setErrorMessage('Add <body> first!'); return } toggle(headingsAdded, setHeadingsAdded, 'headings', 'Headings structure content.'); break;
-      case 'paragraphs': if(!bodyAdded){ setErrorMessage('Add <body> first!'); return } toggle(paragraphsAdded, setParagraphsAdded, 'paragraphs', 'Paragraphs hold text.'); break;
-      case 'links': if(!bodyAdded){ setErrorMessage('Add <body> first!'); return } toggle(linksAdded, setLinksAdded, 'links', 'Links navigate pages.'); break;
-      case 'images': if(!bodyAdded){ setErrorMessage('Add <body> first!'); return } toggle(imagesAdded, setImagesAdded, 'images', 'Images are added with <img>.'); break;
+      case 'DOCTYPE':
+        addBlock('doctype', '<!DOCTYPE html> specifies the document type.', setDoctypeAdded);
+        break;
+      case 'html':
+        if (!doctypeAdded) { setErrorMessage('Add <!DOCTYPE html> first!'); return; }
+        addBlock('html', '<html> is the root element.', setHtmlAdded);
+        break;
+      case 'head':
+        if (!htmlAdded) { setErrorMessage('Add <html> first!'); return; }
+        addBlock('head', '<head> contains meta info.', setHeadAdded);
+        break;
+      case 'body':
+        if (!htmlAdded) { setErrorMessage('Add <html> first!'); return; }
+        addBlock('body', '<body> contains page content.', setBodyAdded);
+        break;
+      case 'headings':
+        if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; }
+        addBlock('headings', 'Headings structure content.', setHeadingsAdded);
+        break;
+      case 'paragraphs':
+        if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; }
+        addBlock('paragraphs', 'Paragraphs hold text.', setParagraphsAdded);
+        break;
+      case 'links':
+        if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; }
+        addBlock('links', 'Links navigate pages.', setLinksAdded);
+        break;
+      case 'images':
+        if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; }
+        addBlock('images', 'Images are added with <img>.', setImagesAdded);
+        break;
     }
 
     setErrorMessage('');
@@ -104,16 +132,27 @@ const HTMLexamContent: React.FC = () => {
         <div className="lesson-content">
           <div className="lesson-left">
             <h1>HTML Exam: Build Your HTML Document</h1>
-            <p>Tap blocks to build your HTML structure. Tap again to undo.</p>
+            <p>Tap blocks to build your HTML structure.</p>
             <div className="code-blocks">
-              {['DOCTYPE','html','head','body','headings','paragraphs','links','images'].map(tag => (
-                <CodeBlock key={tag} tag={tag} onClick={() => handleBlockClick(tag)}
-                  doctypeAdded={doctypeAdded} htmlAdded={htmlAdded} headAdded={headAdded} bodyAdded={bodyAdded}
-                  headingsAdded={headingsAdded} paragraphsAdded={paragraphsAdded} linksAdded={linksAdded} imagesAdded={imagesAdded} />
+              {availableBlocks.map(tag => (
+                <CodeBlock
+                  key={tag}
+                  tag={tag}
+                  onClick={() => handleBlockClick(tag)}
+                  doctypeAdded={doctypeAdded}
+                  htmlAdded={htmlAdded}
+                  headAdded={headAdded}
+                  bodyAdded={bodyAdded}
+                  headingsAdded={headingsAdded}
+                  paragraphsAdded={paragraphsAdded}
+                  linksAdded={linksAdded}
+                  imagesAdded={imagesAdded}
+                />
               ))}
             </div>
           </div>
           <div className="lesson-right">
+            <h3 className="output-title">HTML Output:</h3>
             {errorMessage && <div className="error-message">{errorMessage}</div>}
             <div className="html-output"><pre>{htmlOutput}</pre></div>
           </div>
@@ -127,7 +166,7 @@ const HTMLexamContent: React.FC = () => {
           </div>
         )}
       </main>
-     
+
     </div>
   );
 };
