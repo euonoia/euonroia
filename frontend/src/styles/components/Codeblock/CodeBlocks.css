@@ -1,28 +1,20 @@
-/* =========================
-   Theme Variables
-========================= */
 :root {
   --bg-card: #f8f8f8;
   --text-primary: #111;
   --text-secondary: #555;
   --color-border: #ddd;
-  --bg-active-card: #d1ffd6;
-  --text-active: #0a5300;
+  --accent: #0a5300; /* font highlight color */
 }
 
-/* Dark theme override */
 [data-theme="dark"] {
   --bg-card: #1e1e1e;
   --text-primary: #eee;
   --text-secondary: #ccc;
   --color-border: #444;
-  --bg-active-card: #333;
-  --text-active: #0f0;
+  --accent: #0f0;
 }
 
-/* -------------------------
-   Code Blocks
-------------------------- */
+/* Code Blocks */
 .code-block {
   background-color: var(--bg-card);
   color: var(--text-primary);
@@ -37,8 +29,7 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  transition: all 0.2s ease;
-  position: relative;
+  transition: color 0.3s ease, font-weight 0.3s ease, transform 0.2s ease;
   min-width: 60px;
   max-width: 100%;
   box-sizing: border-box;
@@ -49,23 +40,24 @@
   overflow-wrap: anywhere; 
 }
 
-
-.code-block.active {
-  background-color: var(--bg-active-card);
-  border-color: var(--text-active);
-  color: var(--text-active);
-  font-weight: 600;
+.code-block.active-font {
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .code-block:hover {
-  transform: scale(1.03);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transform: scale(1.02);
 }
 
-/* Hint text for interactive blocks */
-.code-block span.hint {
-  display: block;
-  font-size: 0.7rem;
-  color: var(--text-secondary);
-  margin-top: 3px;
+/* Highlight for HTML output */
+.highlight {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Pre formatting for HTML output */
+.lesson-right pre {
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
 }

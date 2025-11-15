@@ -79,6 +79,14 @@
   transform: translateY(-2px);
 }
 
+.inline-icon {
+  display: inline-flex;      
+  align-items: center;      
+  margin-left: 0.3rem;      
+  color: var(--accent);
+  font-size: 1em;           
+}
+
 
 /* Lessons Overview */
 .lessons-overview {

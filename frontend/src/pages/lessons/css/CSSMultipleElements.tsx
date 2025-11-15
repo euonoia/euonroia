@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../../components/header";
-import Footer from "../../../components/footer";
 import CodeBlockCSS from "../../../components/lessons/CodeBlockCSS";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
@@ -26,84 +25,70 @@ const CSSMultipleElementsContent: React.FC = () => {
   const colors = ["red", "blue", "green", "orange"];
   const fontSizes = ["15px", "20px", "24px", "30px"];
 
-  // ✅ Check if lesson is complete
-  const requiredBlocks = [pAdded, h1Added, styleAdded, propertyAdded, colorAdded, fontSizeAdded];
-  const lessonComplete = requiredBlocks.every(Boolean);
+  const lessonComplete = [pAdded, h1Added, styleAdded, propertyAdded, colorAdded, fontSizeAdded].every(Boolean);
 
+  // Single click handler for all blocks
   const handleBlockClick = (tag: string) => {
     switch (tag) {
-      case "p":
-        setPAdded(true);
-        break;
-      case "h1":
-        setH1Added(true);
-        break;
-      case "style":
-        setStyleAdded(true);
-        break;
-      case "property":
-        setPropertyAdded(true);
-        break;
-      case "value":
+      case "p": setPAdded(true); break;
+      case "h1": setH1Added(true); break;
+      case "style": setStyleAdded(true); break;
+      case "property": setPropertyAdded(true); break;
+      case "value": 
         setColorAdded(true);
-        setColorValue((prev) => {
-          const currentIndex = colors.indexOf(prev);
-          return colors[(currentIndex + 1) % colors.length];
-        });
+        setColorValue(prev => colors[(colors.indexOf(prev) + 1) % colors.length]);
         break;
-      case "fontsize":
+      case "fontsize": 
         setFontSizeAdded(true);
-        setFontSizeValue((prev) => {
-          const currentIndex = fontSizes.indexOf(prev);
-          return fontSizes[(currentIndex + 1) % fontSizes.length];
-        });
-        break;
-      default:
+        setFontSizeValue(prev => fontSizes[(fontSizes.indexOf(prev) + 1) % fontSizes.length]);
         break;
     }
   };
 
-  // Build output
-  const buildOutput = (): string => {
-    const lines: string[] = [];
+  const buildOutput = (): React.ReactNode[] => {
+    const lines: React.ReactNode[] = [];
     const indent = (n: number) => "  ".repeat(n);
 
-    lines.push("<!DOCTYPE html>");
-    lines.push("<html>");
-    lines.push(`${indent(1)}<head>`);
-    lines.push(`${indent(2)}<meta charset="UTF-8" />`);
-    lines.push(`${indent(2)}<meta name="viewport" content="width=device-width, initial-scale=1.0" />`);
-    lines.push(`${indent(2)}<title>Euonroia</title>`);
+    lines.push(<span key="doctype">{"<!DOCTYPE html>"}</span>, <br key="br1" />);
+    lines.push(<span key="html">{"<html>"}</span>, <br key="br2" />);
+    lines.push(<span key="head">{`${indent(1)}<head>`}</span>, <br key="br3" />);
+    lines.push(<span key="meta">{`${indent(2)}<meta charset="UTF-8" />`}</span>, <br key="br4" />);
+    lines.push(<span key="viewport">{`${indent(2)}<meta name="viewport" content="width=device-width, initial-scale=1.0" />`}</span>, <br key="br5" />);
+    lines.push(<span key="title">{`${indent(2)}<title>Euonroia</title>`}</span>, <br key="br6" />);
 
     if (styleAdded && (pAdded || h1Added)) {
-      lines.push(`${indent(2)}<style>`);
-
-      const targets = [
-        { tag: "h1", added: h1Added },
-        { tag: "p", added: pAdded },
-      ];
-
-      targets.forEach(({ tag, added }) => {
+      lines.push(<span key="style-open" style={{ color: '#0a5300' }}>{`${indent(2)}<style>`}</span>, <br key="br7" />);
+      const targets = [{ tag: "h1", added: h1Added }, { tag: "p", added: pAdded }];
+      targets.forEach(({ tag, added }, idx) => {
         if (!added) return;
-        lines.push(`${indent(3)}${tag} {`);
-        if (propertyAdded && colorAdded) lines.push(`${indent(4)}color: ${colorValue};`);
-        if (fontSizeAdded) lines.push(`${indent(4)}font-size: ${fontSizeValue};`);
-        lines.push(`${indent(3)}}`);
-        lines.push("");
+        lines.push(<span key={`selector-${idx}`} style={{ color: '#0a5300' }}>{`${indent(3)}${tag} {`}</span>, <br key={`br-${idx}-1`} />);
+        if (propertyAdded) {
+          lines.push(
+            <span key={`color-${idx}`} style={{ color: '#0a5300' }}>
+              {`${indent(4)}color${colorAdded ? `: ${colorValue};` : ": ;"}`}
+            </span>, <br key={`br-${idx}-2`} />
+          );
+        }
+        if (fontSizeAdded) {
+          lines.push(
+            <span key={`fontsize-${idx}`} style={{ color: '#0a5300' }}>
+              {`${indent(4)}font-size: ${fontSizeValue};`}
+            </span>, <br key={`br-${idx}-3`} />
+          );
+        }
+        lines.push(<span key={`close-${idx}`} style={{ color: '#0a5300' }}>{`${indent(3)}}`}</span>, <br key={`br-${idx}-4`} />);
       });
-
-      lines.push(`${indent(2)}</style>`);
+      lines.push(<span key="style-close" style={{ color: '#0a5300' }}>{`${indent(2)}</style>`}</span>, <br key="br8" />);
     }
 
-    lines.push(`${indent(1)}</head>`);
-    lines.push(`${indent(1)}<body>`);
+    lines.push(<span key="head-close">{`${indent(1)}</head>`}</span>, <br key="br9" />);
+    lines.push(<span key="body">{`${indent(1)}<body>`}</span>, <br key="br10" />);
+    if (h1Added) lines.push(<span key="h1">{`${indent(2)}<h1>Hello, Student!</h1>`}</span>, <br key="br11" />);
+    if (pAdded) lines.push(<span key="p">{`${indent(2)}<p>This is a styled paragraph.</p>`}</span>, <br key="br12" />);
+    lines.push(<span key="body-close">{`${indent(1)}</body>`}</span>, <br key="br13" />);
+    lines.push(<span key="html-close">{"</html>"}</span>);
 
-    if (h1Added) lines.push(`${indent(2)}<h1>Hello, Student!</h1>`);
-    if (pAdded) lines.push(`${indent(2)}<p>This is a styled paragraph.</p>`);
-
-    lines.push(`${indent(1)}</body>`);
-    lines.push("</html>");
-    return lines.join("\n");
+    return lines;
   };
 
   const htmlOutput = buildOutput();
@@ -114,16 +99,14 @@ const CSSMultipleElementsContent: React.FC = () => {
       <Header />
       <main className="lesson-main">
         <div className="lesson-content">
-          {/* LEFT SIDE */}
           <div className="lesson-left">
             <h2 className="lesson-title">Styling Multiple Elements with CSS</h2>
             <p className="lesson-description">
               Tap the blocks to style multiple elements with CSS!
             </p>
-
             <h2 className="section-title">CSS MULTIPLE ELEMENTS STRUCTURE</h2>
             <div className="code-blocks">
-              {["p", "h1", "style", "property", "value", "fontsize"].map((tag) => (
+              {["p", "h1", "style", "property", "value", "fontsize"].map(tag => (
                 <CodeBlockCSS
                   key={tag}
                   tag={tag}
@@ -138,19 +121,12 @@ const CSSMultipleElementsContent: React.FC = () => {
                 />
               ))}
             </div>
-            <br />
-             <div className="next-btn-container">
-            <button
-              className="next-btn"
-              onClick={handleNextLesson}
-              disabled={!lessonComplete}
-            >
-              READY FOR EXAM?
-            </button>
+            <div className="next-btn-container">
+              <button className="next-btn" onClick={handleNextLesson} disabled={!lessonComplete}>
+                READY FOR EXAM?
+              </button>
+            </div>
           </div>
-          </div>
-
-          {/* RIGHT SIDE */}
           <div className="lesson-right">
             <h3 className="output-title">HTML Output (Code):</h3>
             <pre className="code-display">{htmlOutput}</pre>
@@ -168,8 +144,8 @@ const CSSMultipleElementsContent: React.FC = () => {
               dangerouslySetInnerHTML={{
                 __html: `
                   ${styleAdded ? `<style>
-                    ${h1Added ? `h1 { ${propertyAdded && colorAdded ? `color: ${colorValue}; font-size: ${fontSizeValue};` : ""} }` : ""}
-                    ${pAdded ? `p { ${propertyAdded && colorAdded ? `color: ${colorValue}; font-size: ${fontSizeValue};` : ""} }` : ""}
+                    ${h1Added ? `h1 { ${propertyAdded ? `color${colorAdded ? `: ${colorValue};` : ": ;"}` : ""} ${fontSizeAdded ? `font-size: ${fontSizeValue};` : ""} }` : ""}
+                    ${pAdded ? `p { ${propertyAdded ? `color${colorAdded ? `: ${colorValue};` : ": ;"}` : ""} ${fontSizeAdded ? `font-size: ${fontSizeValue};` : ""} }` : ""}
                   </style>` : ""}
                   ${h1Added ? `<h1>Hello, Student!</h1>` : ""}
                   ${pAdded ? `<p>This is a styled paragraph.</p>` : ""}
@@ -179,7 +155,6 @@ const CSSMultipleElementsContent: React.FC = () => {
           </div>
         </div>
       </main>
-      
     </div>
   );
 };
