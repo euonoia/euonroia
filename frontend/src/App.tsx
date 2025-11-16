@@ -22,6 +22,7 @@ import JavaScriptBasics from "./pages/lessons/javascript/JavaScriptBasics";
 import JavascriptSample from "./pages/lessons/javascript/JavasScriptProgram";
 import JavaScriptConditions from "./pages/lessons/javascript/JavaScriptConditions";
 import JavaScriptDisplay from "./pages/lessons/javascript/JavaScriptDisplay";
+import JavaScriptExam from "./pages/lessons/javascript/JavaScriptExam";
 
 import MaintenanceMessage from "./components/messages/Maintenance";
 import AddingFeature from "./components/messages/AddingFeature";
@@ -61,7 +62,7 @@ function AppContent() {
         <Route path="/lessons/js-conditions" element={<JavaScriptConditions />} />
         <Route path="/lessons/js-sample" element={<JavascriptSample />} />
         <Route path="/lessons/js-display" element={<JavaScriptDisplay />} />
-
+        <Route path="/lessons/js-exam" element={<JavaScriptExam/>}/>
 
         {/*maintenance message*/}
         <Route path="/maintenance" element={<MaintenanceMessage />} />

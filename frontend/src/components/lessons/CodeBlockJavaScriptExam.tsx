@@ -8,7 +8,7 @@ type Props = {
   lessonComplete?: boolean;
 };
 
-const CodeBlockJavascriptSample: React.FC<Props> = ({
+const CodeBlockJavascriptExam: React.FC<Props> = ({
   tag,
   onClick,
   usedBlocks = [],
@@ -19,6 +19,7 @@ const CodeBlockJavascriptSample: React.FC<Props> = ({
 
   const displayText = () => {
     switch (tag) {
+      // JS Basics Sample Blocks
       case "let":
         return `let name = "Student";`;
       case "const":
@@ -37,8 +38,21 @@ const CodeBlockJavascriptSample: React.FC<Props> = ({
         return `} else {`;
       case "console-minor":
         return `console.log("You are a minor!");`;
-      case "close":
-        return `}`;
+
+      // Display Blocks
+      case "div":
+        return `<div id="output">`;
+      case "message":
+        return `let message = "Hello, " + name + "!<br>";`;
+      case "ageCheck":
+        return `message += age >= 18 ? "You are an adult!" : "You are a minor!";`;
+      case "display":
+        return `document.getElementById("output").innerHTML = message;`;
+
+      // Script block
+      case "script":
+        return `<script>`;
+
       default:
         return tag;
     }
@@ -48,6 +62,7 @@ const CodeBlockJavascriptSample: React.FC<Props> = ({
     <div
       className={`code-block ${isUsed ? "active" : ""}`}
       onClick={() => onClick(tag)}
+      style={{ padding: "12px 14px" }}
     >
       <pre style={{ margin: 0, fontFamily: '"JetBrains Mono", monospace' }}>
         <code>{displayText()}</code>
@@ -59,4 +74,4 @@ const CodeBlockJavascriptSample: React.FC<Props> = ({
   );
 };
 
-export default CodeBlockJavascriptSample;
+export default CodeBlockJavascriptExam;

@@ -87,25 +87,58 @@
   box-sizing: border-box;
 }
 
+/* VS CODE BLOCK */
 .code-block {
-  background-color: var(--bg-card);
-  color: var(--text-primary);
-  border: 1px solid var(--color-border);
+  background-color: var(--code-bg);
+  color: var(--code-text);
+  border: 1px solid var(--code-border);
   border-radius: 8px;
   padding: 1rem;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: "JetBrains Mono", monospace;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  box-sizing: border-box;
 }
 
+/* Hover — same feel as VS Code */
 .code-block:hover {
+  background-color: var(--code-hover);
   transform: scale(1.03);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
 }
+
+/* Active block — sidebar selected look */
+.code-block.active {
+  background-color: var(--code-active);
+  border-color: var(--code-active-border);
+  color:  #4338ca;
+  font-weight: 600;
+}
+
+/* Hint text */
+.code-block .hint {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.6;
+  margin-top: 4px;
+}
+
+.code-block pre {
+  margin: 0;
+  padding: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.code-block code {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.9rem;
+  color: inherit;
+}
+
 
 /* -------------------------
    Footer Styles

@@ -82,7 +82,7 @@ ${bodyContent}    <script>${scriptContent}
   };
 
   const fullHTML = buildFullHTMLOutput();
-  const handleNextLesson = () => navigate("/adding-feature");
+  const handleNextLesson = () => navigate("/lessons/js-exam");
 
   if (loading) return <div>Loading user data...</div>;
 

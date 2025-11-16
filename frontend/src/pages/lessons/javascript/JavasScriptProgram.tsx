@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../../components/header";
-import Footer from "../../../components/footer";
 import CodeBlockJavascriptSample from "../../../components/lessons/CodeBlockJavascriptSample";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
