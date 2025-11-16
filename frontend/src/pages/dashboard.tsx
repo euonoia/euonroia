@@ -199,10 +199,8 @@ function DashboardContent() {
               {leaderboard.map(user => (
                 <li
                   key={`${user.rank}-${user.displayName}`}
-                  className={`leaderboard-item ${user.xp === 0 ? "zero-xp" : ""}`}
-                >
+                  className={`leaderboard-item ${user.xp === 0 ? "zero-xp" : ""}`}   >
                   <span className="leaderboard-rank">{user.rank}.</span>
-                  <img src={user.photoURL} alt={user.displayName} className="leaderboard-avatar" />
                   <span className="leaderboard-name">{user.displayName}</span>
                   <span className="leaderboard-xp">{user.xp} XP</span>
                   <span className="leaderboard-level">Lvl {user.level}</span>
