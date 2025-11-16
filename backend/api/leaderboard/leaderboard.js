@@ -17,7 +17,6 @@ router.get("/", async (req, res) => {
       return {
         rank: index + 1,
         displayName: data.displayName || "Unknown",
-        photoURL: data.photoURL || "/default-avatar.png",
         xp: data.xp ?? 0,
         level: data.level ?? 1,
       };
