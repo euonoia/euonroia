@@ -232,7 +232,6 @@ const HTMLexamContent: React.FC = () => {
           </div>
         )}
       </main>
-      <Footer />
     </div>
   );
 };
