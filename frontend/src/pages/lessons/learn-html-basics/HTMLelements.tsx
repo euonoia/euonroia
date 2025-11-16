@@ -44,14 +44,28 @@ const HTMLelementsContent: React.FC = () => {
     lines.push(<span key="body">&nbsp;&nbsp;&lt;body&gt;</span>);
     lines.push(<br key="br8" />);
 
-   if (headingsAdded) {
-      lines.push(
-        <span key="headings" style={{ color: '#0a5300' }}>
-          &nbsp;&nbsp;&nbsp;&nbsp;&lt;h1&gt;This is heading 1&lt;/h1&gt;&lt;h2&gt;This is heading 2&lt;/h2&gt;&lt;h3&gt;This is heading 3&lt;/h3&gt;
-        </span>
-      );
-      lines.push(<br key="br9" />);
-    }
+      if (headingsAdded) {
+        lines.push(
+          <span key="h1" style={{ color: "#0a5300" }}>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;h1&gt;This is heading 1&lt;/h1&gt;
+          </span>
+        );
+        lines.push(<br key="h1-br" />);
+
+        lines.push(
+          <span key="h2" style={{ color: "#0a5300" }}>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;h2&gt;This is heading 2&lt;/h2&gt;
+          </span>
+        );
+        lines.push(<br key="h2-br" />);
+
+        lines.push(
+          <span key="h3" style={{ color: "#0a5300" }}>
+            &nbsp;&nbsp;&nbsp;&nbsp;&lt;h3&gt;This is heading 3&lt;/h3&gt;
+          </span>
+        );
+        lines.push(<br key="h3-br" />);
+      }
 
     if (paragraphsAdded) {
       lines.push(

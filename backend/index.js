@@ -10,6 +10,8 @@ import authRoutes from "./api/auth.js";
 import lessonsRoutes from "./api/lessons/html-basics.js";
 import dashboardRoutes from "./api/dashboard.js";
 import cssLessonsRouter from "./api/lessons/cssBasics.js";
+import javascriptLessonsRouter from "./api/lessons/javascript.js";
+
 const app = express();
 const isProduction = ENV.NODE_ENV === "production";
 
@@ -54,6 +56,7 @@ app.use(redirectBrowser);
 app.use("/api/lessons", lessonsRoutes);
 app.use("/api/lessons", cssLessonsRouter);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/lessons", javascriptLessonsRouter);
 
 // 4️⃣ Root route
 app.get("/", (req, res) => res.send("✅ Backend running securely"));

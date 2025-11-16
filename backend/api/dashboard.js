@@ -25,21 +25,22 @@ router.get("/progress", async (req, res) => {
         .collection("quizzes")
         .doc(uid)
         .get();
-
-      return quizDoc.exists && quizDoc.data().completed ? 100 : 0;
+      return quizDoc.exists && quizDoc.data()?.completed ? 100 : 0;
     };
 
-    // ✅ Get both HTML and CSS progress
-    const [htmlBasicsProgress, cssBasicsProgress] = await Promise.all([
+    // ✅ Include HTML, CSS, and JS progress
+    const [htmlBasicsProgress, cssBasicsProgress, javascriptProgress] = await Promise.all([
       getLessonProgress("html-basics"),
       getLessonProgress("css-basics"),
+      getLessonProgress("javascript"),
     ]);
 
     res.json({
-      displayName: userData.displayName,
-      currentLesson: userData.currentLesson || "",
+      displayName: userData?.displayName || "Guest",
+      currentLesson: userData?.currentLesson || "",
       htmlBasicsProgress,
       cssBasicsProgress,
+      javascriptProgress,
     });
   } catch (err) {
     console.error("Failed to fetch dashboard progress:", err);
