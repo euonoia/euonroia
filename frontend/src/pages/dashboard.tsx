@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FaRocket, FaStar, FaTrophy, FaArrowRight } from "react-icons/fa";
+import { FaTrophy } from "react-icons/fa";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import DashboardStats from "../components/DashboardStats";
@@ -10,27 +10,43 @@ import axios from "axios";
 import "../styles/pages/Dashboard.css";
 import VerifyToken from "../components/auth/VerifyToken";
 
+interface Lesson {
+  id: string;
+  title: string;
+  path: string;
+  progress: number;
+}
+
+interface ProgressData {
+  displayName: string;
+  currentLesson: string;
+  htmlBasicsProgress: number;
+  cssBasicsProgress: number;
+  javascriptProgress: number;
+}
+
 function DashboardContent() {
   const { user, loading } = useUser();
   const { theme } = useTheme();
 
-  const [progressData, setProgressData] = useState({
+  const [progressData, setProgressData] = useState<ProgressData>({
     displayName: "",
     currentLesson: "",
     htmlBasicsProgress: 0,
     cssBasicsProgress: 0,
+    javascriptProgress: 0,
   });
 
-  const [lessons, setLessons] = useState([
+  const [lessons, setLessons] = useState<Lesson[]>([
     { id: "html-basics", title: "HTML Basics", path: "html-basics", progress: 0 },
     { id: "css-intro", title: "CSS Basics", path: "css-intro", progress: 0 },
-    { id: "js-start", title: "JavaScript for Beginners", path: "js-basics", progress: 0 },
+    { id: "javascript", title: "JavaScript for Beginners", path: "js-basics", progress: 0 },
   ]);
 
   useEffect(() => {
     const fetchProgress = async () => {
       try {
-        const res = await axios.get(
+        const res = await axios.get<ProgressData>(
           `${import.meta.env.VITE_BACKEND_URL}/api/dashboard/progress`,
           { withCredentials: true }
         );
@@ -41,6 +57,7 @@ function DashboardContent() {
           prev.map(lesson => {
             if (lesson.id === "html-basics") return { ...lesson, progress: data.htmlBasicsProgress };
             if (lesson.id === "css-intro") return { ...lesson, progress: data.cssBasicsProgress };
+            if (lesson.id === "javascript") return { ...lesson, progress: data.javascriptProgress };
             return lesson;
           })
         );
@@ -69,7 +86,9 @@ function DashboardContent() {
       ? lessons.find(l => l.id === "html-basics")
       : progressData.cssBasicsProgress < 100
       ? lessons.find(l => l.id === "css-intro")
-      : lessons.find(l => l.id === "js-start");
+      : progressData.javascriptProgress < 100
+      ? lessons.find(l => l.id === "javascript")
+      : undefined;
 
   return (
     <div className={`dashboard-page ${theme}`}>
@@ -77,10 +96,9 @@ function DashboardContent() {
       <main className="dashboard-main">
         {/* Top Section */}
         <div className="dashboard-top">
-          {/* Greeting + Stats */}
           <div className="dashboard-left">
             <h1>Welcome back, {progressData.displayName || "Guest"}!</h1>
-            <p>Continue your coding journey today </p>
+            <p>Continue your coding journey today</p>
 
             <DashboardStats
               lessonsCompleted={lessons.filter(l => l.progress === 100).length}
@@ -90,7 +108,6 @@ function DashboardContent() {
             />
           </div>
 
-          {/* Next Lesson Card */}
           <div className="dashboard-right">
             <h2>Continue Learning</h2>
             <div className="continue-learning-card">
@@ -99,9 +116,7 @@ function DashboardContent() {
               </p>
               {nextLesson && (
                 <Link to={`/lessons/${nextLesson.path}`}>
-                  <button className="start-lesson-btn">
-                    Start Lesson
-                  </button>
+                  <button className="start-lesson-btn">Start Lesson</button>
                 </Link>
               )}
             </div>
@@ -131,7 +146,9 @@ function DashboardContent() {
             <p>Track badges and milestones earned as you progress.</p>
           </div>
           <div className="dashboard-bottom-right">
-            <h2><FaTrophy className="inline-icon" /> Leaderboard</h2>
+            <h2>
+              <FaTrophy className="inline-icon" /> Leaderboard
+            </h2>
             <p>Check your rank and challenge yourself against peers.</p>
           </div>
         </div>

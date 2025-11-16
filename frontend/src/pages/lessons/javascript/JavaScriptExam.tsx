@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import confetti from "canvas-confetti";
+import axios from "axios";
 import Header from "../../../components/header";
-import Footer from "../../../components/footer";
 import CodeBlockJavascriptExam from "../../../components/lessons/CodeBlockJavaScriptExam";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
@@ -32,22 +33,6 @@ const JavaScriptExamContent: React.FC = () => {
   };
 
   const [output, setOutput] = useState<string | null>(null);
-  useEffect(() => {
-    const logs: string[] = [];
-    const displayName = user?.name || "Student";
-
-    if (usedBlocks.includes("let") && usedBlocks.includes("const") &&
-        usedBlocks.includes("function") && usedBlocks.includes("console.log")) {
-      logs.push(`Hello, ${displayName}!`);
-    }
-
-    if (lessonComplete && usedBlocks.includes("if") && usedBlocks.includes("comparison")) {
-      if (randomAge >= 18 && usedBlocks.includes("console-adult")) logs.push("You are an adult!");
-      else if (randomAge < 18 && usedBlocks.includes("console-minor")) logs.push("You are a minor!");
-    }
-
-    setOutput(logs.length > 0 ? logs.join("\n") : null);
-  }, [usedBlocks, randomAge, lessonComplete, user?.name]);
 
   const buildFullHTMLOutput = (): string => {
     const displayName = user?.name || "Student";
@@ -101,7 +86,40 @@ ${scriptContent}  </script>
   };
 
   const fullHTML = buildFullHTMLOutput();
-  const handleNextLesson = () => navigate("/lessons/congratulations");
+
+ useEffect(() => {
+  const logs: string[] = [];
+  const displayName = user?.name || "Student";
+
+  if (usedBlocks.includes("let") && usedBlocks.includes("const") &&
+      usedBlocks.includes("function") && usedBlocks.includes("console.log")) {
+    logs.push(`Hello, ${displayName}!`);
+  }
+
+  if (lessonComplete && usedBlocks.includes("if") && usedBlocks.includes("comparison")) {
+    if (randomAge >= 18 && usedBlocks.includes("console-adult")) logs.push("You are an adult!");
+    else if (randomAge < 18 && usedBlocks.includes("console-minor")) logs.push("You are a minor!");
+  }
+
+  setOutput(logs.length > 0 ? logs.join("\n") : null);
+
+  // ✅ Lesson complete actions
+  if (lessonComplete) {
+    // Confetti
+    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+    // Save to database via backend route
+    axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/api/lessons/javascript/quizzes`,
+      { jsOutput: fullHTML }, // backend identifies user from session/cookie
+      { withCredentials: true }
+    ).catch(err => console.error("Failed to save JS exam:", err));
+
+    // Redirect after 3 seconds
+    setTimeout(() => navigate("/dashboard"), 3000);
+  }
+
+}, [usedBlocks, randomAge, lessonComplete, user?.name, fullHTML, navigate]);
 
   if (loading) return <div>Loading user data...</div>;
 
@@ -126,12 +144,6 @@ ${scriptContent}  </script>
                   lessonComplete={lessonComplete}
                 />
               ))}
-            </div>
-
-            <div className="next-btn-container">
-              <button className="next-btn" onClick={handleNextLesson} disabled={!lessonComplete}>
-                Finish Exam
-              </button>
             </div>
           </div>
 
