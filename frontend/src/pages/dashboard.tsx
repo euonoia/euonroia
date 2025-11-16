@@ -1,15 +1,17 @@
+// src/pages/Dashboard.tsx
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaTrophy } from "react-icons/fa";
 import Header from "../components/header";
 import Footer from "../components/footer";
 import DashboardStats from "../components/DashboardStats";
+import VerifyToken from "../components/auth/VerifyToken";
 import { useUser } from "../context/UserContext";
 import { useTheme } from "../context/ThemeContext";
-import { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/pages/Dashboard.css";
-import VerifyToken from "../components/auth/VerifyToken";
 
+// Types
 interface Lesson {
   id: string;
   title: string;
@@ -33,7 +35,17 @@ interface LeaderboardUser {
   level: number;
 }
 
-function DashboardContent() {
+interface Badge {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  xpReward: number;
+  category: string;
+  earnedAt?: string;
+}
+
+const DashboardContent: React.FC = () => {
   const { user, loading } = useUser();
   const { theme } = useTheme();
 
@@ -54,12 +66,16 @@ function DashboardContent() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
   const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
 
+  const [badges, setBadges] = useState<Badge[]>([]);
+  const [loadingBadges, setLoadingBadges] = useState(true);
+
   // Fetch user progress
   useEffect(() => {
+    if (!user) return;
     const fetchProgress = async () => {
       try {
         const res = await axios.get<ProgressData>(
-          `${import.meta.env.VITE_BACKEND_URL}/api/dashboard/progress`,
+          `${import.meta.env.VITE_BACKEND_URL}/api/milestones/progress`,
           { withCredentials: true }
         );
         const data = res.data;
@@ -77,8 +93,7 @@ function DashboardContent() {
         console.error("Failed to fetch progress:", err);
       }
     };
-
-    if (user) fetchProgress();
+    fetchProgress();
   }, [user]);
 
   // Fetch leaderboard
@@ -89,8 +104,6 @@ function DashboardContent() {
           `${import.meta.env.VITE_BACKEND_URL}/api/leaderboard`,
           { withCredentials: true }
         );
-
-        // Map and ensure defaults
         const allUsers = res.data.leaderboard.map((u, index) => ({
           rank: index + 1,
           displayName: u.displayName || "Unknown",
@@ -98,7 +111,6 @@ function DashboardContent() {
           xp: u.xp ?? 0,
           level: u.level ?? 1,
         }));
-
         setLeaderboard(allUsers);
       } catch (err) {
         console.error("Failed to fetch leaderboard:", err);
@@ -106,9 +118,28 @@ function DashboardContent() {
         setLoadingLeaderboard(false);
       }
     };
-
     fetchLeaderboard();
   }, []);
+
+  // Fetch earned badges
+  useEffect(() => {
+    if (!user) return;
+    const fetchBadges = async () => {
+      try {
+        const res = await axios.post<{ earnedBadges: Badge[] }>(
+          `${import.meta.env.VITE_BACKEND_URL}/api/badgesEarned/earned`,
+          { uid: user.id },
+          { withCredentials: true }
+        );
+        setBadges(res.data.earnedBadges || []);
+      } catch (err) {
+        console.error("Failed to fetch badges:", err);
+      } finally {
+        setLoadingBadges(false);
+      }
+    };
+    fetchBadges();
+  }, [user]);
 
   if (loading) {
     return (
@@ -184,6 +215,24 @@ function DashboardContent() {
           <div className="dashboard-bottom-left">
             <h2>Achievements</h2>
             <p>Track badges and milestones earned as you progress.</p>
+
+            {loadingBadges ? (
+              <p>Loading badges...</p>
+            ) : badges.length === 0 ? (
+              <p>No badges earned yet.</p>
+            ) : (
+              <div className="badges-grid">
+                {badges.map(badge => (
+                  <div key={badge.id} className="badge-card">
+                    <span className="badge-icon">{badge.icon}</span>
+                    <div>
+                      <h4>{badge.title}</h4>
+                      <p>{badge.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="dashboard-bottom-right">
@@ -195,19 +244,19 @@ function DashboardContent() {
             {loadingLeaderboard ? (
               <p>Loading leaderboard...</p>
             ) : (
-            <ol className="leaderboard-list">
-              {leaderboard.map(user => (
-                <li
-                  key={`${user.rank}-${user.displayName}`}
-                  className={`leaderboard-item ${user.xp === 0 ? "zero-xp" : ""}`}   >
-                  <span className="leaderboard-rank">{user.rank}.</span>
-                  <span className="leaderboard-name">{user.displayName}</span>
-                  <span className="leaderboard-xp">{user.xp} XP</span>
-                  <span className="leaderboard-level">Lvl {user.level}</span>
-                </li>
-              ))}
-            </ol>
-
+              <ol className="leaderboard-list">
+                {leaderboard.map(user => (
+                  <li
+                    key={`${user.rank}-${user.displayName}`}
+                    className={`leaderboard-item ${user.xp === 0 ? "zero-xp" : ""}`}
+                  >
+                    <span className="leaderboard-rank">{user.rank}.</span>
+                    <span className="leaderboard-name">{user.displayName}</span>
+                    <span className="leaderboard-xp">{user.xp} XP</span>
+                    <span className="leaderboard-level">Lvl {user.level}</span>
+                  </li>
+                ))}
+              </ol>
             )}
           </div>
         </div>
@@ -215,12 +264,12 @@ function DashboardContent() {
       <Footer />
     </div>
   );
-}
+};
 
-export default function Dashboard() {
-  return (
-    <VerifyToken>
-      <DashboardContent />
-    </VerifyToken>
-  );
-}
+const Dashboard: React.FC = () => (
+  <VerifyToken>
+    <DashboardContent />
+  </VerifyToken>
+);
+
+export default Dashboard;

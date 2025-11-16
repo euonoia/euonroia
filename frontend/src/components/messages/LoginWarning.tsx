@@ -84,6 +84,9 @@ export default function LoginWarning() {
           <strong>Brave Shield</strong> or open this at chrome.
           <br />
           <br />
+          If using a ios devices this will not work on Safari, please try using Chrome instead.
+          <br />
+          <br />
           You can also check my work on GitHub at{" "}
           <a
             href="https://github.com/euonoia"

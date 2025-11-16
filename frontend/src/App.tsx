@@ -24,6 +24,8 @@ import JavaScriptConditions from "./pages/lessons/javascript/JavaScriptCondition
 import JavaScriptDisplay from "./pages/lessons/javascript/JavaScriptDisplay";
 import JavaScriptExam from "./pages/lessons/javascript/JavaScriptExam";
 
+import AddBadge from "./pages/add-badges/addBadge";
+
 import MaintenanceMessage from "./components/messages/Maintenance";
 import AddingFeature from "./components/messages/AddingFeature";
 
@@ -64,6 +66,7 @@ function AppContent() {
         <Route path="/lessons/js-display" element={<JavaScriptDisplay />} />
         <Route path="/lessons/js-exam" element={<JavaScriptExam/>}/>
 
+        <Route path="/add-badge" element={<AddBadge />} />
         {/*maintenance message*/}
         <Route path="/maintenance" element={<MaintenanceMessage />} />
         <Route path="/adding-feature" element={<AddingFeature />} />

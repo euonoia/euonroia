@@ -7,6 +7,7 @@ import Header from '../../../components/header';
 import Footer from '../../../components/footer';
 import "../../../styles/pages/lessons/LessonPage.css";
 import VerifyToken from '../../../components/auth/VerifyToken';
+import { useUser } from '../../../context/UserContext';
 
 // 🔥 Randomizer function
 const shuffleArray = (array: string[]) => {
@@ -20,6 +21,7 @@ const shuffleArray = (array: string[]) => {
 
 const HTMLexamContent: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
 
   const [doctypeAdded, setDoctypeAdded] = useState(false);
   const [htmlAdded, setHtmlAdded] = useState(false);
@@ -149,26 +151,38 @@ const HTMLexamContent: React.FC = () => {
     headingsAdded && paragraphsAdded && linksAdded && imagesAdded;
 
   useEffect(() => {
-    if (isExamComplete) {
+    if (isExamComplete && user) {
       setShowCongrats(true);
 
+      // 1️⃣ Save exam output
       axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/lessons/html-basics/quizzes`,
         { htmlOutput },
         { withCredentials: true }
       ).catch(() => {});
 
+     // 2️⃣ Automatically award "first_lesson" badge
+        axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/badges/check`,
+          { 
+            uid: user.id,           // logged-in user UID
+            badgeId: "first_lesson" // the badge to award
+          },
+          { withCredentials: true }
+        ).catch((err) => {
+          console.error("Failed to award first_lesson badge:", err);
+        });
+
+      // 🎉 Confetti effect
       const duration = 3000;
       const end = Date.now() + duration;
-
       (function frame() {
         confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
         confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
         if (Date.now() < end) requestAnimationFrame(frame);
       })();
     }
-  }, [isExamComplete, htmlOutput]);
-
+  }, [isExamComplete, htmlOutput, user]);
 
   const handleCongratsClick = () => navigate('/dashboard');
 
@@ -218,16 +232,15 @@ const HTMLexamContent: React.FC = () => {
           </div>
         )}
       </main>
+      <Footer />
     </div>
   );
 };
 
-const HTMLexam: React.FC = () => {
-  return (
-    <VerifyToken>
-      <HTMLexamContent />
-    </VerifyToken>
-  );
-};
+const HTMLexam: React.FC = () => (
+  <VerifyToken>
+    <HTMLexamContent />
+  </VerifyToken>
+);
 
 export default HTMLexam;
