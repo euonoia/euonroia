@@ -11,6 +11,7 @@ import lessonsRoutes from "./api/lessons/html-basics.js";
 import dashboardRoutes from "./api/dashboard.js";
 import cssLessonsRouter from "./api/lessons/cssBasics.js";
 import javascriptLessonsRouter from "./api/lessons/javascript.js";
+import leaderboardRoutes from "./api/leaderboard/leaderboard.js";
 
 const app = express();
 const isProduction = ENV.NODE_ENV === "production";
@@ -57,6 +58,7 @@ app.use("/api/lessons", lessonsRoutes);
 app.use("/api/lessons", cssLessonsRouter);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/lessons", javascriptLessonsRouter);
+app.use("/api/leaderboard", leaderboardRoutes);
 
 // 4️⃣ Root route
 app.get("/", (req, res) => res.send("✅ Backend running securely"));

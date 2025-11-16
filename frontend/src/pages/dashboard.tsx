@@ -25,6 +25,14 @@ interface ProgressData {
   javascriptProgress: number;
 }
 
+interface LeaderboardUser {
+  rank: number;
+  displayName: string;
+  photoURL: string;
+  xp: number;
+  level: number;
+}
+
 function DashboardContent() {
   const { user, loading } = useUser();
   const { theme } = useTheme();
@@ -43,6 +51,10 @@ function DashboardContent() {
     { id: "javascript", title: "JavaScript for Beginners", path: "js-basics", progress: 0 },
   ]);
 
+  const [leaderboard, setLeaderboard] = useState<LeaderboardUser[]>([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(true);
+
+  // Fetch user progress
   useEffect(() => {
     const fetchProgress = async () => {
       try {
@@ -68,6 +80,35 @@ function DashboardContent() {
 
     if (user) fetchProgress();
   }, [user]);
+
+  // Fetch leaderboard
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const res = await axios.get<{ leaderboard: LeaderboardUser[] }>(
+          `${import.meta.env.VITE_BACKEND_URL}/api/leaderboard`,
+          { withCredentials: true }
+        );
+
+        // Map and ensure defaults
+        const allUsers = res.data.leaderboard.map((u, index) => ({
+          rank: index + 1,
+          displayName: u.displayName || "Unknown",
+          photoURL: u.photoURL || "/default-avatar.png",
+          xp: u.xp ?? 0,
+          level: u.level ?? 1,
+        }));
+
+        setLeaderboard(allUsers);
+      } catch (err) {
+        console.error("Failed to fetch leaderboard:", err);
+      } finally {
+        setLoadingLeaderboard(false);
+      }
+    };
+
+    fetchLeaderboard();
+  }, []);
 
   if (loading) {
     return (
@@ -102,7 +143,6 @@ function DashboardContent() {
 
             <DashboardStats
               lessonsCompleted={lessons.filter(l => l.progress === 100).length}
-              totalLessons={lessons.length}
               streak={3}
               xp={450}
             />
@@ -145,11 +185,32 @@ function DashboardContent() {
             <h2>Achievements</h2>
             <p>Track badges and milestones earned as you progress.</p>
           </div>
+
           <div className="dashboard-bottom-right">
             <h2>
               <FaTrophy className="inline-icon" /> Leaderboard
             </h2>
             <p>Check your rank and challenge yourself against peers.</p>
+
+            {loadingLeaderboard ? (
+              <p>Loading leaderboard...</p>
+            ) : (
+            <ol className="leaderboard-list">
+              {leaderboard.map(user => (
+                <li
+                  key={`${user.rank}-${user.displayName}`}
+                  className={`leaderboard-item ${user.xp === 0 ? "zero-xp" : ""}`}
+                >
+                  <span className="leaderboard-rank">{user.rank}.</span>
+                  <img src={user.photoURL} alt={user.displayName} className="leaderboard-avatar" />
+                  <span className="leaderboard-name">{user.displayName}</span>
+                  <span className="leaderboard-xp">{user.xp} XP</span>
+                  <span className="leaderboard-level">Lvl {user.level}</span>
+                </li>
+              ))}
+            </ol>
+
+            )}
           </div>
         </div>
       </main>

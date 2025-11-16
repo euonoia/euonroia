@@ -24,7 +24,6 @@
   align-items: flex-start;
 }
 
-/* Left Column: Greeting + Stats */
 .dashboard-left {
   flex: 1 1 320px;
   min-width: 280px;
@@ -41,7 +40,116 @@
   margin-bottom: 1rem;
 }
 
-/* Right Column: Next Lesson */
+/* Dashboard Stats */
+.dashboard-stats {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  flex: 1 1 120px;
+  min-width: 100px;
+  background: var(--bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  text-align: center;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--accent);
+}
+
+.stat-card p {
+  margin: 0.3rem 0 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/* Leaderboard container */
+.leaderboard-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 400px; /* optional: scrollable */
+  overflow-y: auto;
+}
+
+/* Each leaderboard item */
+.leaderboard-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #fff;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+/* Hover effect */
+.leaderboard-item:hover {
+  background-color: #f5f5f5;
+  transform: translateY(-2px);
+}
+
+/* Rank number */
+.leaderboard-rank {
+  font-weight: bold;
+  width: 2rem;
+  text-align: right;
+}
+
+/* Avatar */
+.leaderboard-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* User display name */
+.leaderboard-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+/* XP and Level */
+.leaderboard-xp,
+.leaderboard-level {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+/* Style for users with 0 XP */
+.leaderboard-item.zero-xp {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+/* Optional: scrollbar styling for leaderboard */
+.leaderboard-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.leaderboard-list::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.2);
+  border-radius: 3px;
+}
+
 .dashboard-right {
   flex: 1 1 320px;
   min-width: 280px;
@@ -54,11 +162,10 @@
   background: var(--bg-card);
   border: 1px solid var(--color-border);
   box-shadow: 0 6px 15px rgba(0,0,0,0.05);
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 
 .continue-learning-card:hover {
-  transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
 
@@ -71,12 +178,11 @@
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: background 0.3s ease;
 }
 
 .start-lesson-btn:hover {
   background: var(--accent-hover);
-  transform: translateY(-2px);
 }
 
 .inline-icon {
@@ -86,7 +192,6 @@
   color: var(--accent);
   font-size: 1em;           
 }
-
 
 /* Lessons Overview */
 .lessons-overview {
@@ -109,11 +214,10 @@
   flex-direction: column;
   gap: 0.5rem;
   box-shadow: 0 6px 12px rgba(0,0,0,0.03);
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 
 .lesson-card:hover {
-  transform: translateY(-3px);
   box-shadow: 0 12px 20px rgba(0,0,0,0.08);
 }
 
@@ -147,12 +251,11 @@
   border-radius: 12px;
   border: 1px solid var(--color-border);
   box-shadow: 0 6px 15px rgba(0,0,0,0.05);
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 
 .dashboard-bottom-left:hover,
 .dashboard-bottom-right:hover {
-  transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
 
