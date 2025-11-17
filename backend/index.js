@@ -1,35 +1,42 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
+
 import { ENV } from "./config/env.js";
 import "./config/firebase.js";
 import { securityMiddleware } from "./config/security.js";
-import redirectBrowser from "./middlewares/redirectBrowser.js";
 import { protectBackend } from "./middlewares/protectBackend.js";
+
 import authRoutes from "./api/auth.js";
 import lessonsRoutes from "./api/lessons/html-basics.js";
 import dashboardRoutes from "./api/milestones.js";
 import cssLessonsRouter from "./api/lessons/cssBasics.js";
 import javascriptLessonsRouter from "./api/lessons/javascript.js";
 import leaderboardRoutes from "./api/leaderboard/leaderboard.js";
-import checkBadge from "./api/badges/check.js"
+import checkBadge from "./api/badges/check.js";
 import earnedBadges from "./api/badges/earnedbadges.js";
 
 const app = express();
 const isProduction = ENV.NODE_ENV === "production";
 
-// ✅ Allowed frontends
+// Fix __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Allowed frontend origins
 const FRONTEND_URLS = isProduction
   ? ["https://euonroia.onrender.com"]
   : ["http://localhost:5173", "http://127.0.0.1:5173"];
 
-// Trust proxies for secure cookies
+// Trust proxies (required for Secure cookies on Render)
 app.set("trust proxy", 1);
 
-// Security middleware (helmet, rate limiting, etc.)
+// Security middleware
 app.use(securityMiddleware);
 
-// ✅ CORS: allow frontend origins only, with cookies
+// CORS config
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -46,28 +53,42 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
-// 1️⃣ Auth routes first (Google OAuth login & callback)
+/* --------------------------------------------------
+   1️⃣ AUTH ROUTES (Google OAuth)
+   -------------------------------------------------- */
 app.use("/auth", authRoutes);
 
-// 2️⃣ Protect sensitive backend routes (API + /auth/me + /auth/signout)
+/* --------------------------------------------------
+   2️⃣ PROTECTED API ROUTES
+   -------------------------------------------------- */
 app.use(protectBackend);
-
-// 3️⃣ Redirect browser requests for non-API/auth paths
-app.use(redirectBrowser);
-
 
 app.use("/api/lessons", lessonsRoutes);
 app.use("/api/lessons", cssLessonsRouter);
-app.use("/api/milestones", dashboardRoutes);
 app.use("/api/lessons", javascriptLessonsRouter);
+
+app.use("/api/milestones", dashboardRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
-app.use("/api/badges",checkBadge);
-app.use("/api/badgesEarned",earnedBadges);
-// 4️⃣ Root route
-app.get("/", (req, res) => res.send("✅ Backend running securely"));
+app.use("/api/badges", checkBadge);
+app.use("/api/badgesEarned", earnedBadges);
 
+/* --------------------------------------------------
+   3️⃣ SERVE FRONTEND BUILD (Vite dist/)
+   -------------------------------------------------- */
 
-// Start server
+// Serve static files
+app.use(express.static(path.join(__dirname, "public")));
+
+/* --------------------------------------------------
+   4️⃣ REACT ROUTER FALLBACK
+   -------------------------------------------------- */
+app.get("*", (req, res) => {
+  return res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+/* --------------------------------------------------
+   5️⃣ START SERVER
+   -------------------------------------------------- */
 app.listen(ENV.PORT, () => {
-  console.log(`🚀 Backend running on port ${ENV.PORT}`);
+  console.log(`🚀 Backend + Frontend running on port ${ENV.PORT}`);
 });
