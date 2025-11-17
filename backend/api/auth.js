@@ -55,8 +55,7 @@ router.get("/google/callback", async (req, res) => {
     let userRecord;
     try {
       userRecord = await admin.auth().getUserByEmail(email);
-    } catch (err) {
-      // Create user if doesn't exist
+    } catch {
       userRecord = await admin.auth().createUser({
         email,
         displayName: name,
@@ -70,7 +69,7 @@ router.get("/google/callback", async (req, res) => {
       photoURL: picture,
     });
 
-    // ✅ Ensure Google provider appears in Firebase Auth console
+    // Ensure Google provider exists in Firebase
     const user = await admin.auth().getUser(userRecord.uid);
     if (!user.providerData.some((p) => p.providerId === "google.com")) {
       await admin.auth().updateUser(userRecord.uid, {
@@ -87,14 +86,12 @@ router.get("/google/callback", async (req, res) => {
       });
     }
 
-    // ✅ Firestore user document setup
+    // Firestore user setup
     const userRef = admin.firestore().collection("users").doc(userRecord.uid);
     const userSnap = await userRef.get();
-
     const now = new Date().toISOString();
 
     if (!userSnap.exists) {
-      // Create new user profile with defaults
       await userRef.set(
         {
           uid: userRecord.uid,
@@ -113,7 +110,6 @@ router.get("/google/callback", async (req, res) => {
         { merge: true }
       );
     } else {
-      // Update only activity + profile changes
       await userRef.set(
         {
           displayName: name,
@@ -126,14 +122,9 @@ router.get("/google/callback", async (req, res) => {
       );
     }
 
-    // ✅ Create a secure short-lived session (custom JWT)
+    // Create short-lived session token
     const token = jwt.sign(
-      {
-        uid: userRecord.uid,
-        name,
-        email,
-        picture,
-      },
+      { uid: userRecord.uid, name, email, picture },
       JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -143,18 +134,17 @@ router.get("/google/callback", async (req, res) => {
       secure: true,
       sameSite: "None",
       path: "/",
-      maxAge: 60 * 60 * 1000, // 1 hour
+      maxAge: 60 * 60 * 1000,
     });
 
     res.redirect(`${FRONTEND_URL}/dashboard`);
   } catch (err) {
-    console.error("❌ OAuth callback error:", err);
+    if (!isProduction) console.error("❌ OAuth callback error:", err);
     res.redirect(FRONTEND_URL);
   }
 });
 
-
-// --- 5️⃣ Protected route ---
+// --- 3️⃣ Protected route ---
 router.get("/me", async (req, res) => {
   try {
     const token = req.cookies?.authToken;
@@ -162,7 +152,6 @@ router.get("/me", async (req, res) => {
 
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // Double-check user still exists in Firebase
     const userRecord = await admin.auth().getUser(decoded.uid);
 
     res.json({
@@ -174,13 +163,12 @@ router.get("/me", async (req, res) => {
       },
     });
   } catch (err) {
-    console.error("Auth check failed:", err);
+    if (!isProduction) console.error("Auth check failed:", err);
     res.status(401).json({ error: "Invalid token" });
   }
 });
 
-
-// --- 6️⃣ Logout ---
+// --- 4️⃣ Logout ---
 router.post("/signout", (req, res) => {
   res.clearCookie("authToken", {
     httpOnly: true,
@@ -190,6 +178,5 @@ router.post("/signout", (req, res) => {
   });
   res.json({ success: true });
 });
-
 
 export default router;
