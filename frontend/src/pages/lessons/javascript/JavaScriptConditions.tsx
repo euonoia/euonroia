@@ -1,3 +1,4 @@
+// src/pages/lessons/javascript/JavaScriptConditions.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CodeBlockJavascriptConditions from "../../../components/lessons/CodeBlockJavascriptConditions";
@@ -6,8 +7,8 @@ import Footer from "../../../components/footer";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
 import { useUser } from "../../../context/UserContext";
-import axios from "axios";
 import VerifyToken from "../../../components/auth/VerifyToken";
+import axios from "../../../utils/axiosClient";
 
 const JavaScriptConditionsContent: React.FC = () => {
   const navigate = useNavigate();
@@ -32,6 +33,9 @@ const JavaScriptConditionsContent: React.FC = () => {
 
   if (loading) return <div>Loading user data...</div>;
 
+  // --------------------------
+  // Handle tapping blocks
+  // --------------------------
   const handleClick = (block: string) => {
     if (!usedBlocks.includes(block)) {
       setUsedBlocks((prev) => [...prev, block]);
@@ -63,6 +67,9 @@ const JavaScriptConditionsContent: React.FC = () => {
     }
   };
 
+  // --------------------------
+  // Update output
+  // --------------------------
   useEffect(() => {
     if (lessonComplete) {
       setOutput(randomAge >= 18 ? "You are an adult!" : "You are a minor!");
@@ -71,6 +78,9 @@ const JavaScriptConditionsContent: React.FC = () => {
     }
   }, [usedBlocks, randomAge, lessonComplete]);
 
+  // --------------------------
+  // Build code preview
+  // --------------------------
   const buildCodePreview = () => {
     const lines: string[] = [];
     const ageForDisplay = lessonComplete ? randomAge : 18;
@@ -109,6 +119,34 @@ const JavaScriptConditionsContent: React.FC = () => {
   };
 
   const fullCode = buildCodePreview();
+
+  // --------------------------
+  // Save progress to backend
+  // --------------------------
+  useEffect(() => {
+    if (lessonComplete && user) {
+      const saveProgress = async () => {
+        try {
+          await axios.post("/api/lessons/progress", {
+            lessonId: "js-conditions",
+            completedBlocks: usedBlocks,
+          });
+
+          // Optionally, update milestones or badges
+          await axios.post("/api/badgesEarned", {
+            lessonId: "js-conditions",
+          });
+
+          console.log("Progress & badges updated!");
+        } catch (err) {
+          console.error("Failed to save progress:", err);
+        }
+      };
+
+      saveProgress();
+    }
+  }, [lessonComplete, user, usedBlocks]);
+
   const handleNextLesson = () => navigate("/lessons/js-sample");
 
   return (
@@ -173,7 +211,7 @@ const JavaScriptConditionsContent: React.FC = () => {
           </div>
         </div>
       </main>
-     
+      <Footer />
     </div>
   );
 };

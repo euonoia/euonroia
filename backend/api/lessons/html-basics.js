@@ -1,14 +1,27 @@
 import express from "express";
 import admin from "firebase-admin";
+import { authMiddleware } from "../../middlewares/auth.js";
+import sanitizeHtml from "sanitize-html";
 
 const router = express.Router();
 
 // POST /api/lessons/html-basics/quizzes
-router.post("/html-basics/quizzes", async (req, res) => {
+router.post("/html-basics/quizzes", authMiddleware, async (req, res) => {
   try {
-    const { htmlOutput } = req.body;
+    let { htmlOutput } = req.body;
 
-    if (!htmlOutput) return res.status(400).json({ error: "No HTML output provided" });
+    if (!htmlOutput)
+      return res.status(400).json({ error: "No HTML output provided" });
+
+    // --- Sanitize user-submitted HTML ---
+    htmlOutput = sanitizeHtml(htmlOutput, {
+      allowedTags: sanitizeHtml.defaults.allowedTags.concat(["h1", "h2", "span"]),
+      allowedAttributes: {
+        ...sanitizeHtml.defaults.allowedAttributes,
+        span: ["style"],
+        div: ["style"],
+      },
+    });
 
     const uid = req.user?.uid; // from JWT payload
     if (!uid) return res.status(401).json({ error: "Unauthorized" });

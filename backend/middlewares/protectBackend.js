@@ -10,7 +10,7 @@ export function protectBackend(req, res, next) {
       ? ["https://euonroia.onrender.com"]
       : ["http://localhost:5173", "http://127.0.0.1:5173"];
 
-  // --- 1️⃣ Allow Google OAuth login & callback without JWT
+  // Allow OAuth flow
   if (
     req.path.startsWith("/auth/google") ||
     req.path.startsWith("/auth/google/callback")
@@ -18,49 +18,64 @@ export function protectBackend(req, res, next) {
     return next();
   }
 
-  // --- 2️⃣ Protect API endpoints ---
+  // Protect API endpoints
   if (req.path.startsWith("/api")) {
-    // Block requests from unauthorized origins
     if (origin && !allowedOrigins.some((o) => origin.startsWith(o))) {
       return res.status(403).send("❌ Access forbidden: invalid origin");
     }
 
-    // Require JWT
     if (!token) return res.status(401).json({ error: "Not logged in" });
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded; // attach payload to req.user
+
+      // 🔥 Normalize user object so Firestore always has UID
+      req.user = {
+        ...decoded,
+        uid: decoded.uid || decoded.id || decoded.sub, // <--- IMPORTANT
+      };
+
+      if (!req.user.uid) {
+        return res.status(401).json({ error: "Invalid token — no UID found" });
+      }
+
       return next();
     } catch {
       return res.status(401).json({ error: "Invalid or expired token" });
     }
   }
 
-  // --- 3️⃣ Protect sensitive /auth/me endpoint ---
+  // Protect /auth/me
   if (req.path.startsWith("/auth/me")) {
     if (!token) return res.status(401).json({ error: "Not logged in" });
+
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded;
+      req.user = {
+        ...decoded,
+        uid: decoded.uid || decoded.id || decoded.sub,
+      };
       return next();
     } catch {
       return res.status(401).json({ error: "Invalid or expired token" });
     }
   }
 
-  // --- 4️⃣ Protect sensitive /auth/signout endpoint ---
+  // Protect /auth/signout
   if (req.path.startsWith("/auth/signout")) {
     if (!token) return res.status(401).json({ error: "Not logged in" });
+
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded;
+      req.user = {
+        ...decoded,
+        uid: decoded.uid || decoded.id || decoded.sub,
+      };
       return next();
     } catch {
       return res.status(401).json({ error: "Invalid or expired token" });
     }
   }
 
-  // --- 5️⃣ All other routes are safe ---
   next();
 }

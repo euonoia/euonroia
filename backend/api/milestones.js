@@ -1,13 +1,18 @@
 import express from "express";
 import admin from "firebase-admin";
+import { authMiddleware } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-// GET /api/dashboard/progress
-router.get("/progress", async (req, res) => {
+// GET /api/milestones/progress
+router.get("/progress", authMiddleware, async (req, res) => {
   try {
     const uid = req.user?.uid;
-    if (!uid) return res.status(401).json({ error: "Unauthorized" });
+
+    if (!uid) {
+      console.error("❌ UID missing in request");
+      return res.status(401).json({ error: "Unauthorized" });
+    }
 
     const db = admin.firestore();
 
@@ -19,16 +24,19 @@ router.get("/progress", async (req, res) => {
 
     // Helper to check quiz completion
     const getLessonProgress = async (lessonId) => {
+      if (!lessonId || !uid) return 0; // safety check
+
       const quizDoc = await db
         .collection("lessons")
         .doc(lessonId)
         .collection("quizzes")
         .doc(uid)
         .get();
+
       return quizDoc.exists && quizDoc.data()?.completed ? 100 : 0;
     };
 
-    // ✅ Include HTML, CSS, and JS progress
+    // Fetch progress in parallel
     const [htmlBasicsProgress, cssBasicsProgress, javascriptProgress] = await Promise.all([
       getLessonProgress("html-basics"),
       getLessonProgress("css-basics"),

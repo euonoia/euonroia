@@ -4,20 +4,20 @@ FROM node:22-alpine
 # Set working directory
 WORKDIR /app
 
-# Install Yarn globally if not already installed
-RUN if ! command -v yarn > /dev/null; then npm install -g yarn; fi
+# Cache busting argument (force reinstall when needed)
+ARG CACHEBUST=1
 
-# Copy package dependency files first for caching
-COPY package*.json ./
+# Copy only package files first for caching
+COPY package.json yarn.lock ./
 
-# Install dependencies using Yarn
+# Install dependencies
 RUN yarn install --frozen-lockfile
 
-# Copy all frontend source code into the image
+# Copy the rest of the frontend source code
 COPY . .
 
 # Expose Vite dev server port
 EXPOSE 5173
 
-# Use Yarn to start dev server and listen on all interfaces
+# Dev command with host binding
 CMD ["yarn", "run", "dev", "--", "--host", "0.0.0.0"]

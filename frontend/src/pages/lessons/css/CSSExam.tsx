@@ -6,7 +6,7 @@ import CodeBlockCSSExam from "../../../components/lessons/CodeBlockCSSExam";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
 import confetti from "canvas-confetti";
-import axios from "axios";
+import axios from "../../../utils/axiosClient";
 import VerifyToken from "../../../components/auth/VerifyToken";
 
 const CSSExamContent: React.FC = () => {

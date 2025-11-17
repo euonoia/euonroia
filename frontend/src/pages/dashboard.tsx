@@ -8,7 +8,7 @@ import DashboardStats from "../components/DashboardStats";
 import VerifyToken from "../components/auth/VerifyToken";
 import { useUser } from "../context/UserContext";
 import { useTheme } from "../context/ThemeContext";
-import axios from "axios";
+import axios from "../utils/axiosClient";
 import "../styles/pages/Dashboard.css";
 
 // Types

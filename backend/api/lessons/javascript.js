@@ -1,17 +1,27 @@
 import express from "express";
 import admin from "firebase-admin";
+import sanitizeHtml from "sanitize-html";
+import { authMiddleware } from "../../middlewares/auth.js";
 
 const router = express.Router();
 
 // POST /api/lessons/javascript/quizzes
-router.post("/javascript/quizzes", async (req, res) => {
+router.post("/javascript/quizzes", authMiddleware, async (req, res) => {
   try {
     const { jsOutput } = req.body;
 
-    if (!jsOutput) return res.status(400).json({ error: "No JS output provided" });
+    if (!jsOutput) {
+      return res.status(400).json({ error: "No JS output provided" });
+    }
 
-    const uid = req.user?.uid; // extracted from JWT/session
+    const uid = req.user.uid; // guaranteed by authMiddleware
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
+
+    // Sanitize JS output to prevent unsafe content
+    const sanitizedOutput = sanitizeHtml(jsOutput, {
+      allowedTags: [], // no HTML tags allowed
+      allowedAttributes: {},
+    });
 
     const quizRef = admin
       .firestore()
@@ -24,8 +34,8 @@ router.post("/javascript/quizzes", async (req, res) => {
       {
         uid,
         completed: true,
-        jsOutput,
-        score: 100, // you can adjust scoring logic if needed
+        jsOutput: sanitizedOutput,
+        score: 100, // can add actual scoring logic here
         timestamp: admin.firestore.FieldValue.serverTimestamp(),
       },
       { merge: true }
