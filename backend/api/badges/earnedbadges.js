@@ -4,10 +4,10 @@ import { authMiddleware } from "../../middlewares/auth.js";
 
 const router = express.Router();
 
-// POST /api/badges/earned
+// GET /api/badges/earned
 router.post("/earned", authMiddleware, async (req, res) => {
   try {
-    const uid = req.user?.uid; // ✅ Always from authMiddleware
+    const uid = req.user?.uid; 
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
 
     const db = admin.firestore();

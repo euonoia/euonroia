@@ -1,7 +1,7 @@
 // src/context/UserContext.tsx
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import axios from "../utils/axiosClient";
-
+import axiosClient from "../utils/axiosClient";
+import Cookies from "js-cookie";
 interface User {
   id: string;
   name: string;
@@ -34,9 +34,15 @@ export const UserProvider = ({ children }: Props) => {
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-        withCredentials: true,
-      });
+      const csrfToken = Cookies.get("csrfToken"); // make sure you import js-cookie
+      const res = await axiosClient.post(
+        "/auth/me",
+        {},
+        {
+          headers: { "x-csrf-token": csrfToken || "" },
+          withCredentials: true,
+        }
+      );
       setUser(res.data.user || null);
       setLoginError(false);
     } catch (err: any) {
@@ -59,7 +65,7 @@ export const UserProvider = ({ children }: Props) => {
 
   const signOut = async () => {
     try {
-      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+      await axiosClient.post("/auth/signout"); // CSRF header automatically attached
       setUser(null);
       window.location.href = "/";
     } catch (err) {

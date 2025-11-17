@@ -25,13 +25,10 @@ const client = new OAuth2Client(
 
 // --- 1️⃣ Redirect to Google with state ---
 router.get("/google", (req, res) => {
-  // Generate a random state for CSRF protection
   const state = crypto.randomBytes(16).toString("hex");
-
-  // Save state in a cookie
   res.cookie("oauth_state", state, {
     httpOnly: true,
-    secure: isProduction, // ✅ false locally
+    secure: isProduction,
     sameSite: isProduction ? "None" : "Lax",
     maxAge: 5 * 60 * 1000, // 5 minutes
   });
@@ -55,12 +52,10 @@ router.get("/google/callback", async (req, res) => {
     const { code, state } = req.query;
     const storedState = req.cookies?.oauth_state;
 
-    // Check state
     if (!state || !storedState || state !== storedState) {
       return res.redirect(`${FRONTEND_URL}?error=invalid_oauth_state`);
     }
 
-    // Remove state cookie
     res.clearCookie("oauth_state", {
       httpOnly: true,
       secure: isProduction,
@@ -70,18 +65,15 @@ router.get("/google/callback", async (req, res) => {
 
     if (!code) return res.redirect(FRONTEND_URL);
 
-    // Exchange code for tokens
     const { tokens } = await client.getToken(code);
     client.setCredentials(tokens);
 
-    // Get user info
     const { data } = await client.request({
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
 
     const { id, name, email, picture } = data;
 
-    // ✅ Firebase Auth: create or update user
     let userRecord;
     try {
       userRecord = await admin.auth().getUserByEmail(email);
@@ -98,7 +90,6 @@ router.get("/google/callback", async (req, res) => {
       photoURL: picture,
     });
 
-    // Firestore user setup
     const userRef = admin.firestore().collection("users").doc(userRecord.uid);
     const userSnap = await userRef.get();
     const now = new Date().toISOString();
@@ -134,7 +125,7 @@ router.get("/google/callback", async (req, res) => {
       );
     }
 
-    // ✅ Create short-lived JWT
+    // --- JWT cookie ---
     const token = jwt.sign(
       { uid: userRecord.uid, name, email, picture },
       JWT_SECRET,
@@ -148,14 +139,16 @@ router.get("/google/callback", async (req, res) => {
       path: "/",
       maxAge: 60 * 60 * 1000,
     });
-    
+
+    // --- CSRF token cookie ---
     const csrfToken = crypto.randomBytes(24).toString("hex");
-      res.cookie("csrfToken", csrfToken, {
-        httpOnly: false,      // frontend needs to read it
-        secure: isProduction,
-        sameSite: isProduction ? "None" : "Lax",
-        maxAge: 60 * 60 * 1000, // 1 hour
-      });
+    res.cookie("csrfToken", csrfToken, {
+      httpOnly: false, // frontend reads this
+      secure: isProduction,
+      sameSite: isProduction ? "None" : "Lax",
+      maxAge: 60 * 60 * 1000,
+    });
+
     res.redirect(`${FRONTEND_URL}/dashboard`);
   } catch (err) {
     console.error("OAuth callback error:", err);
@@ -163,8 +156,15 @@ router.get("/google/callback", async (req, res) => {
   }
 });
 
-// --- 3️⃣ Protected route example ---
-router.get("/me", authMiddleware, (req, res) => {
+// --- 3️⃣ Secure /me endpoint (POST + CSRF) ---
+router.post("/me", authMiddleware, (req, res) => {
+  const clientCsrfToken = req.headers["x-csrf-token"];
+  const cookieCsrfToken = req.cookies?.csrfToken;
+
+  if (!clientCsrfToken || clientCsrfToken !== cookieCsrfToken) {
+    return res.status(403).json({ error: "Invalid CSRF token" });
+  }
+
   res.json({ user: req.user });
 });
 
