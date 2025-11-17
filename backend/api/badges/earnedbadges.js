@@ -1,16 +1,18 @@
 import express from "express";
 import admin from "firebase-admin";
+import { authMiddleware } from "../../middlewares/auth.js";
 
 const router = express.Router();
 
-router.post("/earned", async (req, res) => {
+// POST /api/badges/earned
+router.post("/earned", authMiddleware, async (req, res) => {
   try {
-    const { uid } = req.body;
-    if (!uid) return res.status(400).json({ error: "Missing user uid" });
+    const uid = req.user?.uid; // ✅ Always from authMiddleware
+    if (!uid) return res.status(401).json({ error: "Unauthorized" });
 
     const db = admin.firestore();
 
-    // 1️⃣ Get all earned badges from the subcollection
+    // 1️⃣ Get all earned badges from user's subcollection
     const earnedSnap = await db
       .collection("users")
       .doc(uid)
@@ -25,7 +27,7 @@ router.post("/earned", async (req, res) => {
 
     // 2️⃣ Get all badges from central badges collection
     const badgeSnap = await db.collection("badges").get();
-    const allBadges = badgeSnap.docs.map(doc => doc.data());
+    const allBadges = badgeSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
     // 3️⃣ Filter only the badges the user has earned
     const earnedBadges = allBadges.filter(badge => earnedBadgeIds.includes(badge.id));

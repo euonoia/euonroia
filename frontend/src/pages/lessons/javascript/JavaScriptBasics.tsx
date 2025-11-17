@@ -1,3 +1,4 @@
+// src/pages/lessons/javascript/JavaScriptBasics.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CodeBlockJavascript from "../../../components/lessons/CodeBlockJavascript";
@@ -7,7 +8,7 @@ import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
 import { useUser } from "../../../context/UserContext";
 import VerifyToken from "../../../components/auth/VerifyToken";
-import axios from "axios";
+import axios from "../../../utils/axiosClient";
 
 const JavaScriptBasicsContent: React.FC = () => {
   const navigate = useNavigate();
@@ -30,6 +31,9 @@ const JavaScriptBasicsContent: React.FC = () => {
 
   if (loading) return <div>Loading user data...</div>;
 
+  // --------------------------
+  // Handle block clicks
+  // --------------------------
   const handleBlockClick = (block: string) => {
     if (block === "let" && !letUsed) {
       setLetUsed(true);
@@ -72,6 +76,9 @@ const JavaScriptBasicsContent: React.FC = () => {
     }
   };
 
+  // --------------------------
+  // Build code preview
+  // --------------------------
   const buildJsOutput = (): string | null => {
     if (!letUsed && !constUsed && !functionUsed && !consoleUsed) return null;
 
@@ -107,6 +114,36 @@ const JavaScriptBasicsContent: React.FC = () => {
   };
 
   const jsOutput = buildJsOutput();
+
+  // --------------------------
+  // Save progress & badges
+  // --------------------------
+  useEffect(() => {
+    const allBlocksUsed = letUsed && constUsed && functionUsed && consoleUsed;
+
+    if (allBlocksUsed && user) {
+      const saveProgress = async () => {
+        try {
+          await axios.post("/api/lessons/progress", {
+            lessonId: "js-basics",
+            completedBlocks: ["let", "const", "function", "console.log"],
+          });
+
+          // Optional: award badges
+          await axios.post("/api/badgesEarned", {
+            lessonId: "js-basics",
+          });
+
+          console.log("Progress and badges updated!");
+        } catch (err) {
+          console.error("Failed to save progress:", err);
+        }
+      };
+
+      saveProgress();
+    }
+  }, [letUsed, constUsed, functionUsed, consoleUsed, user]);
+
   const handleNextLesson = () => navigate("/lessons/js-conditions");
 
   return (
@@ -121,7 +158,7 @@ const JavaScriptBasicsContent: React.FC = () => {
               Tap the blocks to learn how JavaScript works — variables, constants, functions, and output!
             </p>
 
-            <h2 className="section-title">JAVASCRIPT FUNDAMENTALS</h2>
+            <h2 className="section-title">JavaScript Fundamentals</h2>
             <div className="code-blocks">
               {["let", "const", "function", "console.log"].map((block) => (
                 <CodeBlockJavascript
@@ -164,7 +201,7 @@ const JavaScriptBasicsContent: React.FC = () => {
             )}
           </div>
 
-          {/* NEXT LESSON BUTTON */}
+          {/* NEXT BUTTON */}
           <div className="next-btn-container">
             <button
               className="next-btn"
@@ -176,7 +213,7 @@ const JavaScriptBasicsContent: React.FC = () => {
           </div>
         </div>
       </main>
-     
+      <Footer />
     </div>
   );
 };

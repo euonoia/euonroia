@@ -1,15 +1,17 @@
 import express from "express";
 import admin from "firebase-admin";
+import { authMiddleware } from "../../middlewares/auth.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+// GET /api/leaderboard
+router.get("/", /* authMiddleware, */ async (req, res) => {
   try {
     const usersSnapshot = await admin
       .firestore()
       .collection("users")
       .orderBy("xp", "desc")
-      .limit(10) // increase if needed
+      .limit(10) // Adjust as needed
       .get();
 
     const leaderboard = usersSnapshot.docs.map((doc, index) => {
@@ -24,7 +26,7 @@ router.get("/", async (req, res) => {
 
     res.json({ leaderboard });
   } catch (err) {
-    console.error(err);
+    console.error("Failed to fetch leaderboard:", err);
     res.status(500).json({ error: "Failed to fetch leaderboard" });
   }
 });

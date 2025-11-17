@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from "../utils/axiosClient";
+
 
 const OAuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const [message, setMessage] = useState("Completing sign in...");
 
   // ✅ Use Vite environment variable (fallback to production URL if missing)
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://euonroia-secured.onrender.com";
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
     let mounted = true;

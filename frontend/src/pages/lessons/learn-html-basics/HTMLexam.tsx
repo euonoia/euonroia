@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
-import axios from 'axios';
+import axios from "../../../utils/axiosClient";
 import CodeBlock from '../../../components/lessons/CodeBlock';
 import Header from '../../../components/header';
 import Footer from '../../../components/footer';

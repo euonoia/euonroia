@@ -4,23 +4,23 @@ FROM node:22-alpine
 # Set working directory
 WORKDIR /app
 
-# Install Yarn globally if not already installed
-RUN if ! command -v yarn > /dev/null; then npm install -g yarn; fi
+# Cache busting argument (force reinstall when needed)
+ARG CACHEBUST=1
 
-# Copy package dependency files first for caching
-COPY package*.json ./
+# Copy only package files first for caching
+COPY package.json yarn.lock ./
 
-# Install dependencies using Yarn
+# Install dependencies
 RUN yarn install --frozen-lockfile
 
-# Install nodemon globally using Yarn
-RUN yarn global add nodemon
-
-# Copy backend source code into the image
+# Copy backend source code
 COPY . .
 
-# Expose the backend port
+# Install nodemon globally (for hot reload)
+RUN yarn global add nodemon
+
+# Expose backend port
 EXPOSE 5000
 
-# Use Yarn to run the development script
+# Dev command
 CMD ["yarn", "run", "dev"]
