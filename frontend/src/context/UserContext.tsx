@@ -29,35 +29,35 @@ export const UserProvider = ({ children }: Props) => {
   const [loading, setLoading] = useState(true);
   const [loginError, setLoginError] = useState(false);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  // ✅ Robust backend URL: fallback to current origin if env var is missing
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || window.location.origin;
 
   const fetchUser = async () => {
-  setLoading(true);
-  try {
-    const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-      withCredentials: true,
-    });
-    setUser(res.data.user || null);
-    setLoginError(false); // clear warning if auth works
-  } catch (err: any) {
-    console.warn("Auth check failed:", err?.response?.status || err.message);
-    setUser(null);
+    setLoading(true);
+    try {
+      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+        withCredentials: true,
+      });
+      setUser(res.data.user || null);
+      setLoginError(false); // clear warning if auth works
+    } catch (err: any) {
+      console.warn("Auth check failed:", err?.response?.status || err.message);
+      setUser(null);
 
-    // detect blocked cookies / unauthorized
-    const isCookieBlocked =
-      !err.response || err.response.status === 401 || err.response.status === 403;
+      // detect blocked cookies / unauthorized
+      const isCookieBlocked =
+        !err.response || err.response.status === 401 || err.response.status === 403;
 
-    if (isCookieBlocked) {
-      console.warn("Login likely failed — blocked cookies or Brave Shield.");
-      setLoginError(true);
-    } else {
-      setLoginError(false);
+      if (isCookieBlocked) {
+        console.warn("Login likely failed — blocked cookies or Brave Shield.");
+        setLoginError(true);
+      } else {
+        setLoginError(false);
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   useEffect(() => {
     fetchUser();
@@ -65,20 +65,19 @@ export const UserProvider = ({ children }: Props) => {
 
   const signInWithGoogle = () => {
     setLoginError(false);
+    // ✅ Use BACKEND_URL fallback
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
   const signOut = async () => {
-  try {
-    await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
-    setUser(null);
-    // Redirect to homepage
-    window.location.href = '/';
-  } catch (err) {
-    console.error("Sign out failed:", err);
-  }
-};
-
+    try {
+      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+      setUser(null);
+      window.location.href = '/';
+    } catch (err) {
+      console.error("Sign out failed:", err);
+    }
+  };
 
   return (
     <UserContext.Provider
