@@ -1,4 +1,4 @@
-
+# ---- Frontend build ----
 FROM node:18-alpine AS frontend
 
 WORKDIR /app/frontend
@@ -10,9 +10,12 @@ RUN npm install
 # Copy frontend source
 COPY frontend/ ./
 
+# Pass backend URL as build arg
+ARG VITE_BACKEND_URL
+ENV VITE_BACKEND_URL=$VITE_BACKEND_URL
+
 # Build Vite production files
 RUN npm run build
-
 
 FROM node:18-alpine
 
