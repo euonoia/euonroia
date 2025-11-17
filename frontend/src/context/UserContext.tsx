@@ -29,35 +29,24 @@ export const UserProvider = ({ children }: Props) => {
   const [loading, setLoading] = useState(true);
   const [loginError, setLoginError] = useState(false);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL 
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   const fetchUser = async () => {
-  setLoading(true);
-  try {
-    const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-      withCredentials: true,
-    });
-    setUser(res.data.user || null);
-    setLoginError(false); // clear warning if auth works
-  } catch (err: any) {
-    console.warn("Auth check failed:", err?.response?.status || err.message);
-    setUser(null);
-
-    // detect blocked cookies / unauthorized
-    const isCookieBlocked =
-      !err.response || err.response.status === 401 || err.response.status === 403;
-
-    if (isCookieBlocked) {
-      console.warn("Login likely failed — blocked cookies or Brave Shield.");
-      setLoginError(true);
-    } else {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+        withCredentials: true,
+      });
+      setUser(res.data.user || null);
       setLoginError(false);
+    } catch (err: any) {
+      console.warn("Auth check failed:", err?.response?.status || err.message);
+      setUser(null);
+      setLoginError(true);
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   useEffect(() => {
     fetchUser();
@@ -69,16 +58,14 @@ export const UserProvider = ({ children }: Props) => {
   };
 
   const signOut = async () => {
-  try {
-    await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
-    setUser(null);
-    // Redirect to homepage
-    window.location.href = '/';
-  } catch (err) {
-    console.error("Sign out failed:", err);
-  }
-};
-
+    try {
+      await axios.post(`${BACKEND_URL}/auth/signout`, {}, { withCredentials: true });
+      setUser(null);
+      window.location.href = "/";
+    } catch (err) {
+      console.error("Sign out failed:", err);
+    }
+  };
 
   return (
     <UserContext.Provider
