@@ -25,7 +25,6 @@ import MaintenanceMessage from "./components/messages/Maintenance";
 import AddingFeature from "./components/messages/AddingFeature";
 
 import { useUser } from "./context/UserContext";
-import LoginWarning from "./components/messages/LoginWarning";
 
 function AppContent() {
   const { loading } = useUser();
@@ -33,10 +32,7 @@ function AppContent() {
   if (loading) return <p style={{ textAlign: "center", marginTop: "2rem" }}>Loading...</p>;
 
   return (
-    <>
-      {/* Login warning for blocked cookies */}
-      <LoginWarning />
-
+    <>  
       <Routes>
         <Route path="/" element={<LandingPage />} />
       
