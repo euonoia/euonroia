@@ -29,8 +29,8 @@ export const UserProvider = ({ children }: Props) => {
   const [loading, setLoading] = useState(true);
   const [loginError, setLoginError] = useState(false);
 
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || window.location.origin;
-  
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL 
+
   const fetchUser = async () => {
   setLoading(true);
   try {
