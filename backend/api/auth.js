@@ -17,7 +17,7 @@ const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   isProduction
-    ? "https://euonroia-secured.onrender.com/auth/google/callback"
+    ? "https://euonroia.onrender.com/auth/google/callback"
     : "http://localhost:5000/auth/google/callback"
 );
 
