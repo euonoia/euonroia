@@ -75,15 +75,14 @@ app.use("/api/badgesEarned", earnedBadges);
 /* --------------------------------------------------
    3️⃣ SERVE FRONTEND BUILD (Vite dist/)
    -------------------------------------------------- */
-
-// Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
 /* --------------------------------------------------
    4️⃣ REACT ROUTER FALLBACK
+       Excludes /api and /auth from React Router
    -------------------------------------------------- */
-app.get("*", (req, res) => {
-  return res.sendFile(path.join(__dirname, "public", "index.html"));
+app.get(/^\/(?!api|auth).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 /* --------------------------------------------------

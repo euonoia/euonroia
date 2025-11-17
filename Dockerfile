@@ -1,6 +1,4 @@
-# ----------------------------------------------------
-# 1️⃣ FRONTEND BUILD STAGE
-# ----------------------------------------------------
+
 FROM node:18-alpine AS frontend
 
 WORKDIR /app/frontend
@@ -16,10 +14,6 @@ COPY frontend/ ./
 RUN npm run build
 
 
-
-# ----------------------------------------------------
-# 2️⃣ BACKEND STAGE (FINAL IMAGE)
-# ----------------------------------------------------
 FROM node:18-alpine
 
 WORKDIR /app
