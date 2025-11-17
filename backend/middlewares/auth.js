@@ -14,7 +14,7 @@ export function authMiddleware(req, res, next) {
       return res.status(401).json({ error: "Invalid token payload" });
     }
 
-    req.user = decoded; // ✅ always has uid
+    req.user = decoded; 
     next();
   } catch (err) {
     console.error("JWT verification failed:", err);

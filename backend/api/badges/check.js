@@ -7,7 +7,7 @@ const router = express.Router();
 // POST /api/badges/check
 router.post("/check", authMiddleware, async (req, res) => {
   try {
-    const uid = req.user?.uid; // ✅ Always from JWT
+    const uid = req.user?.uid; 
     const { badgeId } = req.body;
 
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
