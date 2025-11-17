@@ -4,7 +4,6 @@ import { FaLaptopCode, FaGlobe, FaUsers } from "react-icons/fa";
 import Header from '../components/header';
 import Footer from '../components/footer';
 import { useUser } from '../context/UserContext';
-import LoginWarning from '../components/messages/LoginWarning';
 import "../styles/pages/LandingPage.css";
 
 const LandingPage: FC = () => {
@@ -24,8 +23,7 @@ const LandingPage: FC = () => {
 
       <main className="app-main">
         <div className="landing-container">
-          <LoginWarning />
-
+      
           <div className="landing-main">
             {/* Hero Section */}
             <section className="hero-section">
