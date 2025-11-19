@@ -32,7 +32,7 @@ const LessonsPage: FC = () => {
 
   return (
     <div className="app-wrapper">
-      <Header hideUser={false} />
+      <Header />
 
       <main className="app-main">
         <section className="lessons-hero full-screen-section">

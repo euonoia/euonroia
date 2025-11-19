@@ -23,7 +23,7 @@ const LandingPage: FC = () => {
 
   return (
     <div className="app-wrapper">
-      <Header hideUser={true} />
+      <Header />
 
       <main className="app-main">
         <div className="landing-container">
