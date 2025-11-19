@@ -1,4 +1,4 @@
-// src/pages/Dashboard.tsx
+// --- imports (unchanged)
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaTrophy } from "react-icons/fa";
@@ -48,6 +48,12 @@ interface Badge {
 const DashboardContent: React.FC = () => {
   const { user, loading } = useUser();
   const { theme } = useTheme();
+  const [streak, setStreak] = useState<number>(0);
+  const [lastActive, setLastActive] = useState<string>("");
+  const [xp, setXP] = useState<number>(0);
+  const [level, setLevel] = useState<number>(1);
+
+
 
   const [progressData, setProgressData] = useState<ProgressData>({
     displayName: "",
@@ -69,15 +75,56 @@ const DashboardContent: React.FC = () => {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loadingBadges, setLoadingBadges] = useState(true);
 
+useEffect(() => {
+  if (!user) return;
+
+  const fetchXP = async () => {
+    try {
+      const res = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/api/milestones/xp`,
+        { withCredentials: true }
+      );
+      setXP(res.data.xp);
+      setLevel(res.data.level);
+    } catch (err) {
+      console.error("Failed to fetch user XP:", err);
+    }
+  };
+
+  fetchXP();
+}, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchStreak = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_BACKEND_URL}/api/milestones/streak`,
+          { withCredentials: true }
+        );
+
+        setStreak(res.data.streak || 0);
+        setLastActive(res.data.lastActive || "");
+      } catch (err) {
+        console.error("Failed to fetch streak:", err);
+      }
+    };
+
+    fetchStreak();
+  }, [user]);
+
   // Fetch user progress
   useEffect(() => {
     if (!user) return;
+
     const fetchProgress = async () => {
       try {
         const res = await axios.get<ProgressData>(
           `${import.meta.env.VITE_BACKEND_URL}/api/milestones/progress`,
           { withCredentials: true }
         );
+
         const data = res.data;
         setProgressData(data);
 
@@ -93,6 +140,7 @@ const DashboardContent: React.FC = () => {
         console.error("Failed to fetch progress:", err);
       }
     };
+
     fetchProgress();
   }, [user]);
 
@@ -104,6 +152,7 @@ const DashboardContent: React.FC = () => {
           `${import.meta.env.VITE_BACKEND_URL}/api/leaderboard`,
           { withCredentials: true }
         );
+
         const allUsers = res.data.leaderboard.map((u, index) => ({
           rank: index + 1,
           displayName: u.displayName || "Unknown",
@@ -111,6 +160,7 @@ const DashboardContent: React.FC = () => {
           xp: u.xp ?? 0,
           level: u.level ?? 1,
         }));
+
         setLeaderboard(allUsers);
       } catch (err) {
         console.error("Failed to fetch leaderboard:", err);
@@ -118,12 +168,14 @@ const DashboardContent: React.FC = () => {
         setLoadingLeaderboard(false);
       }
     };
+
     fetchLeaderboard();
   }, []);
 
   // Fetch earned badges
   useEffect(() => {
     if (!user) return;
+
     const fetchBadges = async () => {
       try {
         const res = await axios.post<{ earnedBadges: Badge[] }>(
@@ -138,9 +190,11 @@ const DashboardContent: React.FC = () => {
         setLoadingBadges(false);
       }
     };
+
     fetchBadges();
   }, [user]);
 
+  // Loading screen
   if (loading) {
     return (
       <div className={`dashboard-page ${theme}`}>
@@ -153,6 +207,7 @@ const DashboardContent: React.FC = () => {
     );
   }
 
+  // Determine next lesson
   const nextLesson =
     progressData.htmlBasicsProgress < 100
       ? lessons.find(l => l.id === "html-basics")
@@ -172,10 +227,11 @@ const DashboardContent: React.FC = () => {
             <h1>Welcome back, {progressData.displayName || "Guest"}!</h1>
             <p>Continue your coding journey today</p>
 
+            {/* UPDATED: Dashboard Stats now uses real streak */}
             <DashboardStats
               lessonsCompleted={lessons.filter(l => l.progress === 100).length}
-              streak={3}
-              xp={450}
+              streak={streak}
+              xp={xp}
             />
           </div>
 

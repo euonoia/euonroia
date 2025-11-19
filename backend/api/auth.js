@@ -9,12 +9,10 @@ const router = Router();
 const isProduction = process.env.NODE_ENV === "production";
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// Frontend URL
 const FRONTEND_URL = isProduction
   ? "https://euonroia.onrender.com"
   : "http://localhost:5173";
 
-// Google OAuth client
 const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
@@ -23,14 +21,14 @@ const client = new OAuth2Client(
     : "http://localhost:5000/auth/google/callback"
 );
 
-// --- 1️⃣ Redirect to Google with state ---
+// --- 1️⃣ Google Login Redirect ---
 router.get("/google", (req, res) => {
   const state = crypto.randomBytes(16).toString("hex");
   res.cookie("oauth_state", state, {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "None" : "Lax",
-    maxAge: 5 * 60 * 1000, // 5 minutes
+    maxAge: 5 * 60 * 1000,
   });
 
   const url = client.generateAuthUrl({
@@ -46,7 +44,7 @@ router.get("/google", (req, res) => {
   res.redirect(url);
 });
 
-// --- 2️⃣ OAuth callback ---
+// --- 2️⃣ OAuth Google Callback ---
 router.get("/google/callback", async (req, res) => {
   try {
     const { code, state } = req.query;
@@ -74,6 +72,7 @@ router.get("/google/callback", async (req, res) => {
 
     const { id, name, email, picture } = data;
 
+    // Get or create user in Firebase Auth
     let userRecord;
     try {
       userRecord = await admin.auth().getUserByEmail(email);
@@ -90,9 +89,13 @@ router.get("/google/callback", async (req, res) => {
       photoURL: picture,
     });
 
+    // Firestore user document
     const userRef = admin.firestore().collection("users").doc(userRecord.uid);
     const userSnap = await userRef.get();
-    const now = new Date().toISOString();
+    const now = admin.firestore.Timestamp.now();
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Start of today
 
     if (!userSnap.exists) {
       await userRef.set(
@@ -113,19 +116,23 @@ router.get("/google/callback", async (req, res) => {
         { merge: true }
       );
     } else {
-      await userRef.set(
-        {
-          displayName: name,
-          email,
-          photoURL: picture,
-          lastLogin: now,
-          lastActive: now,
-        },
-        { merge: true }
-      );
+      const userData = userSnap.data();
+      const lastLoginDate = userData.lastLogin?.toDate() || new Date(0);
+      const isNewDay = lastLoginDate < today;
+
+      const updates = {
+        displayName: name,
+        email,
+        photoURL: picture,
+        lastActive: now, // always update lastActive
+      };
+
+      if (isNewDay) updates.lastLogin = now; // update lastLogin only once per day
+
+      await userRef.set(updates, { merge: true });
     }
 
-    // --- JWT cookie ---
+    // JWT cookie
     const token = jwt.sign(
       { uid: userRecord.uid, name, email, picture },
       JWT_SECRET,
@@ -140,10 +147,10 @@ router.get("/google/callback", async (req, res) => {
       maxAge: 60 * 60 * 1000,
     });
 
-    // --- CSRF token cookie ---
+    // CSRF token
     const csrfToken = crypto.randomBytes(24).toString("hex");
     res.cookie("csrfToken", csrfToken, {
-      httpOnly: false, // frontend reads this
+      httpOnly: false,
       secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
       maxAge: 60 * 60 * 1000,
@@ -156,7 +163,7 @@ router.get("/google/callback", async (req, res) => {
   }
 });
 
-// --- 3️⃣ Secure /me endpoint (POST + CSRF) ---
+// --- 3️⃣ /me endpoint ---
 router.post("/me", authMiddleware, (req, res) => {
   const clientCsrfToken = req.headers["x-csrf-token"];
   const cookieCsrfToken = req.cookies?.csrfToken;
@@ -170,12 +177,36 @@ router.post("/me", authMiddleware, (req, res) => {
 
 // --- 4️⃣ Logout ---
 router.post("/signout", (req, res) => {
+  // Clear authentication token
   res.clearCookie("authToken", {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "None" : "Lax",
     path: "/",
   });
+
+  // Clear CSRF token
+  res.clearCookie("csrfToken", {
+    httpOnly: false, // matches how it was set
+    secure: isProduction,
+    sameSite: isProduction ? "None" : "Lax",
+    path: "/",
+  });
+
+  res.json({ success: true });
+});
+
+
+// --- 5️⃣ Update lastActive endpoint (heartbeat) ---
+router.post("/active", authMiddleware, async (req, res) => {
+  const uid = req.user?.uid;
+  if (!uid) return res.status(401).json({ error: "Unauthorized" });
+
+  const userRef = admin.firestore().collection("users").doc(uid);
+  await userRef.update({
+    lastActive: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
   res.json({ success: true });
 });
 

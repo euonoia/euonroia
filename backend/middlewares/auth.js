@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
+import admin from "firebase-admin";
 
-export function authMiddleware(req, res, next) {
+export async function authMiddleware(req, res, next) {
   const token = req.cookies?.authToken;
 
   if (!token) {
@@ -14,7 +15,13 @@ export function authMiddleware(req, res, next) {
       return res.status(401).json({ error: "Invalid token payload" });
     }
 
-    req.user = decoded; 
+    req.user = decoded;
+
+    // ✅ Update lastActive on every request
+    await admin.firestore().collection("users").doc(decoded.uid).update({
+      lastActive: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
     next();
   } catch (err) {
     console.error("JWT verification failed:", err);

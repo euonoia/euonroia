@@ -1,0 +1,50 @@
+.login-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.login-modal-box {
+  background: #fff;
+  padding: 2rem;
+  width: 90%;
+  max-width: 380px;
+  border-radius: 14px;
+  text-align: center;
+  animation: pop 0.25s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.login-modal-actions {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.login-btn {
+  padding: 0.75rem 1rem;
+  border: none;
+  background: #2b6cf6;
+  color: white;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.cancel-btn {
+  padding: 0.75rem 1rem;
+  background: #ddd;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}

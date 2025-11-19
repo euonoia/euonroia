@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../../components/header";
 import Footer from "../../../components/footer";
-import CodeBlockCSSExam from "../../../components/lessons/CodeBlockCSSExam";
+import CodeBlockCSSExam from "./CodeBlocks/CodeBlockCSSExam";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
 import confetti from "canvas-confetti";
@@ -172,7 +172,7 @@ const buildLivePreview = () => {
         <div className="lesson-content">
           <div className="lesson-left">
             <h2 className="lesson-title">CSS QUIZ</h2>
-            <p className="lesson-description">Let's test your memory</p>
+            <p className="lesson-description">Answer the higlighted number</p>
             <h2 className="section-title">Choose the correct Blocks</h2>
             <div className="code-blocks" style={{ display: "flex", flexWrap: "wrap" }}>
               {shuffledBlocks.map((tag) => {

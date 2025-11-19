@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../../components/header";
-import CodeBlockCSS from "../../../components/lessons/CodeBlockCSS";
+import CodeBlockCSS from "./CodeBlocks/CodeBlockCSS";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
 import VerifyToken from "../../../components/auth/VerifyToken";
@@ -121,11 +121,6 @@ const CSSMultipleElementsContent: React.FC = () => {
                 />
               ))}
             </div>
-            <div className="next-btn-container">
-              <button className="next-btn" onClick={handleNextLesson} disabled={!lessonComplete}>
-                READY FOR EXAM?
-              </button>
-            </div>
           </div>
           <div className="lesson-right">
             <h3 className="output-title">HTML Output (Code):</h3>
@@ -153,6 +148,11 @@ const CSSMultipleElementsContent: React.FC = () => {
               }}
             />
           </div>
+            <div className="next-btn-container">
+              <button className="next-btn" onClick={handleNextLesson} disabled={!lessonComplete}>
+                READY FOR EXAM?
+              </button>
+            </div>
         </div>
       </main>
     </div>

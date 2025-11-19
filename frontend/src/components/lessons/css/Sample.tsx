@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../../components/header";
 import Footer from "../../../components/footer";
-import CodeBlockCSS from "../../../components/lessons/CodeBlockCSS";
+import CodeBlockCSS from "./CodeBlocks/CodeBlockCSS";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
 import { useUser } from "../../../context/UserContext";

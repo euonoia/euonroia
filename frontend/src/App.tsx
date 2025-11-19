@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Dashboard from "./pages/dashboard";
 import LandingPage from "./pages/LandingPage";
 import OAuthCallback from "./components/OAuthCallBack";
+import LessonsPage from "./pages/lessons";
 
 // Lessons
 // Lessons Html Basics
@@ -21,6 +22,8 @@ import JavaScriptConditions from "./pages/lessons/javascript/JavaScriptCondition
 import JavaScriptDisplay from "./pages/lessons/javascript/JavaScriptDisplay";
 import JavaScriptExam from "./pages/lessons/javascript/JavaScriptExam";
 
+import PasteToBlocks from "./pages/paste-to-blocks";
+
 import MaintenanceMessage from "./components/messages/Maintenance";
 import AddingFeature from "./components/messages/AddingFeature";
 
@@ -35,8 +38,9 @@ function AppContent() {
     <>  
       <Routes>
         <Route path="/" element={<LandingPage />} />
-      
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/lessons" element={<LessonsPage />} />
+
   
         <Route path="/oauth-callback" element={<OAuthCallback />} />
         <Route path="/lessons/greetings" element={<Greetings />} />
@@ -56,6 +60,7 @@ function AppContent() {
         <Route path="/lessons/js-display" element={<JavaScriptDisplay />} />
         <Route path="/lessons/js-exam" element={<JavaScriptExam/>}/>
 
+        <Route path="/paste-to-blocks" element={<PasteToBlocks />} />
 
         {/*maintenance message*/}
         <Route path="/maintenance" element={<MaintenanceMessage />} />

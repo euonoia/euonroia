@@ -14,6 +14,16 @@
   display: flex;
   flex-direction: column;
 }
+/* =============================
+   Full Screen
+   ============================= */
+.full-screen-section {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 /* =============================
    LANDING PAGE CONTAINER
@@ -68,6 +78,22 @@
   color: var(--text-secondary);
   margin-bottom: var(--space-6);
   line-height: 1.6;
+}
+.hero-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.hero-btn-outline {
+  background: transparent;
+  color: var(--accent);
+  border: 2px solid var(--accent);
+}
+
+.hero-btn-outline:hover {
+  background: var(--accent);
+  color: white;
 }
 
 /* =============================
@@ -220,5 +246,20 @@
   .features-section::before,
   .features-section::after {
     display: none; /* remove glow bubbles for small screens */
+  }
+}
+
+/* Fix overflow on laptop screens */
+@media (max-width: 1400px) {
+  .features-section {
+    max-width: 100%;
+  }
+
+  .features-section::before {
+    left: -20px;   /* reduce bubble overflow */
+  }
+
+  .features-section::after {
+    right: -20px;  /* reduce bubble overflow */
   }
 }
