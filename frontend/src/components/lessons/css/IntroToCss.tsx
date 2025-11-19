@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CodeBlockCSS from "../../../components/lessons/CodeBlockCSS";
+import CodeBlockCSS from "./CodeBlocks/CodeBlockCSS";
 import Header from "../../../components/header";
 import Footer from "../../../components/footer";
 import "../../../styles/pages/lessons/LessonPage.css";

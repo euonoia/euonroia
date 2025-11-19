@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../../components/header";
 import Footer from "../../../components/footer";
-import CodeBlockCSSExam from "../../../components/lessons/CodeBlockCSSExam";
+import CodeBlockCSSExam from "./CodeBlocks/CodeBlockCSSExam";
 import "../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../context/ThemeContext";
 import confetti from "canvas-confetti";

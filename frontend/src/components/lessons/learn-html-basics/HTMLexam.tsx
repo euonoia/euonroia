@@ -7,7 +7,7 @@ import Header from '../../../components/header';
 import "../../../styles/pages/lessons/LessonPage.css";
 import VerifyToken from '../../../components/auth/VerifyToken';
 import { useUser } from '../../../context/UserContext';
-
+import LoginRequiredModal from '../../modals/LoginRequireModal';
 const shuffleArray = (array: string[]) => {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -19,7 +19,10 @@ const shuffleArray = (array: string[]) => {
 
 const HTMLexamContent: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, signInWithGoogle } = useUser();
+  const [pendingExamSave, setPendingExamSave] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
 
   const [doctypeAdded, setDoctypeAdded] = useState(false);
   const [htmlAdded, setHtmlAdded] = useState(false);
@@ -148,39 +151,53 @@ const HTMLexamContent: React.FC = () => {
     doctypeAdded && htmlAdded && headAdded && bodyAdded &&
     headingsAdded && paragraphsAdded && linksAdded && imagesAdded;
 
+ useEffect(() => {
+  if (!isExamComplete) return;
+
+  if (!user) {
+    setShowLoginModal(true);
+    setPendingExamSave(true);
+    return;
+  }
+
+  const saveExam = async () => {
+  try {
+    await axios.post(
+      "/api/lessons/html-basics/quizzes",
+      { htmlOutput }
+    );
+
+    await axios.post(
+      "/api/badges/check",
+      { uid: user!.id, badgeId: "first_lesson" }
+    );
+
+    setShowCongrats(true);
+
+    const duration = 3000;
+    const end = Date.now() + duration;
+    (function frame() {
+      confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+      confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    })();
+  } catch (err) {
+    console.error("Failed to save exam or award badge:", err);
+  }
+};
+
+
   useEffect(() => {
-    if (isExamComplete && user) {
-      setShowCongrats(true);
+  if (pendingExamSave && user) {
+    // Guest just became logged-in → save the exam now
+    saveExam();
+    setPendingExamSave(false);
+    setShowLoginModal(false); // hide modal
+  }
+}, [pendingExamSave, user, htmlOutput]);
 
-      // 1️⃣ Save exam output
-      axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/lessons/html-basics/quizzes`,
-        { htmlOutput },
-        { withCredentials: true }
-      ).catch(() => {});
-
-     // 2️⃣ Automatically award "first_lesson" badge
-        axios.post(
-          `${import.meta.env.VITE_BACKEND_URL}/api/badges/check`,
-          { 
-            uid: user.id,           // logged-in user UID
-            badgeId: "first_lesson" // the badge to award
-          },
-          { withCredentials: true }
-        ).catch((err) => {
-          console.error("Failed to award first_lesson badge:", err);
-        });
-
-      // 🎉 Confetti effect
-      const duration = 3000;
-      const end = Date.now() + duration;
-      (function frame() {
-        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
-        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
-        if (Date.now() < end) requestAnimationFrame(frame);
-      })();
-    }
-  }, [isExamComplete, htmlOutput, user]);
+  saveExam();
+}, [isExamComplete, user, htmlOutput]);
 
   const handleCongratsClick = () => navigate('/dashboard');
 
@@ -219,6 +236,13 @@ const HTMLexamContent: React.FC = () => {
           </div>
         </div>
 
+         {/* Login required modal for guests */}
+          {showLoginModal && (
+            <LoginRequiredModal
+              onLogin={signInWithGoogle} 
+            />
+          )}
+
         {showCongrats && (
           <div className="congrats-overlay" onClick={handleCongratsClick}>
             <div className="congrats-box">
@@ -229,6 +253,7 @@ const HTMLexamContent: React.FC = () => {
             </div>
           </div>
         )}
+
       </main>
     </div>
   );
