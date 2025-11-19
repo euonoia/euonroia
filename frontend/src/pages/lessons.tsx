@@ -15,9 +15,9 @@ interface Lesson {
 }
 
 const lessons: Lesson[] = [
-  { id: "html-basics", title: "HTML", description: "Learn the structure of web pages using HTML.", icon: <FaHtml5 />, route: "/lessons/html-basics" },
-  { id: "css-basics", title: "CSS", description: "Style your web pages with colors, layouts, and animations.", icon: <FaCss3Alt />, route: "/lessons/css-basics" },
-  { id: "js-basics", title: "JavaScript", description: "Add interactivity and dynamic behavior to your websites.", icon: <FaJs />, route: "/lessons/js-basics" },
+  { id: "html-basics", title: "HTML", description: "Learn the structure of web pages using HTML.", icon: <FaHtml5 />, route: "/adding-feature" },
+  { id: "css-basics", title: "CSS", description: "Style your web pages with colors, layouts, and animations.", icon: <FaCss3Alt />, route: "/adding-feature" },
+  { id: "js-basics", title: "JavaScript", description: "Add interactivity and dynamic behavior to your websites.", icon: <FaJs />, route: "/adding-feature" },
 ];
 
 const LessonsPage: FC = () => {
