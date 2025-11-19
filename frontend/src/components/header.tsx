@@ -56,7 +56,7 @@ export default function Header({ hideUser = false, showLoginButton = false }: He
             <Link to="/dashboard">
               <FiHome style={{ marginRight: "0.25rem" }} /> Dashboard
             </Link>
-            <Link to="/adding-feature">
+            <Link to="/lessons">
               <FiBook style={{ marginRight: "0.25rem" }} /> Lessons
             </Link>
             <Link to="/adding-feature">

@@ -17,6 +17,7 @@ import javascriptLessonsRouter from "./api/lessons/javascript.js";
 import leaderboardRoutes from "./api/leaderboard/leaderboard.js";
 import checkBadge from "./api/badges/check.js";
 import earnedBadges from "./api/badges/earnedbadges.js";
+import preloadSnippets from "./api/trainer/preloadSnippets.js";
 
 const app = express();
 const isProduction = ENV.NODE_ENV === "production";
@@ -71,6 +72,8 @@ app.use("/api/milestones", dashboardRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/badges", checkBadge);
 app.use("/api/badgesEarned", earnedBadges);
+
+app.use("/api/admin", preloadSnippets);
 
 /* --------------------------------------------------
    3️⃣ SERVE FRONTEND BUILD (Vite dist/)

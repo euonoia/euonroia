@@ -179,14 +179,7 @@
   margin-top: 1rem;
   padding: 1.2rem 1.5rem;
   border-radius: 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.05);
   transition: box-shadow 0.3s ease;
-}
-
-.continue-learning-card:hover {
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
 }
 
 .start-lesson-btn {

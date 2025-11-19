@@ -8,12 +8,12 @@ import '../../../../styles/pages/lessons/LessonPage.css';
 import { useUser } from '../../../../context/UserContext';
 import LoginRequiredModal from '../../../modals/LoginRequireModal';
 import { shuffleArray } from '../utils/shuffleArray';
+import Cookies from "js-cookie";
 
 const HTMLexamContent: React.FC = () => {
   const navigate = useNavigate();
-  const { user, signInWithGoogle } = useUser();
-  const [pendingExamSave, setPendingExamSave] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  const { user } = useUser();
+
   const [doctypeAdded, setDoctypeAdded] = useState(false);
   const [htmlAdded, setHtmlAdded] = useState(false);
   const [headAdded, setHeadAdded] = useState(false);
@@ -24,49 +24,19 @@ const HTMLexamContent: React.FC = () => {
   const [imagesAdded, setImagesAdded] = useState(false);
   const [showCongrats, setShowCongrats] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
   const [descriptions, setDescriptions] = useState({
     doctype: '', html: '', head: '', body: '', headings: '', paragraphs: '', links: '', images: ''
   });
 
+  // 🔥 Blocks are randomized ONCE on load
   const [availableBlocks, setAvailableBlocks] = useState(() =>
-    shuffleArray(['DOCTYPE', 'html', 'head', 'body', 'headings', 'paragraphs', 'links', 'images'])
+    shuffleArray([
+      'DOCTYPE', 'html', 'head', 'body',
+      'headings', 'paragraphs', 'links', 'images'
+    ])
   );
 
-  // Build HTML output
-  const buildHtmlOutput = (): string => {
-    const lines: string[] = [];
-    if (doctypeAdded) {
-      lines.push(`<!-- ${descriptions.doctype} -->`, '<!DOCTYPE html>');
-    }
-    if (htmlAdded) {
-      lines.push('<html>');
-      if (headAdded) {
-        lines.push('  <head>');
-        lines.push(`    <!-- ${descriptions.head} -->`);
-        lines.push('    <meta charset="UTF-8" />');
-        lines.push('    <meta name="viewport" content="width=device-width, initial-scale=1.0" />');
-        lines.push('    <title>HTML Exam</title>');
-        lines.push('  </head>');
-      }
-      if (bodyAdded) {
-        lines.push('  <body>');
-        if (headingsAdded) lines.push('    <h1>Heading 1</h1>', '    <h2>Heading 2</h2>');
-        if (paragraphsAdded) lines.push('    <p>Paragraph</p>');
-        if (linksAdded) lines.push('    <a href="#">Link</a>');
-        if (imagesAdded) lines.push('    <img src="example.jpg" alt="Example" />');
-        lines.push('  </body>');
-      }
-      lines.push('</html>');
-    }
-    return lines.join('\n') || 'Click blocks to build HTML structure';
-  };
-
-  const htmlOutput = buildHtmlOutput();
-  const isExamComplete =
-    doctypeAdded && htmlAdded && headAdded && bodyAdded &&
-    headingsAdded && paragraphsAdded && linksAdded && imagesAdded;
-
-  // Handle block clicks
   const handleBlockClick = (tag: string) => {
     const addBlock = (
       descKey: keyof typeof descriptions,
@@ -79,72 +49,133 @@ const HTMLexamContent: React.FC = () => {
     };
 
     switch(tag) {
-      case 'DOCTYPE': addBlock('doctype', '<!DOCTYPE html> specifies the document type.', setDoctypeAdded); break;
-      case 'html': if (!doctypeAdded) { setErrorMessage('Add <!DOCTYPE html> first!'); return; } addBlock('html', '<html> is the root element.', setHtmlAdded); break;
-      case 'head': if (!htmlAdded) { setErrorMessage('Add <html> first!'); return; } addBlock('head', '<head> contains meta info.', setHeadAdded); break;
-      case 'body': if (!htmlAdded) { setErrorMessage('Add <html> first!'); return; } addBlock('body', '<body> contains page content.', setBodyAdded); break;
-      case 'headings': if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; } addBlock('headings', 'Headings structure content.', setHeadingsAdded); break;
-      case 'paragraphs': if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; } addBlock('paragraphs', 'Paragraphs hold text.', setParagraphsAdded); break;
-      case 'links': if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; } addBlock('links', 'Links navigate pages.', setLinksAdded); break;
-      case 'images': if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; } addBlock('images', 'Images are added with <img>.', setImagesAdded); break;
+      case 'DOCTYPE':
+        addBlock('doctype', '<!DOCTYPE html> specifies the document type.', setDoctypeAdded);
+        break;
+
+      case 'html':
+        if (!doctypeAdded) { setErrorMessage('Add <!DOCTYPE html> first!'); return; }
+        addBlock('html', '<html> is the root element.', setHtmlAdded);
+        break;
+
+      case 'head':
+        if (!htmlAdded) { setErrorMessage('Add <html> first!'); return; }
+        addBlock('head', '<head> contains meta info.', setHeadAdded);
+        break;
+
+      case 'body':
+        if (!htmlAdded) { setErrorMessage('Add <html> first!'); return; }
+        addBlock('body', '<body> contains page content.', setBodyAdded);
+        break;
+
+      case 'headings':
+        if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; }
+        addBlock('headings', 'Headings structure content.', setHeadingsAdded);
+        break;
+
+      case 'paragraphs':
+        if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; }
+        addBlock('paragraphs', 'Paragraphs hold text.', setParagraphsAdded);
+        break;
+
+      case 'links':
+        if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; }
+        addBlock('links', 'Links navigate pages.', setLinksAdded);
+        break;
+
+      case 'images':
+        if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; }
+        addBlock('images', 'Images are added with <img>.', setImagesAdded);
+        break;
     }
 
     setErrorMessage('');
   };
 
-  const runConfetti = () => {
-    const duration = 3000;
-    const end = Date.now() + duration;
-    (function frame() {
-      confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
-      confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
-      if (Date.now() < end) requestAnimationFrame(frame);
-    })();
+  const buildHtmlOutput = (): string => {
+    const lines: string[] = [];
+
+    if (!doctypeAdded && !htmlAdded && !bodyAdded)
+      return 'Click blocks to build HTML structure';
+
+    if (doctypeAdded) {
+      lines.push(`<!-- ${descriptions.doctype} -->`);
+      lines.push('<!DOCTYPE html>');
+    }
+
+    if (htmlAdded) {
+      lines.push('<html>');
+
+      if (headAdded) {
+        lines.push('  <head>');
+        lines.push(`    <!-- ${descriptions.head} -->`);
+        lines.push('    <meta charset="UTF-8" />');
+        lines.push('    <meta name="viewport" content="width=device-width, initial-scale=1.0" />');
+        lines.push('    <title>HTML Exam</title>');
+        lines.push('  </head>');
+      }
+
+      if (bodyAdded) {
+        lines.push('  <body>');
+
+        if (headingsAdded) {
+          lines.push('    <h1>Heading 1</h1>');
+          lines.push('    <h2>Heading 2</h2>');
+        }
+
+        if (paragraphsAdded) lines.push('    <p>Paragraph</p>');
+        if (linksAdded) lines.push('    <a href="#">Link</a>');
+        if (imagesAdded) lines.push('    <img src="example.jpg" alt="Example" />');
+
+        lines.push('  </body>');
+      }
+
+      lines.push('</html>');
+    }
+
+    return lines.join('\n');
   };
 
-  const saveExamForUser = async () => {
-    try {
-      if (!user) return;
-      await axios.post("/api/lessons/html-basics/quizzes", { htmlOutput });
-      await axios.post("/api/badges/check", { uid: user.id, badgeId: "first_lesson" });
+  const htmlOutput = buildHtmlOutput();
+  const isExamComplete =
+    doctypeAdded && htmlAdded && headAdded && bodyAdded &&
+    headingsAdded && paragraphsAdded && linksAdded && imagesAdded;
+
+  useEffect(() => {
+    if (isExamComplete && user) {
       setShowCongrats(true);
-      runConfetti();
-    } catch (err) {
-      console.error("Failed to save exam:", err);
+
+      // 1️⃣ Save exam output
+      axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/api/lessons/html-basics/quizzes`,
+        { htmlOutput },
+        { withCredentials: true }
+      ).catch(() => {});
+
+     // 2️⃣ Automatically award "first_lesson" badge
+        axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/badges/check`,
+          { 
+            uid: user.id,           // logged-in user UID
+            badgeId: "first_lesson" // the badge to award
+          },
+          { withCredentials: true }
+        ).catch((err) => {
+          console.error("Failed to award first_lesson badge:", err);
+        });
+
+      // 🎉 Confetti effect
+      const duration = 3000;
+      const end = Date.now() + duration;
+      (function frame() {
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
     }
-  };
+  }, [isExamComplete, htmlOutput, user]);
 
-  // Exam complete effect
-  useEffect(() => {
-    if (!isExamComplete) return;
-
-    if (!user) {
-      // Guest → show login modal & set pending
-      setShowLoginModal(true);
-      setPendingExamSave(true);
-      return;
-    }
-
-    saveExamForUser();
-  }, [isExamComplete, user]);
-
-  // Claim guest exam after login
-  useEffect(() => {
-    if (pendingExamSave && user) {
-      const guestSessionId = localStorage.getItem("guestSessionId");
-      if (!guestSessionId) return;
-
-      axios.post("/api/lessons/html-basics/claim-pending", { sessionId: guestSessionId })
-        .then(() => {
-          setShowLoginModal(false);
-          setPendingExamSave(false);
-          localStorage.removeItem("guestSessionId");
-          setShowCongrats(true);
-          runConfetti();
-        })
-        .catch(err => console.error("Failed to claim guest exam:", err));
-    }
-  }, [pendingExamSave, user]);
+  const handleCongratsClick = () => navigate('/dashboard');
 
   return (
     <div className="lesson-container">
@@ -180,17 +211,7 @@ const HTMLexamContent: React.FC = () => {
             <div className="html-output"><pre>{htmlOutput}</pre></div>
           </div>
         </div>
-
-        {showLoginModal && (
-          <LoginRequiredModal
-            onLogin={signInWithGoogle}
-            onClose={() => {
-              setShowLoginModal(false);
-              setPendingExamSave(false);
-            }}
-          />
-        )}
-
+      
         {showCongrats && (
           <div className="congrats-overlay" onClick={() => navigate('/dashboard')}>
             <div className="congrats-box">
