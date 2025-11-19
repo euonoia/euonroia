@@ -1,8 +1,18 @@
-import React from 'react';
-import HTMLelements from '../../../components/lessons/learn-html-basics/HTMLelements';
+import React, { useEffect } from "react";
+import HTMLelementsContent from "../../../components/lessons/learn-html-basics/HTMLelements";
+import { useUser } from "../../../context/UserContext";
+import { getGuestSessionId } from "../../../utils/guestSession";
 
-const HTMLelementsPage: React.FC = () => {
-  return <HTMLelements />;
+const HTMLelements: React.FC = () => {
+  const { user } = useUser();
+
+  useEffect(() => {
+    if (!user) {
+      getGuestSessionId();
+    }
+  }, [user]);
+
+  return <HTMLelementsContent />;
 };
 
-export default HTMLelementsPage;
+export default HTMLelements;

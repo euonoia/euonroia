@@ -1,16 +1,18 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "../../styles/modals/LoginRequireModal.css"; // keep your CSS
+import "../../styles/modals/LoginRequireModal.css";
 
 interface Props {
   onLogin: () => void;
+  onClose: () => void;
 }
 
-export default function LoginRequiredModal({ onLogin }: Props) {
+export default function LoginRequiredModal({ onLogin, onClose }: Props) {
   const navigate = useNavigate();
 
-  const handleClose = () => {
-    navigate("/"); // redirect to home
+  const handleMaybeLater = () => {
+    onClose(); 
+     navigate("/");
   };
 
   return (
@@ -23,7 +25,7 @@ export default function LoginRequiredModal({ onLogin }: Props) {
           <button className="login-btn" onClick={onLogin}>
             Continue with Google
           </button>
-          <button className="cancel-btn" onClick={handleClose}>
+          <button className="cancel-btn" onClick={handleMaybeLater}>
             Maybe later
           </button>
         </div>
