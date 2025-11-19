@@ -7,5 +7,4 @@ export const ENV = {
   FRONTEND_URL: process.env.VITE_FRONTEND_URL || "http://localhost:5173",
   FIREBASE_SERVICE_ACCOUNT_PATH:process.env.FIREBASE_SERVICE_ACCOUNT_PATH || "./serviceaccountKey.json",
   FIREBASE_SERVICE_ACCOUNT_JSON: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || null,
-  REDIS_URL: process.env.REDIS_URL || null,
 };

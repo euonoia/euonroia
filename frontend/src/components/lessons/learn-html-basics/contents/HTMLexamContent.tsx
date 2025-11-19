@@ -24,6 +24,8 @@ const HTMLexamContent: React.FC = () => {
   const [imagesAdded, setImagesAdded] = useState(false);
   const [showCongrats, setShowCongrats] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [activeTag, setActiveTag] = useState<string | null>(null);
+
 
   const [descriptions, setDescriptions] = useState({
     doctype: '', html: '', head: '', body: '', headings: '', paragraphs: '', links: '', images: ''
@@ -38,6 +40,7 @@ const HTMLexamContent: React.FC = () => {
   );
 
   const handleBlockClick = (tag: string) => {
+    setActiveTag(tag);
     const addBlock = (
       descKey: keyof typeof descriptions,
       descText: string,
@@ -192,6 +195,7 @@ const HTMLexamContent: React.FC = () => {
                   key={tag}
                   tag={tag}
                   onClick={() => handleBlockClick(tag)}
+                  isActive={activeTag === tag}
                   doctypeAdded={doctypeAdded}
                   htmlAdded={htmlAdded}
                   headAdded={headAdded}

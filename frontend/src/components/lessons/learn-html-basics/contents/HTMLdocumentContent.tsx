@@ -9,11 +9,12 @@ import { useTheme } from "../../../../context/ThemeContext";
 const HTMLdocumentContent: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
-
+  
   const [doctypeAdded, setDoctypeAdded] = useState(false);
   const [htmlAdded, setHtmlAdded] = useState(false);
   const [headAdded, setHeadAdded] = useState(false);
   const [bodyAdded, setBodyAdded] = useState(false);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
 
   const [descriptions, setDescriptions] = useState({
     doctype: "",
@@ -22,7 +23,9 @@ const HTMLdocumentContent: React.FC = () => {
     body: "",
   });
 
-  const handleBlockClick = (tag: string) => {
+    const handleBlockClick = (tag: string) => {
+  setActiveTag(tag);
+
     if (tag === "DOCTYPE") {
       if (!doctypeAdded) {
         setDoctypeAdded(true);
@@ -108,6 +111,7 @@ const HTMLdocumentContent: React.FC = () => {
                   key={tag}
                   tag={tag}
                   onClick={handleBlockClick}
+                  isActive={activeTag === tag}
                   doctypeAdded={doctypeAdded}
                   htmlAdded={htmlAdded}
                   headAdded={headAdded}

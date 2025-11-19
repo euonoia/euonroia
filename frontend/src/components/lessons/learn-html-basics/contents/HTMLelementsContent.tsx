@@ -12,8 +12,10 @@ const HTMLelementsContent: React.FC = () => {
   const [paragraphsAdded, setParagraphsAdded] = useState(false);
   const [linksAdded, setLinksAdded] = useState(false);
   const [imagesAdded, setImagesAdded] = useState(false);
+  const [activeTag, setActiveTag] = useState<string | null>(null);
 
   const handleBlockClick = (tag: string) => {
+    setActiveTag(tag);
     switch(tag) {
       case 'headings': setHeadingsAdded(true); break;
       case 'paragraphs': setParagraphsAdded(true); break;
@@ -104,6 +106,7 @@ const HTMLelementsContent: React.FC = () => {
                   key={tag}
                   tag={tag}
                   onClick={handleBlockClick}
+                  isActive={activeTag === tag}
                   headingsAdded={headingsAdded}
                   paragraphsAdded={paragraphsAdded}
                   linksAdded={linksAdded}

@@ -87,38 +87,57 @@
   box-sizing: border-box;
 }
 
-/* VS CODE BLOCK */
+/* Default: LIGHT mode bump */
 .code-block {
-  background-color: var(--code-bg);
-  color: var(--code-text);
-  border: 1px solid var(--code-border);
-  border-radius: 8px;
+  background: linear-gradient(
+    145deg,
+    #ffffff 0%,
+    #f5f5f5 40%,
+    #eaeaea 100%
+  );
+  border: 1px solid #dcdcdc;
+  border-radius: 12px;
   padding: 1rem;
-  cursor: pointer;
-  font-family: "JetBrains Mono", monospace;
-  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow:
+    4px 4px 10px rgba(0, 0, 0, 0.08),
+    -4px -4px 10px rgba(255, 255, 255, 0.8);
+  color: #333;
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.25s ease;
 }
 
-/* Hover — same feel as VS Code */
+/* DARK MODE bump */
+[data-theme="dark"] .code-block {
+  background: linear-gradient(
+    145deg,
+    #2d2f36 0%,
+    #26272d 40%,
+    #1f2025 100%
+  );
+  border: 1px solid #3a3b45;
+  box-shadow:
+    5px 5px 10px rgba(0, 0, 0, 0.5),
+    -5px -5px 10px rgba(255, 255, 255, 0.05);
+  color: #e5e7eb;
+}
+
+/* Hover — applies cleanly on light and dark */
 .code-block:hover {
-  background-color: var(--code-hover);
   transform: scale(1.03);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
 }
 
-/* Active block — sidebar selected look */
+/* Active block */
 .code-block.active {
-  background-color: var(--code-active);
-  border-color: var(--code-active-border);
-  color:  #4338ca;
-  font-weight: 600;
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.4);
 }
 
-/* Hint text */
+/* Hint */
 .code-block .hint {
   display: block;
   font-size: 0.75rem;
@@ -126,6 +145,7 @@
   margin-top: 4px;
 }
 
+/* Code text */
 .code-block pre {
   margin: 0;
   padding: 0;
@@ -210,26 +230,28 @@
    Responsive Design
 ========================= */
 
-/* Tablet & small screens */
 @media (max-width: 768px) {
-  .lesson-content {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .lesson-left,
-  .lesson-right {
-    min-width: 100%;
-    max-width: 100%;
-  }
-
   .code-blocks {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* STACK */
     padding: 0.5rem;
   }
 
-  .lesson-title {
-    font-size: clamp(1.5rem, 5vw, 1.8rem);
+  .lesson-right {
+    order: 1; /* appear first */
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .lesson-left {
+    order: 2; /* appear after right section */
+    width: 100%;
+  }
+
+  .lesson-right-description {
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    text-align: left;
   }
 }
 

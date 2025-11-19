@@ -3,6 +3,11 @@ import React from "react";
 type CodeBlockProps = {
   tag: string;
   onClick: (tag: string) => void;
+
+  // highlight state
+  isActive?: boolean;
+
+  // optional flags for other lessons
   doctypeAdded?: boolean;
   htmlAdded?: boolean;
   headAdded?: boolean;
@@ -16,6 +21,8 @@ type CodeBlockProps = {
 const CodeBlock: React.FC<CodeBlockProps> = ({
   tag,
   onClick,
+  isActive = false,   // NEW
+
   headingsAdded = false,
   paragraphsAdded = false,
   linksAdded = false,
@@ -43,7 +50,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
 
   return (
     <div
-      className={`code-block ${isFontActive ? "active-font" : ""}`}
+      className={`code-block ${isActive ? "active" : ""}`}   // NEW highlight class
       onClick={() => onClick(tag)}
     >
       {displayText()}

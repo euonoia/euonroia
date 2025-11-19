@@ -172,7 +172,7 @@ const buildLivePreview = () => {
         <div className="lesson-content">
           <div className="lesson-left">
             <h2 className="lesson-title">CSS QUIZ</h2>
-            <p className="lesson-description">Let's test your memory</p>
+            <p className="lesson-description">Answer the higlighted number</p>
             <h2 className="section-title">Choose the correct Blocks</h2>
             <div className="code-blocks" style={{ display: "flex", flexWrap: "wrap" }}>
               {shuffledBlocks.map((tag) => {
