@@ -2,16 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { useTheme } from "../context/ThemeContext";
-import {
-  FiMenu,
-  FiSun,
-  FiMoon,
-  FiHome,
-  FiBook,
-  FiCode,
-  FiLogOut,
-  FiCalendar,
-} from "react-icons/fi";
+import { FiMenu, FiSun, FiMoon, FiCalendar } from "react-icons/fi";
 import DailyLoginModal from "./modals/DailyLoginModal";
 import "../styles/components/header.css";
 
@@ -26,11 +17,18 @@ export default function Header() {
 
   const toggleMenu = () => setMenuOpen((prev) => !prev);
 
+  // Select the correct logo based on theme
+  const logoSrc = theme === "light" ? "/Euonroia_Light.png" : "/Euonroia_Dark.png";
+
   return (
     <header className={`header ${theme}`}>
-      <h2 className="logo">
-        Euonroia <span className="beta-badge">BETA</span>
-      </h2>
+      {/* Logo */}
+      <Link to="/" className="logo-link">
+        <div className="logo-container">
+          <img src={logoSrc} alt="Euonroia Logo" className="logo-img" />
+          <span className="beta-badge">BETA</span>
+        </div>
+      </Link>
 
       <div className="header-actions">
         {!loading && !user && (
@@ -66,22 +64,23 @@ export default function Header() {
         )}
       </div>
 
-      {!loading && user && (
-        <div className={`header-right ${menuOpen ? "open" : ""}`}>
+      {/* Expanded menu for logged-in users */}
+      {!loading && user && menuOpen && (
+        <div className="header-right open">
           <div className="user-info">
             {user.picture && <img src={user.picture} className="user-avatar" />}
             <span className="user-name">{user.name}</span>
           </div>
 
           <nav className="nav-links">
-            <Link to="/dashboard"><FiHome /> Dashboard</Link>
-            <Link to="/lessons"><FiBook /> Lessons</Link>
-            <Link to="/playground"><FiCode /> Playground</Link>
+            <Link to="/dashboard">Dashboard</Link>
+            <Link to="/lessons">Lessons</Link>
+            <Link to="/playground">Playground</Link>
           </nav>
 
           {!isLessonPage && (
             <button className="btn signout-btn" onClick={signOut}>
-              <FiLogOut /> Sign Out
+              Sign Out
             </button>
           )}
         </div>
@@ -89,9 +88,7 @@ export default function Header() {
 
       {/* Daily Login Modal */}
       {dailyLoginOpen && (
-        <DailyLoginModal
-          onClose={() => setDailyLoginOpen(false)}
-        />
+        <DailyLoginModal onClose={() => setDailyLoginOpen(false)} />
       )}
     </header>
   );

@@ -1,0 +1,214 @@
+/* ===============================
+   Full-screen hero
+=============================== */
+.welcome-hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 2rem;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, var(--bg-main) 0%, var(--bg-alt) 100%);
+  overflow: hidden;
+  position: relative;
+}
+
+/* ===============================
+   Two-column container
+=============================== */
+.welcome-container {
+  display: flex;
+  gap: 4rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+/* ===============================
+   Left Column
+=============================== */
+.left-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center; /* center horizontally */
+}
+
+/* ===============================
+   Slide Section (static lift)
+=============================== */
+.slide-section {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2rem;
+  padding: 3rem;
+  backdrop-filter: blur(16px);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.slide-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.slide-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.slide-title {
+  font-size: 2.75rem;
+  font-weight: 700;
+  flex: 1;
+}
+
+.slide-description {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.highlight {
+  color: var(--accent);
+  position: relative;
+}
+
+.highlight::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 100%;
+  height: 3px;
+  background: var(--accent-hover);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.highlight:hover::after {
+  transform: scaleX(1);
+}
+
+.slide-icon {
+  font-size: 4rem;
+  flex-shrink: 0;
+  animation: bounce 1.2s infinite alternate;
+}
+
+/* ===============================
+   Navigation dots (always centered)
+=============================== */
+.slide-dots {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  width: 100%;
+  justify-content: center; /* center horizontally on all screens */
+  align-items: center;
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ccc;
+  cursor: pointer;
+  transition: transform 0.3s, background 0.3s;
+}
+
+.dot.active {
+  background: var(--accent);
+  transform: scale(1.3);
+}
+
+/* ===============================
+   Right Column: Logo + Button
+=============================== */
+.logo-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.euonroia-logo {
+  max-width: 200px;
+  width: 100%;
+  object-fit: contain;
+}
+
+.continue-button {
+  background: var(--accent);
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding: 1rem 2rem;
+  border-radius: 2rem;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease, transform 0.3s;
+  animation: pulse 2s infinite;
+}
+
+.continue-button:hover {
+  background: var(--accent-hover);
+  transform: translateY(-3px);
+}
+
+/* ===============================
+   Animations
+=============================== */
+@keyframes bounce {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-15px); }
+}
+
+
+/* ===============================
+   Responsive
+=============================== */
+@media (max-width: 1024px) {
+  .welcome-container {
+    flex-direction: column-reverse;
+    gap: 3rem;
+  }
+  .slide-title {
+    font-size: 2.25rem;
+  }
+  .slide-description {
+    font-size: 1rem;
+  }
+  .euonroia-logo {
+    max-width: 180px;
+  }
+  .dot {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .slide-title {
+    font-size: 1.9rem;
+  }
+  .slide-description {
+    font-size: 0.95rem;
+  }
+  .continue-button {
+    font-size: 1rem;
+    padding: 0.85rem 1.8rem;
+  }
+}

@@ -1,0 +1,86 @@
+.getstarted-wrapper {
+  display: flex;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto; /* remove top margin */
+  padding: calc(var(--space-6) + 60px) var(--space-4) var(--space-4); 
+  /* added top padding to account for fixed header height (~60px + extra spacing) */
+  flex-wrap: wrap;
+}
+
+/* LEFT — Cards */
+.lessons-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* RIGHT — Lesson Overview */
+.lessons-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-6);
+  border-radius: 16px;
+
+}
+
+.lessons-right h2 {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-3);
+  color: var(--accent);
+}
+
+.lessons-right p {
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+/* Lesson Cards */
+.lesson-card {
+  background: var(--bg-card);
+  padding: var(--space-5);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.lesson-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+}
+
+.lesson-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-3);
+  color: var(--accent);
+}
+
+.lesson-card h2 {
+  font-size: var(--font-size-lg);
+  margin-bottom: var(--space-2);
+}
+
+.lesson-card p {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+/* Responsive: Mobile */
+@media (max-width: 768px) {
+  .getstarted-wrapper {
+    flex-direction: column-reverse; /* overview on top */
+    gap: var(--space-6);
+    padding-top: calc(var(--space-6) + 60px); /* maintain top padding on mobile */
+  }
+
+  .lessons-left, .lessons-right {
+    width: 100%;
+  }
+}

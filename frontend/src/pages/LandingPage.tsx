@@ -39,12 +39,8 @@ const LandingPage: FC = () => {
                 <p>Start your journey today!</p>
 
                 <div className="hero-buttons">
-                <button
-                  className="hero-btn"
-                  onClick={() => navigate("/lessons/html-basics")}
-                >
-                  Get Started
-                </button>
+               <button onClick={() => navigate("/welcome")}>Get Started</button>
+
 
                <button className="hero-btn hero-btn-outline" onClick={scrollToAbout}>
                 About Us
