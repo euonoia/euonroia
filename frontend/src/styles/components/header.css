@@ -4,8 +4,8 @@
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;        /* vertically center everything */
-  padding: var(--space-3) var(--space-6); /* slightly smaller top/bottom padding */
+  align-items: center;       
+  padding: var(--space-2) var(--space-4); /* slightly smaller padding for mobile */
   background-color: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
   position: fixed;
@@ -18,32 +18,35 @@
 }
 
 /* Logo + Beta wrapper */
-.logo {
+.logo-container {
   display: flex;
-  align-items: center;       /* vertical alignment */
-  gap: 0.5rem;
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--accent);
+  align-items: center;
+  gap: 0.4rem;
 }
 
-/* Align Beta badge with text */
+.logo-img {
+  height: 35px; /* slightly smaller for mobile */
+  max-width: 120px;
+  object-fit: contain;
+}
+
 .beta-badge {
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 700;
   color: var(--bg-main);
   background-color: var(--accent);
   padding: 2px 6px;
-  border-radius: 8px;
+  border-radius: 6px;
   display: inline-flex;
-  align-items: center;       /* vertically center badge */
+  align-items: center;
 }
 
 /* Header actions wrapper */
 .header-actions {
   display: flex;
-  align-items: center;       /* vertical alignment with logo */
-  gap: var(--space-3);
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap; /* allow wrapping on small screens */
 }
 
 /* Buttons */
@@ -54,13 +57,13 @@
   gap: 0.25rem;
   background-color: var(--accent);
   color: #fff;
-  padding: var(--space-2) var(--space-4);
+  padding: var(--space-2) var(--space-3);
   border-radius: 0.5rem;
   font-weight: 600;
   cursor: pointer;
   border: none;
   transition: background-color 0.2s ease, transform 0.2s ease;
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
 }
 
 .btn:hover,
@@ -80,7 +83,6 @@
   align-self: center;
 }
 
-
 /* ------------------------ */
 /* Dropdown / Hamburger Menu */
 /* ------------------------ */
@@ -90,15 +92,15 @@
   right: 0;
   display: flex;
   flex-direction: column;
-  align-items: stretch;      /* fill content width */
+  align-items: stretch; 
   background-color: var(--bg-card);
-  padding: var(--space-4);
+  padding: var(--space-3);
   border-radius: 8px;
-  gap: var(--space-3);
+  gap: var(--space-2);
   box-shadow: var(--shadow-md);
   display: none;
   z-index: 200;
-  width: max-content;        /* shrink to content size */
+  width: max-content;
   transition: all 0.3s ease;
 }
 
@@ -109,7 +111,7 @@
 /* User info */
 .user-info {
   display: flex;
-  align-items: center;       /* vertical alignment */
+  align-items: center;  
   gap: var(--space-2);
   flex-direction: column;
 }
@@ -129,8 +131,8 @@
 .header-right .nav-links {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  margin-top: var(--space-3);
+  gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 .header-right .nav-links a {
@@ -140,7 +142,7 @@
   color: var(--text-primary);
   text-decoration: none;
   font-weight: 500;
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   transition: color 0.2s ease, transform 0.2s ease;
 }
 
@@ -149,28 +151,61 @@
   transform: translateY(-1px);
 }
 
-/* Hide old desktop nav links outside dropdown */
-.nav-links.desktop-only {
-  display: none;
-}
-
 /* ------------------------ */
 /* Responsive Adjustments   */
 /* ------------------------ */
-@media (max-width: 768px) {
-  .header-right {
-    right: var(--space-2);
-    min-width: 180px;
+@media (max-width: 1024px) {
+  .logo-img {
+    height: 32px;
+    max-width: 100px;
   }
 
   .btn,
   .theme-toggle {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    padding: var(--space-1) var(--space-2);
+  }
+
+  .header {
+    padding: var(--space-2) var(--space-3);
   }
 }
 
-@media (min-width: 769px) {
+@media (max-width: 768px) {
   .header-right {
-    right: var(--space-4);
+    right: var(--space-2);
+    min-width: 160px;
+  }
+
+  .logo-img {
+    height: 28px;
+    max-width: 90px;
+  }
+
+  .beta-badge {
+    font-size: 0.45rem;
+    padding: 1px 4px;
+  }
+
+  .btn,
+  .theme-toggle {
+    font-size: 0.8rem;
+    padding: var(--space-1) var(--space-2);
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-img {
+    height: 24px;
+    max-width: 80px;
+  }
+
+  .beta-badge {
+    font-size: 0.4rem;
+    padding: 1px 3px;
+  }
+
+  .header-actions {
+    gap: var(--space-1);
   }
 }
