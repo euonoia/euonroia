@@ -12,7 +12,9 @@ import authRoutes from "./api/auth/index.js";
 import lessonsRoutes from "./api/lessons/index.js";
 import dashboardRoutes from "./api/dashboard/index.js";
 import leaderboardRoutes from "./api/leaderboard/leaderboard.js";
-import checkBadge from "./api/badges/index.js";
+
+import Badges from "./api/badges/index.js";
+
 import preloadSnippets from "./api/trainer/preloadSnippets.js";
 
 const app = express();
@@ -63,7 +65,7 @@ app.use(protectBackend);
 app.use("/api/lessons", lessonsRoutes);
 app.use("/api/milestones", dashboardRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
-app.use("/api/badges", checkBadge);
+app.use("/api/badges", Badges);
 app.use("/api/admin", preloadSnippets);
 
 /* --------------------------------------------------

@@ -11,11 +11,11 @@ export const useDashboardBadges = (user: any) => {
 
     const fetchBadges = async () => {
       try {
-        const res = await axios.post<{ earnedBadges: Badge[] }>(
-          `${import.meta.env.VITE_BACKEND_URL}/api/badgesEarned/earned`,
-          { uid: user.id },
-          { withCredentials: true }
+        const res = await axios.get<{ earnedBadges: Badge[] }>(
+          `${import.meta.env.VITE_BACKEND_URL}/api/badges/earned`,
+          { withCredentials: true } 
         );
+
         setBadges(res.data.earnedBadges || []);
       } catch (err) {
         console.error("Failed to fetch badges:", err);
