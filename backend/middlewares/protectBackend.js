@@ -10,34 +10,32 @@ export function protectBackend(req, res, next) {
       ? ["https://euonroia.onrender.com"]
       : ["http://localhost:5173", "http://127.0.0.1:5173"];
 
-  // Allow OAuth flow
-  if (
-    req.path.startsWith("/auth/google") ||
-    req.path.startsWith("/auth/google/callback")
-  ) {
-    return next();
-  }
+  // ✅ Allow OAuth flow without auth
+  if (req.path.startsWith("/auth/google")) return next();
 
-  // Protect API endpoints
+  // ✅ Check allowed origins for API calls
   if (req.path.startsWith("/api")) {
     if (origin && !allowedOrigins.some((o) => origin.startsWith(o))) {
       return res.status(403).send("❌ Access forbidden: invalid origin");
     }
+  }
 
+  // ✅ Protect auth-protected routes (API + /auth/me + /auth/signout)
+  const protectedPaths = ["/api", "/auth/me", "/auth/signout", "/auth/active"];
+  const requiresAuth = protectedPaths.some((p) => req.path.startsWith(p));
+
+  if (requiresAuth) {
     if (!token) return res.status(401).json({ error: "Not logged in" });
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      // 🔥 Normalize user object so Firestore always has UID
       req.user = {
         ...decoded,
-        uid: decoded.uid || decoded.id || decoded.sub, // <--- IMPORTANT
+        uid: decoded.uid || decoded.id || decoded.sub,
       };
 
-      if (!req.user.uid) {
+      if (!req.user.uid)
         return res.status(401).json({ error: "Invalid token — no UID found" });
-      }
 
       return next();
     } catch {
@@ -45,37 +43,6 @@ export function protectBackend(req, res, next) {
     }
   }
 
-  // Protect /auth/me
-  if (req.path.startsWith("/auth/me")) {
-    if (!token) return res.status(401).json({ error: "Not logged in" });
-
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = {
-        ...decoded,
-        uid: decoded.uid || decoded.id || decoded.sub,
-      };
-      return next();
-    } catch {
-      return res.status(401).json({ error: "Invalid or expired token" });
-    }
-  }
-
-  // Protect /auth/signout
-  if (req.path.startsWith("/auth/signout")) {
-    if (!token) return res.status(401).json({ error: "Not logged in" });
-
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = {
-        ...decoded,
-        uid: decoded.uid || decoded.id || decoded.sub,
-      };
-      return next();
-    } catch {
-      return res.status(401).json({ error: "Invalid or expired token" });
-    }
-  }
-
+  // Allow everything else
   next();
 }

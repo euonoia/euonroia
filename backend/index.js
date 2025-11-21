@@ -9,7 +9,7 @@ import "./config/firebase.js";
 import { securityMiddleware } from "./config/security.js";
 import { protectBackend } from "./middlewares/protectBackend.js";
 
-import authRoutes from "./api/auth.js";
+import authRoutes from "./api/auth/index.js";
 import lessonsRoutes from "./api/lessons/html-basics.js";
 import dashboardRoutes from "./api/milestones.js";
 import cssLessonsRouter from "./api/lessons/cssBasics.js";

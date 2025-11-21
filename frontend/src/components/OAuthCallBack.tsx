@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "../utils/axiosClient";
-
+import Cookies from "js-cookie";
 
 const OAuthCallback: React.FC = () => {
   const navigate = useNavigate();
   const [message, setMessage] = useState("Completing sign in...");
 
-  // ✅ Use Vite environment variable (fallback to production URL if missing)
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://euonroia.onrender.com";
 
   useEffect(() => {
     let mounted = true;
@@ -17,17 +16,23 @@ const OAuthCallback: React.FC = () => {
       try {
         setMessage("Checking authentication...");
 
-        // ✅ Call backend using environment variable
-        const res = await axios.get(`${BACKEND_URL}/auth/me`, {
-          withCredentials: true, // include HTTP-only cookies
-          timeout: 5000,
-        });
+        // ✅ Attach CSRF token from cookie if backend expects it
+        const csrfToken = Cookies.get("csrfToken");
+
+        const res = await axios.post(
+          `${BACKEND_URL}/auth/me`,
+          {},
+          {
+            headers: { "x-csrf-token": csrfToken || "" },
+            withCredentials: true, // include HTTP-only cookies
+            timeout: 5000,
+          }
+        );
 
         if (!mounted) return;
 
         if (res.data?.user) {
           setMessage("Login successful — redirecting...");
-          // Short delay for smooth user experience
           setTimeout(() => navigate("/dashboard"), 800);
         } else {
           setMessage("Login failed — redirecting to home...");
@@ -52,8 +57,7 @@ const OAuthCallback: React.FC = () => {
     <div style={{ padding: "2rem", textAlign: "center" }}>
       <h2>{message}</h2>
       <p>
-        If you are not redirected automatically, try refreshing or logging in
-        again.
+        If you are not redirected automatically, try refreshing or logging in again.
       </p>
     </div>
   );
