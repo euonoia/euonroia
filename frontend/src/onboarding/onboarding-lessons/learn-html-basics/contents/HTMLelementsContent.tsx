@@ -122,7 +122,7 @@ const HTMLelementsContent: React.FC = () => {
           </div>
 
           <div className="next-btn-container">
-            <button className="next-btn" onClick={() => navigate('/lessons/html-exam')}>READY FOR EXAM?</button>
+            <button className="next-btn" onClick={() => navigate('/onboarding/html-exam')}>READY FOR EXAM?</button>
           </div>
         </div>
       </main>

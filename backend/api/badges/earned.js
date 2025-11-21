@@ -4,8 +4,7 @@ import { authMiddleware } from "../../middlewares/auth.js";
 
 const router = express.Router();
 
-// GET /api/badges/earned
-router.post("/earned", authMiddleware, async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const uid = req.user?.uid; 
     if (!uid) return res.status(401).json({ error: "Unauthorized" });
@@ -19,18 +18,17 @@ router.post("/earned", authMiddleware, async (req, res) => {
       .collection("earnedBadges")
       .get();
 
-    const earnedBadgeIds = earnedSnap.docs.map(doc => doc.id);
-
-    if (earnedBadgeIds.length === 0) {
+    if (earnedSnap.empty) {
       return res.json({ success: true, earnedBadges: [] });
     }
 
+    const earnedBadgeIds = new Set(earnedSnap.docs.map(doc => doc.id));
+
     // 2️⃣ Get all badges from central badges collection
     const badgeSnap = await db.collection("badges").get();
-    const allBadges = badgeSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-    // 3️⃣ Filter only the badges the user has earned
-    const earnedBadges = allBadges.filter(badge => earnedBadgeIds.includes(badge.id));
+    const earnedBadges = badgeSnap.docs
+      .filter(doc => earnedBadgeIds.has(doc.id))
+      .map(doc => ({ id: doc.id, ...doc.data() }));
 
     res.json({ success: true, earnedBadges });
   } catch (err) {

@@ -1,9 +1,9 @@
-// src/context/UserContext.tsx
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import axiosClient from "../utils/axiosClient";
 import Cookies from "js-cookie";
+
 interface User {
-  id: string;
+  uid: string;      // Use "uid" to match backend JWT
   name: string;
   email: string;
   picture?: string;
@@ -31,10 +31,11 @@ export const UserProvider = ({ children }: Props) => {
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
+  // --- Fetch current user from backend
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const csrfToken = Cookies.get("csrfToken"); // make sure you import js-cookie
+      const csrfToken = Cookies.get("euonroiaCsrfToken");
       const res = await axiosClient.post(
         "/auth/me",
         {},
@@ -43,6 +44,7 @@ export const UserProvider = ({ children }: Props) => {
           withCredentials: true,
         }
       );
+
       setUser(res.data.user || null);
       setLoginError(false);
     } catch (err: any) {
@@ -58,14 +60,24 @@ export const UserProvider = ({ children }: Props) => {
     fetchUser();
   }, []);
 
+  // --- Redirect to Google OAuth
   const signInWithGoogle = () => {
     setLoginError(false);
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
+  // --- Sign out user
   const signOut = async () => {
     try {
-      await axiosClient.post("/auth/signout"); // CSRF header automatically attached
+      const csrfToken = Cookies.get("euonroiaCsrfToken");
+      await axiosClient.post(
+        "/auth/signout",
+        {},
+        {
+          headers: { "x-csrf-token": csrfToken || "" },
+          withCredentials: true,
+        }
+      );
       setUser(null);
       window.location.href = "/";
     } catch (err) {
@@ -89,6 +101,7 @@ export const UserProvider = ({ children }: Props) => {
   );
 };
 
+// --- Custom hook to use UserContext
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) throw new Error("useUser must be used within a UserProvider");

@@ -3,7 +3,6 @@ import admin from "firebase-admin";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import { authMiddleware } from "../middlewares/auth.js";
 
 const router = Router();
 const isProduction = process.env.NODE_ENV === "production";
@@ -21,8 +20,8 @@ const client = new OAuth2Client(
     : "http://localhost:5000/auth/google/callback"
 );
 
-// --- 1️⃣ Google Login Redirect ---
-router.get("/google", (req, res) => {
+// --- Google Login Redirect ---
+router.get("/", (req, res) => {
   const state = crypto.randomBytes(16).toString("hex");
   res.cookie("oauth_state", state, {
     httpOnly: true,
@@ -44,8 +43,8 @@ router.get("/google", (req, res) => {
   res.redirect(url);
 });
 
-// --- 2️⃣ OAuth Google Callback ---
-router.get("/google/callback", async (req, res) => {
+// --- OAuth Google Callback ---
+router.get("/callback", async (req, res) => {
   try {
     const { code, state } = req.query;
     const storedState = req.cookies?.oauth_state;
@@ -93,9 +92,8 @@ router.get("/google/callback", async (req, res) => {
     const userRef = admin.firestore().collection("users").doc(userRecord.uid);
     const userSnap = await userRef.get();
     const now = admin.firestore.Timestamp.now();
-
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Start of today
+    today.setHours(0, 0, 0, 0);
 
     if (!userSnap.exists) {
       await userRef.set(
@@ -124,10 +122,10 @@ router.get("/google/callback", async (req, res) => {
         displayName: name,
         email,
         photoURL: picture,
-        lastActive: now, // always update lastActive
+        lastActive: now,
       };
 
-      if (isNewDay) updates.lastLogin = now; // update lastLogin only once per day
+      if (isNewDay) updates.lastLogin = now;
 
       await userRef.set(updates, { merge: true });
     }
@@ -139,7 +137,7 @@ router.get("/google/callback", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.cookie("authToken", token, {
+    res.cookie("euonroiaAuthToken", token, {
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
@@ -149,7 +147,7 @@ router.get("/google/callback", async (req, res) => {
 
     // CSRF token
     const csrfToken = crypto.randomBytes(24).toString("hex");
-    res.cookie("csrfToken", csrfToken, {
+    res.cookie("euonroiaCsrfToken", csrfToken, {
       httpOnly: false,
       secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
@@ -161,53 +159,6 @@ router.get("/google/callback", async (req, res) => {
     console.error("OAuth callback error:", err);
     res.redirect(`${FRONTEND_URL}?error=login_failed`);
   }
-});
-
-// --- 3️⃣ /me endpoint ---
-router.post("/me", authMiddleware, (req, res) => {
-  const clientCsrfToken = req.headers["x-csrf-token"];
-  const cookieCsrfToken = req.cookies?.csrfToken;
-
-  if (!clientCsrfToken || clientCsrfToken !== cookieCsrfToken) {
-    return res.status(403).json({ error: "Invalid CSRF token" });
-  }
-
-  res.json({ user: req.user });
-});
-
-// --- 4️⃣ Logout ---
-router.post("/signout", (req, res) => {
-  // Clear authentication token
-  res.clearCookie("authToken", {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "None" : "Lax",
-    path: "/",
-  });
-
-  // Clear CSRF token
-  res.clearCookie("csrfToken", {
-    httpOnly: false, // matches how it was set
-    secure: isProduction,
-    sameSite: isProduction ? "None" : "Lax",
-    path: "/",
-  });
-
-  res.json({ success: true });
-});
-
-
-// --- 5️⃣ Update lastActive endpoint (heartbeat) ---
-router.post("/active", authMiddleware, async (req, res) => {
-  const uid = req.user?.uid;
-  if (!uid) return res.status(401).json({ error: "Unauthorized" });
-
-  const userRef = admin.firestore().collection("users").doc(uid);
-  await userRef.update({
-    lastActive: admin.firestore.FieldValue.serverTimestamp(),
-  });
-
-  res.json({ success: true });
 });
 
 export default router;

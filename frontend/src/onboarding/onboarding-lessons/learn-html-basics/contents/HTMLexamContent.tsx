@@ -157,7 +157,7 @@ const HTMLexamContent: React.FC = () => {
         axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/api/badges/check`,
           { 
-            uid: user.id,           // logged-in user UID
+            uid: user.uid,           // logged-in user UID
             badgeId: "first_lesson" // the badge to award
           },
           { withCredentials: true }
@@ -176,7 +176,7 @@ const HTMLexamContent: React.FC = () => {
     }
   }, [isExamComplete, htmlOutput, user]);
 
-  const handleCongratsClick = () => navigate('/dashboard');
+  const handleCongratsClick = () => navigate('/onboarding');
 
   return (
     <div className="lesson-container">

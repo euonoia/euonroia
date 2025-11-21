@@ -129,7 +129,7 @@ const HTMLdocumentContent: React.FC = () => {
           <div className="next-btn-container">
             <button
               className="next-btn"
-              onClick={() => navigate("/lessons/html-elements")}
+              onClick={() => navigate("/onboarding/html-elements")}
               disabled={!doctypeAdded || !htmlAdded || !headAdded || !bodyAdded}
             >
               Next Lesson
