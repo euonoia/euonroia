@@ -209,5 +209,72 @@ router.post("/active", authMiddleware, async (req, res) => {
 
   res.json({ success: true });
 });
+// --- 6️⃣ Check Daily Login Streak ---
+router.post("/streak", authMiddleware, async (req, res) => {
+  try {
+    const uid = req.user?.uid;
+    if (!uid) return res.status(401).json({ error: "Unauthorized" });
+
+    const userRef = admin.firestore().collection("users").doc(uid);
+    const userSnap = await userRef.get();
+
+    if (!userSnap.exists) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const userData = userSnap.data();
+    const lastLogin = userData.lastLogin?.toDate() || null;
+    let streak = userData.streak || 0;
+
+    // Today's date at midnight
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let shouldIncrease = false;
+    let shouldReset = false;
+
+    if (!lastLogin) {
+      // First login ever → streak starts at 1
+      streak = 1;
+    } else {
+      const last = new Date(lastLogin);
+      last.setHours(0, 0, 0, 0);
+
+      const diffInMs = today - last;
+      const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+      if (diffInDays === 0) {
+        // Already logged in today → do nothing
+      } else if (diffInDays === 1) {
+        // Logged in yesterday → streak increases
+        streak += 1;
+        shouldIncrease = true;
+      } else {
+        // Missed 1+ days → reset streak
+        streak = 1;
+        shouldReset = true;
+      }
+    }
+
+    // Update Firestore
+    await userRef.set(
+      {
+        streak,
+        lastLogin: admin.firestore.Timestamp.fromDate(today),
+      },
+      { merge: true }
+    );
+
+    res.json({
+      success: true,
+      streak,
+      increased: shouldIncrease,
+      reset: shouldReset,
+    });
+  } catch (err) {
+    console.error("Streak check error:", err);
+    res.status(500).json({ error: "Failed to check streak" });
+  }
+});
 
 export default router;

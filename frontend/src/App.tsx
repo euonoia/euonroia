@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Dashboard from "./pages/dashboard";
+import Dashboard from "./pages/dashboard/index";
 import LandingPage from "./pages/LandingPage";
 import OAuthCallback from "./components/OAuthCallBack";
 import LessonsPage from "./pages/lessons";

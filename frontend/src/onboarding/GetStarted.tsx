@@ -18,7 +18,7 @@ const lessons: Lesson[] = [
     title: "HTML Basics",
     description: "Build your first webpage structure — the foundation of all websites.",
     icon: <FaHtml5 />,
-    route: "/adding-feature",
+    route: "/onboarding/html-basics",
   },
   {
     id: "css-basics",
