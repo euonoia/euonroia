@@ -26,8 +26,12 @@ const __dirname = path.dirname(__filename);
 
 // Allowed frontend origins
 const FRONTEND_URLS = isProduction
-  ? ["https://euonroia.onrender.com"]
+  ? [
+      "https://euonroia.onrender.com",                 // main site
+      /^https:\/\/euonroia-pr-\d+\.onrender\.com$/    // PR preview URLs
+    ]
   : ["http://localhost:5173", "http://127.0.0.1:5173"];
+
 
 // Trust proxies (required for Secure cookies on Render)
 app.set("trust proxy", 1);
@@ -39,11 +43,13 @@ app.use(securityMiddleware);
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || FRONTEND_URLS.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("❌ Not allowed by CORS"));
-      }
+      if (!origin) return callback(null, true); 
+      const allowed = FRONTEND_URLS.some((o) =>
+        o instanceof RegExp ? o.test(origin) : o === origin
+      );
+      if (allowed) return callback(null, true);
+      console.warn("❌ CORS blocked:", origin);
+      callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
   })
