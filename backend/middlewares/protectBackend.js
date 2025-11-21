@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { ENV } from "../config/env.js";
 
 export function protectBackend(req, res, next) {
-  const token = req.cookies?.authToken;
+  const token = req.cookies?.euonroiaAuthToken; 
   const origin = req.get("origin") || req.get("referer") || "";
 
   const allowedOrigins =
@@ -10,17 +10,14 @@ export function protectBackend(req, res, next) {
       ? ["https://euonroia.onrender.com"]
       : ["http://localhost:5173", "http://127.0.0.1:5173"];
 
-  // ✅ Allow OAuth flow without auth
   if (req.path.startsWith("/auth/google")) return next();
 
-  // ✅ Check allowed origins for API calls
   if (req.path.startsWith("/api")) {
     if (origin && !allowedOrigins.some((o) => origin.startsWith(o))) {
       return res.status(403).send("❌ Access forbidden: invalid origin");
     }
   }
 
-  // ✅ Protect auth-protected routes (API + /auth/me + /auth/signout)
   const protectedPaths = ["/api", "/auth/me", "/auth/signout", "/auth/active"];
   const requiresAuth = protectedPaths.some((p) => req.path.startsWith(p));
 
@@ -43,6 +40,5 @@ export function protectBackend(req, res, next) {
     }
   }
 
-  // Allow everything else
   next();
 }

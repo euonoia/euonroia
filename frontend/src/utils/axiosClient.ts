@@ -1,4 +1,3 @@
-// src/utils/axiosClient.ts
 import axios from "axios";
 import Cookies from "js-cookie";
 
@@ -11,7 +10,7 @@ const axiosClient = axios.create({
 
 // Add CSRF token to all state-changing requests
 axiosClient.interceptors.request.use((config) => {
-  const csrfToken = Cookies.get("csrfToken");
+  const csrfToken = Cookies.get("euonroiaCsrfToken");
   if (csrfToken && config.method !== "get") {
     config.headers!["x-csrf-token"] = csrfToken;
   }

@@ -35,7 +35,7 @@ export const UserProvider = ({ children }: Props) => {
   const fetchUser = async () => {
     setLoading(true);
     try {
-      const csrfToken = Cookies.get("euonroiaCsrfToken"); // aligned with backend
+      const csrfToken = Cookies.get("euonroiaCsrfToken");
       const res = await axiosClient.post(
         "/auth/me",
         {},

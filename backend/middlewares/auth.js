@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import admin from "firebase-admin";
 
 export async function authMiddleware(req, res, next) {
-  const token = req.cookies?.authToken;
+  const token = req.cookies?.euonroiaAuthToken; 
 
   if (!token) {
     return res.status(401).json({ error: "Not logged in" });
@@ -17,7 +17,7 @@ export async function authMiddleware(req, res, next) {
 
     req.user = decoded;
 
-    // ✅ Update lastActive on every request
+    // Update lastActive
     await admin.firestore().collection("users").doc(decoded.uid).update({
       lastActive: admin.firestore.FieldValue.serverTimestamp(),
     });
