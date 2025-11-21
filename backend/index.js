@@ -8,14 +8,11 @@ import { ENV } from "./config/env.js";
 import "./config/firebase.js";
 import { securityMiddleware } from "./config/security.js";
 import { protectBackend } from "./middlewares/protectBackend.js";
-
 import authRoutes from "./api/auth/index.js";
-
 import lessonsRoutes from "./api/lessons/index.js";
-import dashboardRoutes from "./api/milestones.js";
+import dashboardRoutes from "./api/dashboard/index.js";
 import leaderboardRoutes from "./api/leaderboard/leaderboard.js";
-import checkBadge from "./api/badges/check.js";
-import earnedBadges from "./api/badges/earnedbadges.js"; 
+import checkBadge from "./api/badges/index.js";
 import preloadSnippets from "./api/trainer/preloadSnippets.js";
 
 const app = express();
@@ -64,12 +61,9 @@ app.use("/auth", authRoutes);
 app.use(protectBackend);
 
 app.use("/api/lessons", lessonsRoutes);
-
 app.use("/api/milestones", dashboardRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/badges", checkBadge);
-app.use("/api/badgesEarned", earnedBadges);
-
 app.use("/api/admin", preloadSnippets);
 
 /* --------------------------------------------------
