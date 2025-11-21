@@ -176,7 +176,7 @@ const HTMLexamContent: React.FC = () => {
     }
   }, [isExamComplete, htmlOutput, user]);
 
-  const handleCongratsClick = () => navigate('/dashboard');
+  const handleCongratsClick = () => navigate('/onboarding');
 
   return (
     <div className="lesson-container">

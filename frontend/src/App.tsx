@@ -94,7 +94,7 @@ function AppContent() {
         <Route path="/onboarding/js-sample" element={<OnboardingJsSample />} />
         <Route path="/onboarding/js-display" element={<OnboardingJsDisplay />} />
         <Route path="/onboarding/js-exam" element={<OnboardingJsExam/>}/>
-
+        
         {/*maintenance message*/}
         <Route path="/maintenance" element={<MaintenanceMessage />} />
         <Route path="/adding-feature" element={<AddingFeature />} />
