@@ -1,7 +1,6 @@
 import admin from "firebase-admin";
 import fs from "fs";
 import { ENV } from "./env.js";
-
 let serviceAccount;
 
 try {
