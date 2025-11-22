@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import lusca from "lusca";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -20,11 +21,9 @@ import preloadSnippets from "./api/trainer/preloadSnippets.js";
 const app = express();
 const isProduction = ENV.NODE_ENV === "production";
 
-// Fix __dirname in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Allowed frontend origins
 const FRONTEND_URLS = isProduction
   ? ["https://euonroia.onrender.com"]
   : ["http://localhost:5173", "http://127.0.0.1:5173"];
