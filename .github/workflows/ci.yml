@@ -20,15 +20,22 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Cache frontend dependencies
+        uses: actions/cache@v3
+        with:
+          path: frontend/node_modules
+          key: yarn-frontend-${{ hashFiles('frontend/yarn.lock') }}
+          restore-keys: |
+            yarn-frontend-
+
       - name: Install frontend dependencies
+        working-directory: frontend
         run: |
-          cd frontend
-          yarn install --frozen-lockfile
+          yarn install --frozen-lockfile || yarn install
 
       - name: Build frontend
-        run: |
-          cd frontend
-          yarn build
+        working-directory: frontend
+        run: yarn build
 
   backend:
     name: Backend Build & Test
@@ -43,7 +50,19 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Cache backend dependencies
+        uses: actions/cache@v3
+        with:
+          path: backend/node_modules
+          key: yarn-backend-${{ hashFiles('backend/yarn.lock') }}
+          restore-keys: |
+            yarn-backend-
+
       - name: Install backend dependencies
+        working-directory: backend
         run: |
-          cd backend
-          yarn install --frozen-lockfile
+          yarn install --frozen-lockfile || yarn install
+
+      - name: Run backend tests
+        working-directory: backend
+        run: yarn test
