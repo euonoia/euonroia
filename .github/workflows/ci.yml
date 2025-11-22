@@ -1,4 +1,4 @@
-name: CI
+name: Frontend CI
 
 on:
   push:
@@ -24,12 +24,18 @@ jobs:
 
       # 3. Install dependencies
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: |
+          cd frontend
+          yarn install --frozen-lockfile
 
       # 4. Build your project
       - name: Build
-        run: yarn build
+        run: |
+          cd frontend
+          yarn build
 
       # 5. Run tests (optional for now)
       - name: Run tests
-        run: yarn test --if-present
+        run: |
+          cd frontend
+          yarn test --if-present
