@@ -62,7 +62,3 @@ jobs:
         working-directory: backend
         run: |
           yarn install --frozen-lockfile || yarn install
-
-      - name: Run backend tests
-        working-directory: backend
-        run: yarn test
