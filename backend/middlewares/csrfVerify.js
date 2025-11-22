@@ -1,4 +1,4 @@
-// middlewares/csrfVerify.js
+
 export const verifyCsrfToken = (req, res, next) => {
   const cookieToken = req.cookies?.euonroiaCsrfToken;
   const headerToken = req.headers["x-csrf-token"];
