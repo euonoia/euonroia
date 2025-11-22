@@ -5,7 +5,7 @@ import { authMiddleware } from "../../middlewares/auth.js";
 const router = express.Router();
 
 // POST /api/badges/check
-router.post("/check", authMiddleware, async (req, res) => {
+router.post("/", authMiddleware, async (req, res) => {
   try {
     const uid = req.user?.uid; 
     const { badgeId } = req.body;

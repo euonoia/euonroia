@@ -2,22 +2,27 @@ import jwt from "jsonwebtoken";
 import admin from "firebase-admin";
 
 export async function authMiddleware(req, res, next) {
-  const token = req.cookies?.euonroiaAuthToken; 
-
-  if (!token) {
-    return res.status(401).json({ error: "Not logged in" });
-  }
-
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const token = req.cookies?.euonroiaAuthToken;
+
+    // 1️⃣ No token
+    if (!token) {
+      return res.status(401).json({ error: "Not logged in" });
+    }
+
+    // 2️⃣ Verify token expiration + signature
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, {
+      ignoreExpiration: false, // ✔ ensure expired tokens throw an error
+    });
 
     if (!decoded || !decoded.uid) {
       return res.status(401).json({ error: "Invalid token payload" });
     }
 
+    // Attach user
     req.user = decoded;
 
-    // Update lastActive
+    // 3️⃣ Update lastActive safely
     await admin.firestore().collection("users").doc(decoded.uid).update({
       lastActive: admin.firestore.FieldValue.serverTimestamp(),
     });
@@ -25,6 +30,8 @@ export async function authMiddleware(req, res, next) {
     next();
   } catch (err) {
     console.error("JWT verification failed:", err);
+
+    // 4️⃣ Expired token should always return 401
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 }

@@ -1,17 +1,28 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { useUser } from "../../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   children: ReactNode;
 }
 
 const VerifyToken = ({ children }: Props) => {
-  const { loading } = useUser();
+  const { user, loading } = useUser();
+  const navigate = useNavigate();
 
-  // While user is still loading, avoid flashing UI
+  useEffect(() => {
+    if (!loading) {
+      // No user → token missing or expired → redirect
+      if (!user) {
+        navigate("/", { replace: true });
+      }
+    }
+  }, [user, loading, navigate]);
+
+  // Prevent UI flash while loading user state
   if (loading) return null;
 
-  // No redirect — guests are allowed
+  // If user exists → allow rendering children
   return <>{children}</>;
 };
 

@@ -159,8 +159,8 @@ const HTMLexamContent: React.FC = () => {
         axios.post(
           `${import.meta.env.VITE_BACKEND_URL}/api/badges/check`,
           { 
-            uid: user.uid,           // logged-in user UID
-            badgeId: "first_lesson" // the badge to award
+            uid: user.uid,          
+            badgeId: "first_lesson" 
           },
           { withCredentials: true }
         ).catch((err) => {
