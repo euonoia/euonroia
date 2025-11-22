@@ -1,4 +1,4 @@
-name: Frontend CI
+name: Monorepo CI
 
 on:
   push:
@@ -7,35 +7,60 @@ on:
     branches: [ main ]
 
 jobs:
-  build-test:
+  frontend:
+    name: Frontend Build & Test
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout your code
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # 2. Use cached Node version
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'yarn'
 
-      # 3. Install dependencies
-      - name: Install dependencies
+      - name: Install frontend dependencies
         run: |
           cd frontend
           yarn install --frozen-lockfile
 
-      # 4. Build your project
-      - name: Build
+      - name: Build frontend
         run: |
           cd frontend
           yarn build
 
-      # 5. Run tests (optional for now)
-      - name: Run tests
+      - name: Run frontend tests
         run: |
           cd frontend
+          yarn test --if-present
+
+  backend:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          yarn install --frozen-lockfile
+
+      - name: Build backend
+        run: |
+          cd backend
+          yarn build
+
+      - name: Run backend tests
+        run: |
+          cd backend
           yarn test --if-present
