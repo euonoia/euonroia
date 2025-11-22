@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import lusca from "lusca";
 import path from "path";
 import { fileURLToPath } from "url";
 
