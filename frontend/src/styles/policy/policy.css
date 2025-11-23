@@ -1,0 +1,48 @@
+.policy-layout {
+  display: flex;
+  padding: 1rem;
+  gap: 1.5rem;
+}
+
+.policy-sidebar {
+  width: 250px;
+  background: var(--bg-card);
+  padding: 1rem;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-md);
+}
+
+.policy-sidebar h2 {
+  margin-bottom: 1rem;
+}
+
+.policy-link {
+  display: block;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.3rem;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.policy-link:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.policy-link.active {
+  background: var(--accent);
+  color: white;
+}
+
+.policy-content {
+  flex: 1;
+  background: var(--bg-card);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: var(--shadow-md);
+}
+
+.policy-markdown pre {
+  font-size: 1rem;
+  line-height: 1.6;
+}
