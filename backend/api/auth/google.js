@@ -69,7 +69,7 @@ router.get("/callback", async (req, res) => {
       url: "https://www.googleapis.com/oauth2/v2/userinfo",
     });
 
-    const { id, name, email, picture } = data;
+    const { id, name, email } = data; // removed picture
 
     // Get or create user in Firebase Auth
     let userRecord;
@@ -79,13 +79,11 @@ router.get("/callback", async (req, res) => {
       userRecord = await admin.auth().createUser({
         email,
         displayName: name,
-        photoURL: picture,
       });
     }
 
     await admin.auth().updateUser(userRecord.uid, {
       displayName: name,
-      photoURL: picture,
     });
 
     // Firestore user document
@@ -101,7 +99,6 @@ router.get("/callback", async (req, res) => {
           uid: userRecord.uid,
           displayName: name,
           email,
-          photoURL: picture,
           createdAt: now,
           xp: 0,
           streak: 0,
@@ -121,7 +118,6 @@ router.get("/callback", async (req, res) => {
       const updates = {
         displayName: name,
         email,
-        photoURL: picture,
         lastActive: now,
       };
 
@@ -130,9 +126,9 @@ router.get("/callback", async (req, res) => {
       await userRef.set(updates, { merge: true });
     }
 
-    // JWT cookie
+    // JWT cookie 
     const token = jwt.sign(
-      { uid: userRecord.uid, name, email, picture },
+      { uid: userRecord.uid, name, email },
       JWT_SECRET,
       { expiresIn: "1h" }
     );
