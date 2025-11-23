@@ -82,16 +82,15 @@
 .hamburger-container {
   position: relative;
 }
-
 /* ------------------------ */
-/* Dropdown / Hamburger Menu Slimmed */
+/* Dropdown / Hamburger Menu  */
 /* ------------------------ */
 .header-dropdown {
   position: absolute;
   top: 100%;
   right: 1rem;
   margin-top: 0.5rem;
-  width: clamp(140px, 12vw, 220px); /* scales nicely */
+  width: clamp(140px, 12vw, 220px);
   max-width: 220px;
   min-width: 140px;
   overflow: hidden;
@@ -107,7 +106,6 @@
   opacity: 1;
 }
 
-/* Drip pseudo-background */
 .dropdown-drip {
   position: absolute;
   top: -25px;
@@ -138,71 +136,85 @@
 .nav-links {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start; /* left-aligned links */
   gap: 0.4rem;
-  padding: 0.5rem 0;
+  padding: 0.5rem 0.5rem;
   background: var(--bg-card);
   border-radius: 0 0 12px 12px;
 }
 
-.nav-links a,
-.nav-links .signout-btn {
+.nav-links a {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 0.4rem;
   color: var(--text-primary);
   text-decoration: none;
   font-weight: 500;
   padding: 0.4rem 0.8rem;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   transition: all 0.25s ease;
-  width: 85%;
-  text-align: center;
+  width: 100%;
   font-size: clamp(0.75rem, 0.8vw, 0.85rem);
 }
 
-.nav-links a:hover,
-.nav-links .signout-btn:hover {
+.nav-links a:hover {
   color: var(--accent);
   transform: translateY(-2px);
   background: rgba(79, 70, 229, 0.1);
 }
 
-.signout-btn {
+/* Separator line above Sign Out */
+.signout-divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(79, 70, 229, 0.2);
+  margin: 0.25rem 0;
+}
+
+/* Sign Out button - icon and text centered */
+.nav-links .signout-btn {
   background: var(--accent);
   color: #fff;
   font-weight: 600;
   cursor: pointer;
   border: none;
+  padding: 0.35rem 0;
+  border-radius: 0.5rem;
+  width: 100%;
+  display: flex;            
+  align-items: center;       
+  justify-content: center;   
+  gap: 0.4rem;               
+  transition: all 0.25s ease;
 }
 
-.signout-btn:hover {
+.nav-links .signout-btn:hover {
   background: var(--accent-hover);
 }
+
 
 /* ------------------------ */
 /* Responsive Adjustments   */
 /* ------------------------ */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .header-dropdown {
-    width: clamp(140px, 18vw, 200px);
-  }
-  .nav-links a,
-  .nav-links .signout-btn {
-    width: 90%;
+    width: clamp(140px, 18vw, 180px);
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .header-dropdown {
-    width: 160px;
+    width: 140px;
   }
-  .nav-links a,
+  .nav-links a {
+    padding: 0.35rem 0.6rem;
+  }
   .nav-links .signout-btn {
-    width: 90%;
+    padding: 0.35rem 0;
   }
 }
+
+
 
 @media (max-width: 480px) {
   .header-dropdown {

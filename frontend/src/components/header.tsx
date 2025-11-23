@@ -63,14 +63,25 @@ export default function Header() {
 
               <div className={`header-dropdown ${menuOpen ? "open" : ""}`}>
                 <div className="dropdown-drip"></div>
-                <nav className="nav-links">
-                  <Link to="/dashboard"><FiHome /> Dashboard</Link>
-                  <Link to="/lessons"><FiBook /> Lessons</Link>
-                  <Link to="/playground"><FiCode /> Playground</Link>
-                  {!isLessonPage && (
-                    <button className="signout-btn"><FiLogOut /> Sign Out</button>
-                  )}
-                </nav>
+               <nav className="nav-links">
+                <Link to="/dashboard">
+                  <FiHome /> Dashboard
+                </Link>
+                <Link to="/lessons">
+                  <FiBook/> Lessons
+                </Link>
+                <Link to="/playground">
+                  <FiCode /> Playground
+                </Link>
+
+                {/* Divider line */}
+                <div className="signout-divider"></div>
+
+                {/* Sign Out button */}
+                <button className="signout-btn" onClick={signOut}>
+                  <FiLogOut /> Sign Out
+                </button>
+              </nav>
               </div>
             </div>
           </>
