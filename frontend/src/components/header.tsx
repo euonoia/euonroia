@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import { useTheme } from "../context/ThemeContext";
-import { FiMenu, FiSun, FiMoon, FiCalendar } from "react-icons/fi";
+import { FiMenu, FiSun, FiMoon, FiCalendar, FiHome, FiBook, FiCode, FiLogOut } from "react-icons/fi";
 import DailyLoginModal from "./modals/DailyLoginModal";
 import "../styles/components/header.css";
 
@@ -16,8 +16,6 @@ export default function Header() {
   const isLessonPage = location.pathname.startsWith("/lessons/");
 
   const toggleMenu = () => setMenuOpen((prev) => !prev);
-
-  // Select the correct logo based on theme
   const logoSrc = theme === "light" ? "/Euonroia_Light.png" : "/Euonroia_Dark.png";
 
   return (
@@ -30,13 +28,13 @@ export default function Header() {
         </div>
       </Link>
 
+      {/* Header Actions */}
       <div className="header-actions">
         {!loading && !user && (
           <>
             <button className="btn" onClick={signInWithGoogle}>
               Continue with Google
             </button>
-
             <button className="btn theme-toggle" onClick={toggleTheme}>
               {theme === "light" ? <FiMoon /> : <FiSun />}
             </button>
@@ -49,7 +47,7 @@ export default function Header() {
               className="btn daily-login-btn"
               onClick={() => setDailyLoginOpen(true)}
             >
-              <FiCalendar style={{ marginRight: "0.25rem" }} />
+              <FiCalendar />
               Daily Login
             </button>
 
@@ -57,39 +55,30 @@ export default function Header() {
               {theme === "light" ? <FiMoon /> : <FiSun />}
             </button>
 
-            <button className="hamburger" onClick={toggleMenu}>
-              <FiMenu size={24} />
-            </button>
+            {/* Hamburger + Dropdown */}
+            <div className="hamburger-container">
+              <button className="hamburger" onClick={toggleMenu}>
+                <FiMenu size={24} />
+              </button>
+
+              <div className={`header-dropdown ${menuOpen ? "open" : ""}`}>
+                <div className="dropdown-drip"></div>
+                <nav className="nav-links">
+                  <Link to="/dashboard"><FiHome /> Dashboard</Link>
+                  <Link to="/lessons"><FiBook /> Lessons</Link>
+                  <Link to="/playground"><FiCode /> Playground</Link>
+                  {!isLessonPage && (
+                    <button className="signout-btn"><FiLogOut /> Sign Out</button>
+                  )}
+                </nav>
+              </div>
+            </div>
           </>
         )}
       </div>
 
-      {/* Expanded menu for logged-in users */}
-      {!loading && user && menuOpen && (
-        <div className="header-right open">
-          <div className="user-info">
-            {user.picture && <img src={user.picture} className="user-avatar" />}
-            <span className="user-name">{user.name}</span>
-          </div>
-
-          <nav className="nav-links">
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/lessons">Lessons</Link>
-            <Link to="/playground">Playground</Link>
-          </nav>
-
-          {!isLessonPage && (
-            <button className="btn signout-btn" onClick={signOut}>
-              Sign Out
-            </button>
-          )}
-        </div>
-      )}
-
       {/* Daily Login Modal */}
-      {dailyLoginOpen && (
-        <DailyLoginModal onClose={() => setDailyLoginOpen(false)} />
-      )}
+      {dailyLoginOpen && <DailyLoginModal onClose={() => setDailyLoginOpen(false)} />}
     </header>
   );
 }
