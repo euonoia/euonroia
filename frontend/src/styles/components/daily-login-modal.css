@@ -1,174 +1,129 @@
+/* =========================
+   Overlay
+========================= */
 .modal-overlay {
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
-  background-color: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.55);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999;
+  backdrop-filter: blur(12px) saturate(120%);
+  animation: fadeIn 0.35s ease;
 }
+@keyframes fadeIn { 0% { opacity:0 } 100% { opacity:1 } }
 
+/* =========================
+   Modal box
+========================= */
 .modal-content {
-  background-color: #fff;
-  color: #333;
-  padding: 2rem;
-  border-radius: 1rem;
-  max-width: 400px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: var(--space-8);
+  border-radius: 1.5rem;
+  max-width: 440px;
   width: 90%;
   position: relative;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.35);
   text-align: center;
+  font-family: var(--font-family-base);
   overflow: hidden;
+  border: 1px solid var(--border-color);
 }
 
 .modal-content.scale-in {
-  animation: scaleIn 0.3s ease forwards;
+  animation: popIn 0.5s cubic-bezier(.4,1.2,.2,1) forwards;
+}
+@keyframes popIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  80% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); }
 }
 
-@keyframes scaleIn {
-  0% { transform: scale(0.8); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
+/* =========================
+   Close button
+========================= */
 .modal-close {
-  position: absolute; top: 12px; right: 12px;
-  background: none; border: none; font-size: 1.2rem;
-  cursor: pointer;
-}
-
-.modal-title {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #ff9800;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-}
-
-.streak-info p {
-  margin: 0.3rem 0;
-  font-size: 1rem;
-}
-
-.streak-progress {
-  background: #eee;
-  border-radius: 10px;
-  height: 10px;
-  margin: 1rem 0;
-  overflow: hidden;
-}
-
-.streak-progress-filled {
-  background: #4caf50;
-  height: 100%;
-  transition: width 0.5s ease;
-}
-
-.streak-calendar {
-  display: flex;
-  gap: 0.25rem;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-
-.streak-day {
-  width: 35px; height: 35px;
-  border-radius: 50%;
-  background-color: #eee;
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 600;
-  transition: transform 0.2s, background-color 0.2s;
-}
-
-.streak-day.logged {
-  background-color: #4caf50;
-  color: #fff;
-  transform: scale(1.1);
-}
-
-.streak-day.today {
-  border: 2px solid #ff9800;
-  box-shadow: 0 0 8px rgba(255,152,0,0.7);
-}
-
-.claim-btn {
-  padding: 0.6rem 1.2rem;
-  background: #ff9800;
-  color: #fff;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 1rem;
-  transition: transform 0.2s, background 0.2s;
-}
-
-.claim-btn:hover {
-  transform: scale(1.05);
-  background: #ffa726;
-}
-
-.claim-btn.claiming {
-  background: #ffb74d;
-  cursor: default;
-}
-
-.claimed-text {
-  margin-top: 1rem;
-  font-weight: 600;
-  color: #4caf50;
-  font-size: 1.1rem;
-}
-
-.xp-popup {
   position: absolute;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #ff9800;
-  color: #fff;
-  font-weight: 700;
-  padding: 0.4rem 0.8rem;
-  border-radius: 0.5rem;
-  animation: popXP 1.5s ease forwards;
+  top: var(--space-3);
+  right: var(--space-3);
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.25s ease;
 }
-.month-calendar {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 0.25rem;
-  margin: 1rem 0;
-}
+.modal-close:hover { color: var(--accent); }
 
-.month-day-header {
+/* =========================
+   Modal Title
+========================= */
+.modal-title {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-4);
+  color: var(--accent);
   font-weight: 600;
-  text-align: center;
-  color: #555;
-}
-
-.month-day {
-  width: 35px;
-  height: 35px;
+  letter-spacing: 0.5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background-color: #eee;
-  font-weight: 600;
-  transition: transform 0.2s, background-color 0.2s;
-  cursor: default;
+  gap: var(--space-2);
 }
+.icon { width: 26px; height: 26px; color: var(--accent); text-shadow:0 0 4px var(--accent); }
 
-.month-day.logged {
-  background-color: #4caf50;
-  color: #fff;
-  transform: scale(1.05);
+/* =========================
+   Calendar
+========================= */
+.month-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-1);
+  margin: var(--space-4) 0 var(--space-6);
 }
+.month-day-header { font-weight:600; text-align:center; color:var(--text-secondary); font-size:0.85rem; }
+.month-day {
+  width: 40px; height: 40px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:50%;
+  background: var(--bg-main);
+  font-weight:600; font-size:0.95rem;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+.month-day.logged { background: linear-gradient(135deg, var(--color-success), #00ff90); color:#fff; transform: scale(1.05); box-shadow:0 0 12px var(--color-success); }
+.month-day.today { border:3px solid var(--accent); box-shadow:0 0 18px var(--accent); animation:pulseToday 1.5s infinite alternate; transform: scale(1.1);}
+.month-day.logged.today { background: var(--color-success); border-color: var(--accent); color:#fff;}
+@keyframes pulseToday {0%{transform:scale(1.1);box-shadow:0 0 15px var(--accent);}100%{transform:scale(1.2);box-shadow:0 0 25px var(--accent);}}
 
-.month-day.today {
-  border: 2px solid #ff9800;
-  box-shadow: 0 0 8px rgba(255,152,0,0.7);
+/* =========================
+   Claim Button
+========================= */
+.claim-btn {
+  padding: 0.75rem 1.75rem;
+  background: linear-gradient(45deg, var(--accent), var(--accent-hover));
+  color:#fff;
+  border-radius:1rem;
+  font-weight:600; font-size:var(--font-size-base);
+  cursor:pointer; margin-top: var(--space-4);
+  border:none;
+  box-shadow:0 6px 18px rgba(0,0,0,0.25),0 0 12px var(--accent);
+  transition: all 0.3s ease;
 }
+.claim-btn:hover { transform: scale(1.05); box-shadow:0 8px 25px rgba(0,0,0,0.3),0 0 20px var(--accent-hover);}
+.claim-btn.claiming { background: var(--color-primary-hover); cursor:default; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
 
-@keyframes popXP {
-  0% { transform: translateX(-50%) translateY(0) scale(0.5); opacity: 0; }
-  50% { transform: translateX(-50%) translateY(-20px) scale(1.2); opacity: 1; }
-  100% { transform: translateX(-50%) translateY(-50px) scale(1); opacity: 0; }
+/* =========================
+   XP Popup
+========================= */
+.xp-popup {
+  position:absolute; top: var(--space-5); left:50%; transform: translateX(-50%);
+  background: linear-gradient(135deg,#FFD700,#FFB800);
+  color:#fff; font-weight:700;
+  padding:0.5rem 1rem; border-radius:0.6rem;
+  font-size:0.95rem; text-shadow:0 0 6px #fff;
+  animation: floatXP 1.5s ease forwards; box-shadow:0 6px 16px rgba(0,0,0,0.15);
 }
+@keyframes floatXP {0%{transform:translateX(-50%) translateY(0) scale(0.5);opacity:0;}50%{transform:translateX(-50%) translateY(-25px) scale(1.2);opacity:1;}100%{transform:translateX(-50%) translateY(-60px) scale(1);opacity:0;}}
