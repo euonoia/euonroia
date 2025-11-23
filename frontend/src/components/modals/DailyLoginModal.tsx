@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
+import { FaFire, FaRegStar } from "react-icons/fa";
 import "../../styles/components/daily-login-modal.css";
 
 interface StreakResponse {
@@ -26,9 +27,6 @@ export default function DailyLoginModal({ onClose }: { onClose: () => void }) {
   const [claimedToday, setClaimedToday] = useState(false);
   const [loggedDates, setLoggedDates] = useState<string[]>([]);
 
-  //---------------------------------------------
-  // Helper: Extract cookie value
-  //---------------------------------------------
   const getCookie = (name: string) =>
     document.cookie
       .split("; ")
@@ -38,9 +36,6 @@ export default function DailyLoginModal({ onClose }: { onClose: () => void }) {
   const authToken = getCookie("euonroiaAuthToken");
   const csrfToken = getCookie("euonroiaCsrfToken");
 
-  //---------------------------------------------
-  // Fetch streak info (GET)
-  //---------------------------------------------
   useEffect(() => {
     const fetchStreak = async () => {
       try {
@@ -56,32 +51,24 @@ export default function DailyLoginModal({ onClose }: { onClose: () => void }) {
           }
         );
 
-        if (!res.ok) throw new Error("Failed to fetch");
+        if (!res.ok) throw new Error("Failed to fetch streak");
 
         const data: StreakResponse = await res.json();
-
         setStreak(data.streak);
         setLoggedDates(data.loggedDates || []);
-
-        // Determine if claimed today
-        const today = new Date().toISOString().split("T")[0];
-        setClaimedToday(data.lastClaimedReward.startsWith(today));
+        const todayStr = new Date().toISOString().slice(0, 10);
+        setClaimedToday(data.lastClaimedReward.slice(0, 10) === todayStr);
       } catch (err) {
         console.error("Daily streak fetch error:", err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchStreak();
   }, []);
 
-  //---------------------------------------------
-  // Claim reward (POST)
-  //---------------------------------------------
   const claimReward = async () => {
     if (claiming || claimedToday) return;
-
     setClaiming(true);
 
     try {
@@ -98,42 +85,32 @@ export default function DailyLoginModal({ onClose }: { onClose: () => void }) {
       );
 
       const data: ClaimResponse = await res.json();
-
       setStreak(data.streak);
       setXpEarned(data.xpEarned);
       setClaimedToday(true);
 
-      const today = new Date().toISOString().split("T")[0];
-      setLoggedDates((prev) => [...prev, today]);
+      const todayStr = new Date().toISOString().slice(0, 10);
+      setLoggedDates((prev) => [...prev, todayStr]);
 
-      // Show XP popup
       setShowXP(true);
       setTimeout(() => setShowXP(false), 1500);
-    } catch (e) {
-      console.error("Claim reward error:", e);
+    } catch (err) {
+      console.error("Claim reward error:", err);
     } finally {
       setClaiming(false);
     }
   };
 
-  //---------------------------------------------
-  // Build calendar for this month
-  //---------------------------------------------
   const generateCalendar = () => {
     const today = new Date();
     const year = today.getFullYear();
     const month = today.getMonth();
-
+    const todayStr = today.toISOString().slice(0, 10);
     const lastDay = new Date(year, month + 1, 0).getDate();
-    const todayStr = today.toISOString().split("T")[0];
-
     const dates = [];
 
     for (let d = 1; d <= lastDay; d++) {
-      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(
-        d
-      ).padStart(2, "0")}`;
-
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
       dates.push({
         day: d,
         date: dateStr,
@@ -141,15 +118,11 @@ export default function DailyLoginModal({ onClose }: { onClose: () => void }) {
         today: dateStr === todayStr,
       });
     }
-
     return dates;
   };
 
   const monthDates = generateCalendar();
 
-  //---------------------------------------------
-  // UI
-  //---------------------------------------------
   if (loading)
     return (
       <div className="modal-overlay">
@@ -166,7 +139,9 @@ export default function DailyLoginModal({ onClose }: { onClose: () => void }) {
           <FiX />
         </button>
 
-        <h2 className="modal-title">🔥 Daily Login Reward 🔥</h2>
+        <h2 className="modal-title">
+          <FaFire className="icon" /> Daily Login Reward <FaRegStar className="icon" />
+        </h2>
 
         <p className="streak-info">
           Streak: <strong>{streak}</strong> days
@@ -178,13 +153,12 @@ export default function DailyLoginModal({ onClose }: { onClose: () => void }) {
 
         <div className="month-calendar">
           {["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map((d) => (
-            <div key={d} className="day-header">{d}</div>
+            <div key={d} className="month-day-header">{d}</div>
           ))}
-
           {monthDates.map((d) => (
             <div
               key={d.date}
-              className={`day ${d.logged ? "logged" : ""} ${d.today ? "today" : ""}`}
+              className={`month-day ${d.logged ? "logged" : ""} ${d.today ? "today" : ""}`}
             >
               {d.day}
             </div>
@@ -196,7 +170,7 @@ export default function DailyLoginModal({ onClose }: { onClose: () => void }) {
           disabled={claimedToday || claiming}
           onClick={claimReward}
         >
-          {claimedToday ? "Reward Claimed 🎉" : claiming ? "Claiming..." : "Claim Reward"}
+          {claimedToday ? "Reward Claimed" : claiming ? "Claiming..." : "Claim Reward"}
         </button>
 
         {showXP && <div className="xp-popup">+{xpEarned} XP!</div>}
