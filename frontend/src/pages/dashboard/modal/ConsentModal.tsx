@@ -1,24 +1,54 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom"; // <-- import Link
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useUser } from "../../../context/UserContext";
+import axios from "axios";
 import "../../../styles/policy/policy.css";
 
-type Props = {
+interface Props {
   isOpen: boolean;
-  onAccept: () => void;
-  onCancel: () => void;
-};
+  onClose: () => void; 
+}
 
-const ConsentModal: React.FC<Props> = ({ isOpen, onAccept, onCancel }) => {
-  const [checked, setChecked] = useState(false);
 
-  if (!isOpen) return null;
+export default function ConsentModal({ isOpen, onClose }: Props) {
+  const { user, fetchUser } = useUser();
+  const [agreed, setAgreed] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  if (!isOpen || !user) return null;
+
+  const handleAgree = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/consent/log-consent`,
+        {
+          uid: user.uid,
+          email: user.email,
+          agreed: true,
+        },
+        { withCredentials: true }
+      );
+
+      // Refresh user info to update agreedToPolicies
+      fetchUser?.();
+
+      onClose(); // close modal after agreeing
+    } catch (err) {
+      console.error("Consent logging failed:", err);
+      alert("Failed to record consent. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="policy-modal-overlay">
       <div className="policy-modal-card">
         <h2>Terms & Policies</h2>
 
-        {/* Scrollable policy text */}
         <div
           style={{
             maxHeight: "300px",
@@ -30,44 +60,35 @@ const ConsentModal: React.FC<Props> = ({ isOpen, onAccept, onCancel }) => {
           }}
         >
           <p>
-            Welcome to our platform. By using our service, you agree to follow all policies and
-            guidelines. You can read the full documents{" "}
+            Welcome! By using our service, you agree to follow all policies. Read the full documents{" "}
             <Link to="/policies/privacy">here (Privacy Policy)</Link>,{" "}
             <Link to="/policies/terms">here (Terms of Service)</Link>, and{" "}
             <Link to="/policies/cookies">here (Cookie Policy)</Link>.
           </p>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed tempus mauris non
-            faucibus viverra. Curabitur vel eros vel sapien gravida tincidunt.
-          </p>
         </div>
 
-        {/* Checkbox */}
         <label className="policy-checkbox">
           <input
             type="checkbox"
-            checked={checked}
-            onChange={(e) => setChecked(e.target.checked)}
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
           />
-          I have read and agree to the terms and policies
+          I have read and agree to the policies
         </label>
 
-        {/* Buttons */}
         <div className="policy-buttons">
           <button
             className="btn-primary"
-            disabled={!checked}
-            onClick={onAccept}
+            disabled={!agreed || loading}
+            onClick={handleAgree}
           >
-            I Agree
+            {loading ? "Processing..." : "I Agree"}
           </button>
-          <button className="btn-secondary" onClick={onCancel}>
+          <button className="btn-secondary" onClick={onClose}>
             Cancel
           </button>
         </div>
       </div>
     </div>
   );
-};
-
-export default ConsentModal;
+}

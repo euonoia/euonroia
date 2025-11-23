@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useUser } from "../../context/UserContext";
 import { useTheme } from "../../context/ThemeContext";
 import Header from "../../components/header";
@@ -29,31 +29,25 @@ const DashboardContent: React.FC = () => {
   const { user, loading } = useUser();
   const { theme } = useTheme();
 
-  const { xp, level } = useDashboardXP(user);
-  const { streak, lastActive } = useDashboardStreak(user);
+  const { xp } = useDashboardXP(user);
+  const { streak } = useDashboardStreak(user);
   const { progressData, lessons } = useDashboardProgress(user);
   const { badges, loadingBadges } = useDashboardBadges(user);
   const { leaderboard, loadingLeaderboard } = useDashboardLeaderboard();
-
-  // --- useConsent hook
-  const { consent, loading: consentLoading, logConsent } = useConsent();
-
-  // --- local state to handle Cancel
   const [modalOpen, setModalOpen] = useState(true);
+  const { consent, loading: consentLoading } = useConsent(modalOpen);
 
-  const handleAcceptPolicies = () => {
-    if (user?.uid && user?.email) {
-      logConsent(user.uid, user.email);
+  // --- local state to control modal visibility
+
+  // --- automatically close modal if user already agreed
+  useEffect(() => {
+    if (consent?.agreedToPolicies) {
       setModalOpen(false);
     }
-  };
+  }, [consent]);
 
-  const handleCancelPolicies = () => {
-    // Close modal for now but keep the consent state false
-    setModalOpen(false);;
-  };
+  const handleCloseModal = () => setModalOpen(false);
 
-  // --- overall loading state
   if (loading || consentLoading) {
     return (
       <div className={`dashboard-page ${theme}`}>
@@ -66,7 +60,6 @@ const DashboardContent: React.FC = () => {
     );
   }
 
-  // --- compute next lesson
   const nextLesson =
     progressData.htmlBasicsProgress < 100
       ? lessons.find((l) => l.id === "html-basics")
@@ -103,10 +96,9 @@ const DashboardContent: React.FC = () => {
       <Footer />
 
       {/* --- POLICY CONSENT MODAL */}
-      <ConsentModal
+     <ConsentModal
         isOpen={modalOpen && !consent?.agreedToPolicies}
-        onAccept={handleAcceptPolicies}
-        onCancel={handleCancelPolicies}
+        onClose={() => setModalOpen(false)} // unified close
       />
     </div>
   );
