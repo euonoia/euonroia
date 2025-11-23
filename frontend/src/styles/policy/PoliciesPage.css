@@ -1,0 +1,23 @@
+.policies-tabs {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.policies-tabs a {
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  color: var(--text-primary);
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.policies-tabs a.active {
+  border-color: var(--accent);
+  font-weight: bold;
+}
+
+.policies-content {
+  margin-top: 1rem;
+}

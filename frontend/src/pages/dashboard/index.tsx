@@ -1,5 +1,4 @@
-// --- imports (unchanged)
-import React from "react";
+import React, { useState } from "react";
 import { useUser } from "../../context/UserContext";
 import { useTheme } from "../../context/ThemeContext";
 import Header from "../../components/header";
@@ -21,21 +20,41 @@ import {
   DashboardLeaderboard,
 } from "./components";
 
+import useConsent from "./hooks/useConsent";
+import ConsentModal from "./modal/ConsentModal";
+
 import "../../styles/pages/Dashboard.css";
 
 const DashboardContent: React.FC = () => {
   const { user, loading } = useUser();
   const { theme } = useTheme();
 
-  // --- hooks
   const { xp, level } = useDashboardXP(user);
   const { streak, lastActive } = useDashboardStreak(user);
   const { progressData, lessons } = useDashboardProgress(user);
   const { badges, loadingBadges } = useDashboardBadges(user);
   const { leaderboard, loadingLeaderboard } = useDashboardLeaderboard();
 
-  // --- loading state
-  if (loading) {
+  // --- useConsent hook
+  const { consent, loading: consentLoading, logConsent } = useConsent();
+
+  // --- local state to handle Cancel
+  const [modalOpen, setModalOpen] = useState(true);
+
+  const handleAcceptPolicies = () => {
+    if (user?.uid && user?.email) {
+      logConsent(user.uid, user.email);
+      setModalOpen(false);
+    }
+  };
+
+  const handleCancelPolicies = () => {
+    // Close modal for now but keep the consent state false
+    setModalOpen(false);;
+  };
+
+  // --- overall loading state
+  if (loading || consentLoading) {
     return (
       <div className={`dashboard-page ${theme}`}>
         <Header />
@@ -50,11 +69,11 @@ const DashboardContent: React.FC = () => {
   // --- compute next lesson
   const nextLesson =
     progressData.htmlBasicsProgress < 100
-      ? lessons.find(l => l.id === "html-basics")
+      ? lessons.find((l) => l.id === "html-basics")
       : progressData.cssBasicsProgress < 100
-      ? lessons.find(l => l.id === "css-intro")
+      ? lessons.find((l) => l.id === "css-intro")
       : progressData.javascriptProgress < 100
-      ? lessons.find(l => l.id === "javascript")
+      ? lessons.find((l) => l.id === "javascript")
       : null;
 
   return (
@@ -62,22 +81,18 @@ const DashboardContent: React.FC = () => {
       <Header />
 
       <main className="dashboard-main">
-        {/* TOP SECTION */}
         <DashboardTop
           displayName={progressData.displayName}
           streak={streak}
           xp={xp}
           nextLesson={nextLesson || undefined}
-          completedLessons={lessons.filter(l => l.progress === 100).length}
+          completedLessons={lessons.filter((l) => l.progress === 100).length}
         />
 
-        {/* LESSONS GRID */}
         <DashboardLessons lessons={lessons} />
 
-        {/* BOTTOM SECTION */}
         <div className="dashboard-bottom">
           <DashboardAchievements badges={badges} loading={loadingBadges} />
-
           <DashboardLeaderboard
             leaderboard={leaderboard}
             loading={loadingLeaderboard}
@@ -86,11 +101,17 @@ const DashboardContent: React.FC = () => {
       </main>
 
       <Footer />
+
+      {/* --- POLICY CONSENT MODAL */}
+      <ConsentModal
+        isOpen={modalOpen && !consent?.agreedToPolicies}
+        onAccept={handleAcceptPolicies}
+        onCancel={handleCancelPolicies}
+      />
     </div>
   );
 };
 
-// --- wrap with VerifyToken (UNCHANGED)
 const Dashboard: React.FC = () => (
   <VerifyToken>
     <DashboardContent />

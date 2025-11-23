@@ -6,6 +6,7 @@ import { LessonRoutes } from "./routes/lessonsRoutes";
 import { OnboardingRoutes } from "./routes/onboardingRoutes";
 import { SystemRoutes } from "./routes/systemRoutes";
 import { RootRoutes } from "./routes/rootRoutes";
+import { PolicyRoutes } from "./routes/PolicyRoutes";
 
 function AppContent() {
   const { loading } = useUser();
@@ -28,6 +29,9 @@ function AppContent() {
 
       {/* Onboarding Lessons */}
       {OnboardingRoutes}
+      
+        {/* Policies */}
+      {PolicyRoutes}
 
       {/* 404 Fallback */}
       <Route path="*" element={<p>Page not found</p>} />
