@@ -3,7 +3,7 @@ import { authMiddleware } from "../../middlewares/auth.js";
 
 const router = Router();
 
-router.post("/", authMiddleware, (req, res) => {
+router.get("/", authMiddleware, (req, res) => {
   const clientCsrfToken = req.headers["x-csrf-token"];
   const cookieCsrfToken = req.cookies?.euonroiaCsrfToken;
 
