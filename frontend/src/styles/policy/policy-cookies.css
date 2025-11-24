@@ -1,0 +1,84 @@
+/* ============================================
+   COOKIE POLICY — EUONROIA THEME
+   ============================================ */
+
+.cookie-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-6);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-md);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-base);
+}
+
+/* Headings */
+.cookie-container h1 {
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--space-4);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.cookie-container h2 {
+  font-size: var(--font-size-xl);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-2);
+  color: var(--accent-hover);
+  font-weight: 600;
+}
+
+.cookie-container h3 {
+  font-size: var(--font-size-lg);
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-2);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Text */
+.cookie-container p {
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+}
+
+/* Lists */
+.cookie-container ul {
+  margin-left: var(--space-6);
+  margin-bottom: var(--space-4);
+  color: var(--text-secondary);
+}
+
+.cookie-container li {
+  margin-bottom: var(--space-2);
+}
+
+/* Links */
+.cookie-container a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.cookie-container a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+/* Mobile Friendly */
+@media (max-width: 600px) {
+  .cookie-container {
+    padding: var(--space-4);
+  }
+
+  .cookie-container h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .cookie-container h2 {
+    font-size: var(--font-size-lg);
+  }
+}

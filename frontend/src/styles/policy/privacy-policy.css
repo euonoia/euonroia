@@ -1,0 +1,72 @@
+/* ============================================
+   PRIVACY POLICY — EUONROIA THEME
+   ============================================ */
+
+.policy-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--space-6);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-md);
+  color: var(--text-primary);
+  font-family: var(--font-family-base);
+  line-height: var(--line-height-base);
+}
+
+.policy-container h1 {
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--space-4);
+  color: var(--accent);
+  font-weight: bold;
+}
+
+.policy-container h2 {
+  font-size: var(--font-size-xl);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-2);
+  color: var(--accent-hover);
+  font-weight: 600;
+}
+
+.policy-container p {
+  margin-bottom: var(--space-4);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+}
+
+.policy-container ul {
+  margin-left: var(--space-6);
+  margin-bottom: var(--space-4);
+  color: var(--text-secondary);
+}
+
+.policy-container li {
+  margin-bottom: var(--space-2);
+}
+
+.policy-container a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.policy-container a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+
+/* Mobile Friendly */
+@media (max-width: 600px) {
+  .policy-container {
+    padding: var(--space-4);
+  }
+
+  .policy-container h1 {
+    font-size: var(--font-size-2xl);
+  }
+
+  .policy-container h2 {
+    font-size: var(--font-size-lg);
+  }
+}

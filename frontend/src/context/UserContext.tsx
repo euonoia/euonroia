@@ -2,11 +2,12 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 import axiosClient from "../utils/axiosClient";
 import Cookies from "js-cookie";
 
-interface User {
-  uid: string;      // Use "uid" to match backend JWT
+export interface User {
+  uid: string;      
   name: string;
   email: string;
   picture?: string;
+  agreedToPolicies?: boolean; 
 }
 
 interface UserContextType {
@@ -16,6 +17,7 @@ interface UserContextType {
   signOut: () => void;
   loginError: boolean;
   setLoginError: (value: boolean) => void;
+  fetchUser: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -24,15 +26,15 @@ interface Props {
   children: ReactNode;
 }
 
-export const UserProvider = ({ children }: Props) => {
+export const UserProvider = ({ children }: Props): React.ReactNode => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [loginError, setLoginError] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [loginError, setLoginError] = useState<boolean>(false);
 
   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
   // --- Fetch current user from backend
-  const fetchUser = async () => {
+  const fetchUser = async (): Promise<void> => {
     setLoading(true);
     try {
       const csrfToken = Cookies.get("euonroiaCsrfToken");
@@ -61,13 +63,13 @@ export const UserProvider = ({ children }: Props) => {
   }, []);
 
   // --- Redirect to Google OAuth
-  const signInWithGoogle = () => {
+  const signInWithGoogle = (): void => {
     setLoginError(false);
     window.location.href = `${BACKEND_URL}/auth/google`;
   };
 
   // --- Sign out user
-  const signOut = async () => {
+  const signOut = async (): Promise<void> => {
     try {
       const csrfToken = Cookies.get("euonroiaCsrfToken");
       await axiosClient.post(
@@ -94,6 +96,7 @@ export const UserProvider = ({ children }: Props) => {
         signOut,
         loginError,
         setLoginError,
+        fetchUser,
       }}
     >
       {children}
@@ -102,7 +105,7 @@ export const UserProvider = ({ children }: Props) => {
 };
 
 // --- Custom hook to use UserContext
-export const useUser = () => {
+export const useUser = (): UserContextType => {
   const context = useContext(UserContext);
   if (!context) throw new Error("useUser must be used within a UserProvider");
   return context;
