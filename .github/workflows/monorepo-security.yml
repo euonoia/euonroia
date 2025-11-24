@@ -9,35 +9,54 @@ on:
 permissions:
   contents: read
 
-env:
-  SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
 jobs:
-  # ----------------------------
-  # Frontend Build & Security
-  # ----------------------------
-  frontend:
-    name: Frontend Build & Security
+  build-and-security:
+    name: Build & Security
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        folder: [frontend, backend]
+
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
     steps:
+      # ----------------------------
+      # Checkout repository
+      # ----------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ----------------------------
+      # Setup Node.js
+      # ----------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install frontend dependencies
-        run: yarn --cwd frontend install --frozen-lockfile
+      # ----------------------------
+      # Install dependencies
+      # ----------------------------
+      - name: Install dependencies
+        run: yarn --cwd ${{ matrix.folder }} install --frozen-lockfile
 
-      - name: Build frontend
-        run: yarn --cwd frontend build
+      # ----------------------------
+      # Build project
+      # ----------------------------
+      - name: Build project
+        run: yarn --cwd ${{ matrix.folder }} build
 
-      - name: Audit frontend dependencies
-        run: yarn --cwd frontend audit --level moderate
+      # ----------------------------
+      # Audit dependencies with Yarn
+      # ----------------------------
+      - name: Audit dependencies
+        run: yarn --cwd ${{ matrix.folder }} audit --level moderate
 
-      - name: Install Semgrep & Trivy
+      # ----------------------------
+      # Install security tools
+      # ----------------------------
+      - name: Install security tools
         run: |
           pip install semgrep
           sudo apt-get update
@@ -48,41 +67,20 @@ jobs:
           sudo apt-get install -y trivy
           npm install -g snyk
 
-      - name: Run Semgrep (Frontend)
-        run: semgrep --config=p/ci frontend
+      # ----------------------------
+      # Run Semgrep
+      # ----------------------------
+      - name: Run Semgrep
+        run: semgrep --config=p/ci ${{ matrix.folder }}
 
-      - name: Run Trivy (Frontend)
-        run: trivy fs --severity CRITICAL,HIGH,MEDIUM frontend
+      # ----------------------------
+      # Run Trivy
+      # ----------------------------
+      - name: Run Trivy
+        run: trivy fs --severity CRITICAL,HIGH,MEDIUM ${{ matrix.folder }}
 
-      - name: Run Snyk (Frontend)
-        run: snyk test --all-projects
-
-  # ----------------------------
-  # Backend Build & Security
-  # ----------------------------
-  backend:
-    name: Backend Build & Security
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install backend dependencies
-        run: yarn --cwd backend install --frozen-lockfile
-
-      - name: Audit backend dependencies
-        run: yarn --cwd backend audit --level moderate
-
-      - name: Run Semgrep (Backend)
-        run: semgrep --config=p/ci backend
-
-      - name: Run Trivy (Backend)
-        run: trivy fs --severity CRITICAL,HIGH,MEDIUM backend
-
-      - name: Run Snyk (Backend)
+      # ----------------------------
+      # Run Snyk
+      # ----------------------------
+      - name: Run Snyk
         run: snyk test --all-projects
