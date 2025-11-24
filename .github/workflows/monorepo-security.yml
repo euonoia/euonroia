@@ -16,11 +16,13 @@ jobs:
   frontend:
     name: Frontend Build & Security
     runs-on: ubuntu-latest
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -34,17 +36,29 @@ jobs:
       - name: Audit frontend dependencies with Yarn
         run: yarn --cwd frontend audit --level moderate
 
-      - name: Run Semgrep (Frontend) via Docker
-        run: |
-          docker run --rm -v ${{ github.workspace }}/frontend:/src semgrep/semgrep:latest semgrep --config=p/ci /src
+      - name: Install Semgrep
+        run: pip install semgrep
 
-      - name: Run Trivy (Frontend) via Docker
-        run: |
-          docker run --rm -v ${{ github.workspace }}/frontend:/app ghcr.io/aquasecurity/trivy:0.43.1 fs --severity CRITICAL,HIGH,MEDIUM /app
+      - name: Run Semgrep (Frontend)
+        run: semgrep --config=p/ci frontend
 
-      - name: Run Snyk (Frontend) via Docker
+      - name: Install Trivy
         run: |
-          docker run --rm -v ${{ github.workspace }}/frontend:/project -e SNYK_TOKEN=${{ secrets.SNYK_TOKEN }} snyk/snyk-cli:2.33.0 test --all-projects
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Run Trivy (Frontend)
+        run: trivy fs --severity CRITICAL,HIGH,MEDIUM frontend
+
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      - name: Run Snyk (Frontend)
+        run: snyk test --all-projects
 
   # ----------------------------
   # Backend Build & Security
@@ -52,11 +66,13 @@ jobs:
   backend:
     name: Backend Build & Security
     runs-on: ubuntu-latest
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -67,14 +83,26 @@ jobs:
       - name: Audit backend dependencies with Yarn
         run: yarn --cwd backend audit --level moderate
 
-      - name: Run Semgrep (Backend) via Docker
-        run: |
-          docker run --rm -v ${{ github.workspace }}/backend:/src semgrep/semgrep:latest semgrep --config=p/ci /src
+      - name: Install Semgrep
+        run: pip install semgrep
 
-      - name: Run Trivy (Backend) via Docker
-        run: |
-          docker run --rm -v ${{ github.workspace }}/backend:/app ghcr.io/aquasecurity/trivy:0.43.1 fs --severity CRITICAL,HIGH,MEDIUM /app
+      - name: Run Semgrep (Backend)
+        run: semgrep --config=p/ci backend
 
-      - name: Run Snyk (Backend) via Docker
+      - name: Install Trivy
         run: |
-          docker run --rm -v ${{ github.workspace }}/backend:/project -e SNYK_TOKEN=${{ secrets.SNYK_TOKEN }} snyk/snyk-cli:2.33.0 test --all-projects
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Run Trivy (Backend)
+        run: trivy fs --severity CRITICAL,HIGH,MEDIUM backend
+
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      - name: Run Snyk (Backend)
+        run: snyk test --all-projects
