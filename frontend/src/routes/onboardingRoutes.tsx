@@ -1,5 +1,5 @@
 import { Route } from "react-router-dom";
-
+import WelcomeScreen from "../onboarding/steps/WelcomeStep";
 // Onboarding Funnel
 import OnboardingFunnel from "../onboarding/GetStarted";
 
@@ -21,6 +21,7 @@ import OnboardingJsExam from "../onboarding/onboarding-lessons/javascript/JavaSc
 
 export const OnboardingRoutes = (
   <>
+    <Route path="/welcome" element={<WelcomeScreen />} />
     <Route path="/onboarding" element={<OnboardingFunnel />} />
 
     {/* HTML Lessons */}
