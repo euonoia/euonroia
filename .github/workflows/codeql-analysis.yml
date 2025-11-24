@@ -1,4 +1,4 @@
-name: CodeQL Security & Audit
+name: Monorepo Build, Audit & CodeQL
 
 on:
   push:
@@ -15,7 +15,6 @@ jobs:
   frontend:
     name: Frontend Build & Audit
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -43,7 +42,6 @@ jobs:
   backend:
     name: Backend Install & Audit
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -66,7 +64,6 @@ jobs:
   codeql:
     name: CodeQL Security Analysis
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -75,14 +72,15 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: javascript
+          config-file: .codeql-config.yml
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          output: results/javascript.sarif
+          output: results/codeql.sarif
 
       - name: Upload SARIF artifact
         uses: actions/upload-artifact@v4
         with:
           name: codeql-results
-          path: results/javascript.sarif
+          path: results/codeql.sarif
