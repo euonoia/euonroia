@@ -1,0 +1,80 @@
+name: Monorepo Build & Security
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  # ----------------------------
+  # Frontend Build & Security
+  # ----------------------------
+  frontend:
+    name: Frontend Build & Security
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        run: yarn --cwd frontend install --frozen-lockfile
+
+      - name: Build frontend
+        run: yarn --cwd frontend build
+
+      - name: Audit frontend dependencies with Yarn
+        run: yarn --cwd frontend audit --level moderate
+
+      - name: Run Semgrep (Frontend) via Docker
+        run: |
+          docker run --rm -v ${{ github.workspace }}/frontend:/src returntocorp/semgrep semgrep --config=p/ci /src
+
+      - name: Run Trivy (Frontend) via Docker
+        run: |
+          docker run --rm -v ${{ github.workspace }}/frontend:/app aquasec/trivy fs --severity CRITICAL,HIGH,MEDIUM /app
+
+      - name: Run Snyk (Frontend) via Docker
+        run: |
+          docker run --rm -v ${{ github.workspace }}/frontend:/project -e SNYK_TOKEN=${{ secrets.SNYK_TOKEN }} snyk/snyk-cli test --all-projects
+
+  # ----------------------------
+  # Backend Build & Security
+  # ----------------------------
+  backend:
+    name: Backend Build & Security
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install backend dependencies
+        run: yarn --cwd backend install --frozen-lockfile
+
+      - name: Audit backend dependencies with Yarn
+        run: yarn --cwd backend audit --level moderate
+
+      - name: Run Semgrep (Backend) via Docker
+        run: |
+          docker run --rm -v ${{ github.workspace }}/backend:/src returntocorp/semgrep semgrep --config=p/ci /src
+
+      - name: Run Trivy (Backend) via Docker
+        run: |
+          docker run --rm -v ${{ github.workspace }}/backend:/app aquasec/trivy fs --severity CRITICAL,HIGH,MEDIUM /app
+
+      - name: Run Snyk (Backend) via Docker
+        run: |
+          docker run --rm -v ${{ github.workspace }}/backend:/project -e SNYK_TOKEN=${{ secrets.SNYK_TOKEN }} snyk/snyk-cli test --all-projects
