@@ -10,77 +10,99 @@ permissions:
   contents: read
 
 jobs:
-  build-and-security:
-    name: Build & Security
+  # ----------------------------
+  # Frontend Build & Security
+  # ----------------------------
+  frontend:
+    name: Frontend Build & Security
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        folder: [frontend, backend]
-
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
     steps:
-      # ----------------------------
-      # Checkout repository
-      # ----------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ----------------------------
-      # Setup Node.js
-      # ----------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      # ----------------------------
-      # Install dependencies
-      # ----------------------------
-      - name: Install dependencies
-        run: yarn --cwd ${{ matrix.folder }} install --frozen-lockfile
+      - name: Install frontend dependencies
+        run: yarn --cwd frontend install --frozen-lockfile
 
-      # ----------------------------
-      # Build project
-      # ----------------------------
-      - name: Build project
-        run: yarn --cwd ${{ matrix.folder }} build
+      - name: Build frontend
+        run: yarn --cwd frontend build
 
-      # ----------------------------
-      # Audit dependencies with Yarn
-      # ----------------------------
-      - name: Audit dependencies
-        run: yarn --cwd ${{ matrix.folder }} audit --level moderate
+      - name: Audit frontend dependencies with Yarn
+        run: yarn --cwd frontend audit --level moderate
 
-      # ----------------------------
-      # Install security tools
-      # ----------------------------
-      - name: Install security tools
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep (Frontend)
+        run: semgrep --config=p/ci frontend
+
+      - name: Install Trivy
         run: |
-          pip install semgrep
           sudo apt-get update
           sudo apt-get install -y wget apt-transport-https gnupg lsb-release
           wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
           echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
           sudo apt-get update
           sudo apt-get install -y trivy
-          npm install -g snyk
 
-      # ----------------------------
-      # Run Semgrep
-      # ----------------------------
-      - name: Run Semgrep
-        run: semgrep --config=p/ci ${{ matrix.folder }}
+      - name: Run Trivy (Frontend)
+        run: trivy fs --severity CRITICAL,HIGH,MEDIUM frontend
 
-      # ----------------------------
-      # Run Trivy
-      # ----------------------------
-      - name: Run Trivy
-        run: trivy fs --severity CRITICAL,HIGH,MEDIUM ${{ matrix.folder }}
+      - name: Install Snyk CLI
+        run: npm install -g snyk
 
-      # ----------------------------
-      # Run Snyk
-      # ----------------------------
-      - name: Run Snyk
+      - name: Run Snyk (Frontend)
+        run: snyk test --all-projects
+
+  # ----------------------------
+  # Backend Security (No Build)
+  # ----------------------------
+  backend:
+    name: Backend Security
+    runs-on: ubuntu-latest
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install backend dependencies
+        run: yarn --cwd backend install --frozen-lockfile
+
+      - name: Audit backend dependencies with Yarn
+        run: yarn --cwd backend audit --level moderate
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep (Backend)
+        run: semgrep --config=p/ci backend
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Run Trivy (Backend)
+        run: trivy fs --severity CRITICAL,HIGH,MEDIUM backend
+
+      - name: Install Snyk CLI
+        run: npm install -g snyk
+
+      - name: Run Snyk (Backend)
         run: snyk test --all-projects
