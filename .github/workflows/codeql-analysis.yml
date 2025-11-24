@@ -1,4 +1,4 @@
-name: CodeQl Analysis
+name: CodeQL Security & Audit
 
 on:
   push:
@@ -7,9 +7,10 @@ on:
     branches: [ main ]
 
 permissions:
-  security-events: write
+  actions: read
   contents: read
-  
+  security-events: write
+
 jobs:
   frontend:
     name: Frontend Build & Audit
@@ -62,10 +63,8 @@ jobs:
           cd backend
           yarn audit --level moderate
 
-      # No build step since your backend runs directly
-
   codeql:
-    name: CodeQL Analysis
+    name: CodeQL Security Analysis
     runs-on: ubuntu-latest
 
     steps:
