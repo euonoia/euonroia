@@ -36,15 +36,15 @@ jobs:
 
       - name: Run Semgrep (Frontend) via Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/frontend:/src returntocorp/semgrep semgrep --config=p/ci /src
+          docker run --rm -v ${{ github.workspace }}/frontend:/src returntocorp/semgrep:v1.25.0 semgrep --config=p/ci /src
 
       - name: Run Trivy (Frontend) via Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/frontend:/app aquasec/trivy fs --severity CRITICAL,HIGH,MEDIUM /app
+          docker run --rm -v ${{ github.workspace }}/frontend:/app aquasec/trivy:v1.3.0 fs --severity CRITICAL,HIGH,MEDIUM /app
 
       - name: Run Snyk (Frontend) via Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/frontend:/project -e SNYK_TOKEN=${{ secrets.SNYK_TOKEN }} snyk/snyk-cli test --all-projects
+          docker run --rm -v ${{ github.workspace }}/frontend:/project -e SNYK_TOKEN=${{ secrets.SNYK_TOKEN }} snyk/snyk-cli:2.33.0 test --all-projects
 
   # ----------------------------
   # Backend Build & Security
@@ -69,12 +69,12 @@ jobs:
 
       - name: Run Semgrep (Backend) via Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/backend:/src returntocorp/semgrep semgrep --config=p/ci /src
+          docker run --rm -v ${{ github.workspace }}/backend:/src returntocorp/semgrep:v1.25.0 semgrep --config=p/ci /src
 
       - name: Run Trivy (Backend) via Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/backend:/app aquasec/trivy fs --severity CRITICAL,HIGH,MEDIUM /app
+          docker run --rm -v ${{ github.workspace }}/backend:/app aquasec/trivy:v1.3.0 fs --severity CRITICAL,HIGH,MEDIUM /app
 
       - name: Run Snyk (Backend) via Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/backend:/project -e SNYK_TOKEN=${{ secrets.SNYK_TOKEN }} snyk/snyk-cli test --all-projects
+          docker run --rm -v ${{ github.workspace }}/backend:/project -e SNYK_TOKEN=${{ secrets.SNYK_TOKEN }} snyk/snyk-cli:2.33.0 test --all-projects
