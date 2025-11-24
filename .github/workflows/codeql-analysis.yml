@@ -16,71 +16,42 @@ jobs:
     name: Frontend Build & Audit
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install frontend dependencies
-        run: |
+      - run: |
           cd frontend
           yarn install --frozen-lockfile
-
-      - name: Build frontend
-        run: |
-          cd frontend
           yarn build
-
-      - name: Audit frontend dependencies
-        run: |
-          cd frontend
           yarn audit --level moderate
 
   backend:
     name: Backend Install & Audit
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install backend dependencies
-        run: |
+      - run: |
           cd backend
           yarn install --frozen-lockfile
-
-      - name: Audit backend dependencies
-        run: |
-          cd backend
           yarn audit --level moderate
 
   codeql:
     name: CodeQL Security Analysis
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+      - uses: github/codeql-action/init@v4
         with:
           languages: javascript
           config-file: .codeql-config.yml
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          output: results/codeql.sarif
-
-      - name: Upload SARIF artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: codeql-results
-          path: results/codeql.sarif
+      - uses: github/codeql-action/analyze@v4
