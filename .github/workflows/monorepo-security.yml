@@ -36,11 +36,11 @@ jobs:
 
       - name: Run Semgrep (Frontend) via Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/frontend:/src returntocorp/semgrep:latest semgrep --config=p/ci /src
+          docker run --rm -v ${{ github.workspace }}/frontend:/src semgrep/semgrep:latest semgrep --config=p/ci /src
 
       - name: Run Trivy (Frontend) via Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/frontend:/app aquasec/trivy:v0.67.2 fs --severity CRITICAL,HIGH,MEDIUM /app
+          docker run --rm -v ${{ github.workspace }}/frontend:/app ghcr.io/aquasecurity/trivy:0.43.1 fs --severity CRITICAL,HIGH,MEDIUM /app
 
       - name: Run Snyk (Frontend) via Docker
         run: |
@@ -69,11 +69,11 @@ jobs:
 
       - name: Run Semgrep (Backend) via Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/backend:/src returntocorp/semgrep:latest semgrep --config=p/ci /src
+          docker run --rm -v ${{ github.workspace }}/backend:/src semgrep/semgrep:latest semgrep --config=p/ci /src
 
       - name: Run Trivy (Backend) via Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/backend:/app aquasec/trivy:v0.67.2 fs --severity CRITICAL,HIGH,MEDIUM /app
+          docker run --rm -v ${{ github.workspace }}/backend:/app ghcr.io/aquasecurity/trivy:0.43.1 fs --severity CRITICAL,HIGH,MEDIUM /app
 
       - name: Run Snyk (Backend) via Docker
         run: |
