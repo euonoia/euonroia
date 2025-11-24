@@ -1,23 +1,39 @@
+.policies-page {
+  min-height: 100vh;
+  background: var(--bg-main);
+  color: var(--text-primary);
+}
+
+/* Prevent content from hugging the fixed header */
+.policies-main {
+  padding-top: 80px; /* same as dashboard */
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+/* Tabs row */
 .policies-tabs {
   display: flex;
   gap: 1rem;
-  margin: 1rem 0;
+  margin-top: 1.5rem;
   border-bottom: 2px solid var(--color-border);
 }
 
 .policies-tabs a {
-  text-decoration: none;
   padding: 0.5rem 1rem;
+  font-weight: 500;
   color: var(--text-primary);
   border-bottom: 2px solid transparent;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, color 0.2s;
 }
 
 .policies-tabs a.active {
   border-color: var(--accent);
-  font-weight: bold;
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .policies-content {
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 }

@@ -59,12 +59,35 @@ export default function ConsentModal({ isOpen, onClose }: Props) {
             marginBottom: "1rem",
           }}
         >
-          <p>
-            Welcome! By using our service, you agree to follow all policies. Read the full documents{" "}
-            <Link to="/policies/privacy">here (Privacy Policy)</Link>,{" "}
-            <Link to="/policies/terms">here (Terms of Service)</Link>, and{" "}
-            <Link to="/policies/cookies">here (Cookie Policy)</Link>.
+         <p>
+            Before continuing, please review and accept our platform policies. These
+            policies explain how we handle your data, how you are expected to use our
+            services, and your rights as a user. By proceeding, you acknowledge that you
+            have read, understood, and agreed to the following documents:
           </p>
+
+          <ul style={{ marginLeft: "1.25rem", marginBottom: "1rem" }}>
+            <li>
+              <Link to="/policies/terms">Terms of Service</Link> – Outlines acceptable use,
+              account rules, responsibilities, and limitations of liability.
+            </li>
+            <li>
+              <Link to="/policies/privacy">Privacy Policy</Link> – Explains what data we
+              collect, why we collect it, and how it is stored and protected.
+            </li>
+            <li>
+              <Link to="/policies/cookies">Cookie Policy</Link> – Describes how cookies and
+              tracking technologies are used to improve your experience.
+            </li>
+          </ul>
+
+          <p>
+            By checking the box below and clicking <strong>"I Agree"</strong>, you confirm
+            that you accept these policies and consent to the processing of your data as
+            described. If you do not agree, you may close this window and discontinue the
+            use of the service.
+          </p>
+
         </div>
 
         <label className="policy-checkbox">

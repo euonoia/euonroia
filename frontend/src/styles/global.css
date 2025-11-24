@@ -56,3 +56,8 @@ button:hover {
 button:active {
   transform: translateY(1px);
 }
+
+/* Offset for fixed header */
+.page-wrapper {
+  padding-top: 80px; /* Adjust if your header height changes */
+}

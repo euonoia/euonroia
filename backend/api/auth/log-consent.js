@@ -39,9 +39,26 @@ router.post("/log-consent", authMiddleware, async (req, res) => {
       ? crypto.createHash("sha256").update(req.ip).digest("hex")
       : null;
 
-    // Create consent record in Firestore
-    const consentRef = admin.firestore().collection("consents").doc();
-    await consentRef.set({
+    const consentsRef = admin.firestore().collection("consents");
+
+    // Check for existing consent
+    const existing = await consentsRef.where("email", "==", email).limit(1).get();
+
+    if (!existing.empty) {
+      // Already agreed — update user just in case & return
+      await admin.firestore().collection("users").doc(uid).set(
+        { agreedToPolicies: true },
+        { merge: true }
+      );
+
+      return res.json({
+        message: "Consent already exists, no duplicate created",
+        agreedToPolicies: true,
+      });
+    }
+
+    // Create new consent record
+    await consentsRef.add({
       uid,
       email,
       agreed: true,
@@ -50,15 +67,22 @@ router.post("/log-consent", authMiddleware, async (req, res) => {
       userAgent: req.headers["user-agent"] || null,
     });
 
-    // Update user's agreedToPolicies field
-    const userRef = admin.firestore().collection("users").doc(uid);
-    await userRef.set({ agreedToPolicies: true }, { merge: true });
+    // Mark user as agreed
+    await admin.firestore().collection("users").doc(uid).set(
+      { agreedToPolicies: true },
+      { merge: true }
+    );
 
-    res.json({ message: "Consent logged and linked to user", agreedToPolicies: true });
+    res.json({
+      message: "Consent logged and linked to user",
+      agreedToPolicies: true,
+    });
+
   } catch (err) {
     console.error("Consent logging error:", err);
     res.status(500).json({ error: "Failed to log consent" });
   }
 });
+
 
 export default router;
