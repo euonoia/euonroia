@@ -36,7 +36,7 @@ jobs:
 
       - name: Run Semgrep (Frontend) via Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/frontend:/src returntocorp/semgrep:v1.25.0 semgrep --config=p/ci /src
+          docker run --rm -v ${{ github.workspace }}/frontend:/src semgrep/semgrep:latest semgrep --config=p/ci /src
 
       - name: Run Trivy (Frontend) via Docker
         run: |
@@ -69,7 +69,7 @@ jobs:
 
       - name: Run Semgrep (Backend) via Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/backend:/src returntocorp/semgrep:v1.25.0 semgrep --config=p/ci /src
+          docker run --rm -v ${{ github.workspace }}/backend:/src semgrep/semgrep:latest semgrep --config=p/ci /src
 
       - name: Run Trivy (Backend) via Docker
         run: |
