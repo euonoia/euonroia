@@ -3,17 +3,11 @@ import admin from "firebase-admin";
 
 export async function authMiddleware(req, res, next) {
   try {
-    // Read token from cookie instead of Authorization header
     const token = req.cookies.euonroiaAuthToken;
-
-    if (!token) {
-      return res.status(401).json({ error: "Not logged in" });
-    }
+    if (!token) return res.status(401).json({ error: "Not logged in" });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (!decoded?.uid) {
-      return res.status(401).json({ error: "Invalid token" });
-    }
+    if (!decoded?.uid) return res.status(401).json({ error: "Invalid token" });
 
     req.user = decoded;
 

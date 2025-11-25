@@ -1,13 +1,12 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import axiosClient from "../utils/axiosClient";
-import Cookies from "js-cookie";
 
 export interface User {
-  uid: string;      
+  uid: string;
   name: string;
   email: string;
   picture?: string;
-  agreedToPolicies?: boolean; 
+  agreedToPolicies?: boolean;
 }
 
 interface UserContextType {
@@ -37,16 +36,7 @@ export const UserProvider = ({ children }: Props): React.ReactNode => {
   const fetchUser = async (): Promise<void> => {
     setLoading(true);
     try {
-      const csrfToken = Cookies.get("euonroiaCsrfToken");
-      const res = await axiosClient.post(
-        "/auth/me",
-        {},
-        {
-          headers: { "x-csrf-token": csrfToken || "" },
-          withCredentials: true,
-        }
-      );
-
+      const res = await axiosClient.post("/auth/me"); // CSRF handled automatically
       setUser(res.data.user || null);
       setLoginError(false);
     } catch (err: any) {
@@ -58,11 +48,31 @@ export const UserProvider = ({ children }: Props): React.ReactNode => {
     }
   };
 
+  // --- Automatic token refresh
+  const refreshToken = async (): Promise<void> => {
+    try {
+      await axiosClient.post("/auth/refresh"); // CSRF included automatically
+      await fetchUser(); // update user state after refresh
+    } catch (err) {
+      console.error("Token refresh failed:", err);
+      setUser(null);
+    }
+  };
+
+  // --- Periodic refresh every 30 mins
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshToken();
+    }, 30 * 60 * 1000); // 30 minutes
+    return () => clearInterval(interval);
+  }, []);
+
+  // --- Initial fetch
   useEffect(() => {
     fetchUser();
   }, []);
 
-  // --- Redirect to Google OAuth
+  // --- Google OAuth redirect
   const signInWithGoogle = (): void => {
     setLoginError(false);
     window.location.href = `${BACKEND_URL}/auth/google`;
@@ -71,15 +81,7 @@ export const UserProvider = ({ children }: Props): React.ReactNode => {
   // --- Sign out user
   const signOut = async (): Promise<void> => {
     try {
-      const csrfToken = Cookies.get("euonroiaCsrfToken");
-      await axiosClient.post(
-        "/auth/signout",
-        {},
-        {
-          headers: { "x-csrf-token": csrfToken || "" },
-          withCredentials: true,
-        }
-      );
+      await axiosClient.post("/auth/signout"); // CSRF handled automatically
       setUser(null);
       window.location.href = "/";
     } catch (err) {
@@ -104,7 +106,7 @@ export const UserProvider = ({ children }: Props): React.ReactNode => {
   );
 };
 
-// --- Custom hook to use UserContext
+// --- Custom hook
 export const useUser = (): UserContextType => {
   const context = useContext(UserContext);
   if (!context) throw new Error("useUser must be used within a UserProvider");

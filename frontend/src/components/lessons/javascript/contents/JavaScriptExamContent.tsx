@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
 import axios from "../../../../utils/axiosClient";
-import Header from "../../.././../components/header";
+import Header from "../../../../components/header";
 import CodeBlockJavascriptExam from "../CodeBlock/CodeBlockJavaScriptExam";
 import "../../../../styles/pages/lessons/LessonPage.css";
 import { useTheme } from "../../../../context/ThemeContext";
@@ -17,6 +17,7 @@ const JavaScriptExamContent: React.FC = () => {
   const [randomAge, setRandomAge] = useState(Math.floor(Math.random() * 20) + 10);
   const [output, setOutput] = useState<string | null>(null);
   const [message, setMessage] = useState("Tap the blocks to build a JavaScript program!");
+  const [showCongrats, setShowCongrats] = useState(false);
 
   const allRequiredBlocks = [
     "let", "const", "function", "console.log",
@@ -86,8 +87,11 @@ ${scriptContent}  </script>
   const fullHTML = buildFullHTMLOutput();
 
   useEffect(() => {
+    if (!lessonComplete || !user || loading) return;
+    setShowCongrats(true);
+
     const logs: string[] = [];
-    const displayName = user?.name || "Student";
+    const displayName = user.name || "Student";
 
     if (usedBlocks.includes("let") && usedBlocks.includes("const") &&
         usedBlocks.includes("function") && usedBlocks.includes("console.log")) {
@@ -101,18 +105,26 @@ ${scriptContent}  </script>
 
     setOutput(logs.length > 0 ? logs.join("\n") : null);
 
-    if (lessonComplete) {
-      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    const saveExam = async () => {
+      try {
+        await axios.post("/api/lessons/javascript/quizzes", { jsOutput: fullHTML });
+        console.log("JS Exam saved successfully");
+      } catch (err: any) {
+        console.error("Failed to save JS exam:", err.response?.data || err.message);
+      }
 
-      axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/lessons/javascript/quizzes`,
-        { jsOutput: fullHTML },
-        { withCredentials: true }
-      ).catch(err => console.error("Failed to save JS exam:", err));
+      // Confetti animation
+      const duration = 3000;
+      const end = Date.now() + duration;
+      (function frame() {
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    };
 
-      setTimeout(() => navigate("/dashboard"), 3000);
-    }
-  }, [usedBlocks, randomAge, lessonComplete, user?.name, fullHTML, navigate]);
+    saveExam();
+  }, [lessonComplete, usedBlocks, randomAge, fullHTML, user, loading]);
 
   if (loading) return <div>Loading user data...</div>;
 
@@ -165,6 +177,14 @@ ${scriptContent}  </script>
             )}
           </div>
         </div>
+        {showCongrats && (
+          <div className="congrats-overlay" onClick={() => navigate('/dashboard')}>
+            <div className="congrats-box">
+              🎉 Congratulations! You completed the JavaScript Exam! 🎉
+              <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>Tap anywhere to return to dashboard</p>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

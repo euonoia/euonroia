@@ -17,8 +17,22 @@ import leaderboardRoutes from "./api/leaderboard/leaderboard.js";
 import Badges from "./api/badges/index.js";
 import preloadSnippets from "./api/trainer/preloadSnippets.js";
 
+
+
+
+import rateLimit from "express-rate-limit";
+
 const app = express();
+app.disable("x-powered-by");   
+
 const isProduction = ENV.NODE_ENV === "production";
+
+const spaRateLimit = rateLimit({
+  windowMs: 5 * 60 * 1000,  // 5 minutes
+  max: 300,                 // allow 300 SPA loads per 5 minutes per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -61,8 +75,13 @@ app.use("/auth", authRoutes);
    - Valid CSRF cookie
    - Valid x-csrf-token header
    -------------------------------------------------- */
-app.use(verifyCsrfToken);
-
+app.use("/api", (req, res, next) => {
+  const unsafe = ["POST", "PUT", "PATCH", "DELETE"];
+  if (unsafe.includes(req.method)) {
+    return verifyCsrfToken(req, res, next);
+  }
+  next();
+});
 /* --------------------------------------------------
    3️⃣ PROTECTED BACKEND ROUTES
    -------------------------------------------------- */
@@ -83,9 +102,10 @@ app.use(express.static(path.join(__dirname, "public")));
    5️⃣ REACT ROUTER FALLBACK
        Allows SPA routing except under /api and /auth
    -------------------------------------------------- */
-app.get(/^\/(?!api|auth).*/, (req, res) => {
+app.get(/^\/(?!api|auth).*/, spaRateLimit, (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
+
 
 /* --------------------------------------------------
    6️⃣ START SERVER
