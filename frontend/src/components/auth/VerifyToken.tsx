@@ -11,15 +11,13 @@ const VerifyToken = ({ children }: Props) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading) {
-      // No user → token missing or expired → redirect
-      if (!user) {
-        navigate("/", { replace: true });
-      }
+    // Only redirect after loading finishes
+    if (!loading && !user) {
+      navigate("/", { replace: true });
     }
   }, [user, loading, navigate]);
 
-  // Prevent UI flash while loading user state
+  // Prevent rendering UI before we know user state
   if (loading) return null;
 
   // If user exists → allow rendering children

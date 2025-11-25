@@ -6,13 +6,11 @@ import CodeBlock from '../CodeBlock/CodeBlock';
 import Header from '../../../../components/header';
 import '../../../../styles/pages/lessons/LessonPage.css';
 import { useUser } from '../../../../context/UserContext';
-import LoginRequiredModal from '../../../modals/LoginRequireModal';
 import { shuffleArray } from '../utils/shuffleArray';
-import Cookies from "js-cookie";
 
 const HTMLexamContent: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user, loading } = useUser();
 
   const [doctypeAdded, setDoctypeAdded] = useState(false);
   const [htmlAdded, setHtmlAdded] = useState(false);
@@ -26,17 +24,12 @@ const HTMLexamContent: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [activeTag, setActiveTag] = useState<string | null>(null);
 
-
   const [descriptions, setDescriptions] = useState({
     doctype: '', html: '', head: '', body: '', headings: '', paragraphs: '', links: '', images: ''
   });
 
-  // 🔥 Blocks are randomized ONCE on load
   const [availableBlocks, setAvailableBlocks] = useState(() =>
-    shuffleArray([
-      'DOCTYPE', 'html', 'head', 'body',
-      'headings', 'paragraphs', 'links', 'images'
-    ])
+    shuffleArray(['DOCTYPE', 'html', 'head', 'body', 'headings', 'paragraphs', 'links', 'images'])
   );
 
   const handleBlockClick = (tag: string) => {
@@ -55,37 +48,30 @@ const HTMLexamContent: React.FC = () => {
       case 'DOCTYPE':
         addBlock('doctype', '<!DOCTYPE html> specifies the document type.', setDoctypeAdded);
         break;
-
       case 'html':
         if (!doctypeAdded) { setErrorMessage('Add <!DOCTYPE html> first!'); return; }
         addBlock('html', '<html> is the root element.', setHtmlAdded);
         break;
-
       case 'head':
         if (!htmlAdded) { setErrorMessage('Add <html> first!'); return; }
         addBlock('head', '<head> contains meta info.', setHeadAdded);
         break;
-
       case 'body':
         if (!htmlAdded) { setErrorMessage('Add <html> first!'); return; }
         addBlock('body', '<body> contains page content.', setBodyAdded);
         break;
-
       case 'headings':
         if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; }
         addBlock('headings', 'Headings structure content.', setHeadingsAdded);
         break;
-
       case 'paragraphs':
         if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; }
         addBlock('paragraphs', 'Paragraphs hold text.', setParagraphsAdded);
         break;
-
       case 'links':
         if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; }
         addBlock('links', 'Links navigate pages.', setLinksAdded);
         break;
-
       case 'images':
         if (!bodyAdded) { setErrorMessage('Add <body> first!'); return; }
         addBlock('images', 'Images are added with <img>.', setImagesAdded);
@@ -97,18 +83,10 @@ const HTMLexamContent: React.FC = () => {
 
   const buildHtmlOutput = (): string => {
     const lines: string[] = [];
-
-    if (!doctypeAdded && !htmlAdded && !bodyAdded)
-      return 'Click blocks to build HTML structure';
-
-    if (doctypeAdded) {
-      lines.push(`<!-- ${descriptions.doctype} -->`);
-      lines.push('<!DOCTYPE html>');
-    }
-
+    if (!doctypeAdded && !htmlAdded && !bodyAdded) return 'Click blocks to build HTML structure';
+    if (doctypeAdded) { lines.push(`<!-- ${descriptions.doctype} -->`); lines.push('<!DOCTYPE html>'); }
     if (htmlAdded) {
       lines.push('<html>');
-
       if (headAdded) {
         lines.push('  <head>');
         lines.push(`    <!-- ${descriptions.head} -->`);
@@ -117,25 +95,16 @@ const HTMLexamContent: React.FC = () => {
         lines.push('    <title>HTML Exam</title>');
         lines.push('  </head>');
       }
-
       if (bodyAdded) {
         lines.push('  <body>');
-
-        if (headingsAdded) {
-          lines.push('    <h1>Heading 1</h1>');
-          lines.push('    <h2>Heading 2</h2>');
-        }
-
+        if (headingsAdded) lines.push('    <h1>Heading 1</h1>\n    <h2>Heading 2</h2>');
         if (paragraphsAdded) lines.push('    <p>Paragraph</p>');
         if (linksAdded) lines.push('    <a href="#">Link</a>');
         if (imagesAdded) lines.push('    <img src="example.jpg" alt="Example" />');
-
         lines.push('  </body>');
       }
-
       lines.push('</html>');
     }
-
     return lines.join('\n');
   };
 
@@ -144,30 +113,24 @@ const HTMLexamContent: React.FC = () => {
     doctypeAdded && htmlAdded && headAdded && bodyAdded &&
     headingsAdded && paragraphsAdded && linksAdded && imagesAdded;
 
+  // ✅ POST exam and badge only when user exists & exam complete
   useEffect(() => {
-    if (isExamComplete && user) {
-      setShowCongrats(true);
+    if (!isExamComplete || !user || loading) return;
+    setShowCongrats(true);
 
-      // 1️⃣ Save exam output
-      axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/api/lessons/html-basics/quizzes`,
-        { htmlOutput },
-        { withCredentials: true }
-      ).catch(() => {});
+    const saveExam = async () => {
+      try {
+        // Use axiosClient → automatically sends CSRF + cookies
+        await axios.post(`/api/lessons/html-basics/quizzes`, { htmlOutput });
 
-     // 2️⃣ Automatically award "first_lesson" badge
-        axios.post(
-          `${import.meta.env.VITE_BACKEND_URL}/api/badges/check`,
-          { 
-            uid: user.uid,          
-            badgeId: "first_lesson" 
-          },
-          { withCredentials: true }
-        ).catch((err) => {
-          console.error("Failed to award first_lesson badge:", err);
-        });
+        await axios.post(`/api/badges/check`, { uid: user.uid, badgeId: "first_lesson" });
 
-      // 🎉 Confetti effect
+        console.log("Exam saved and badge awarded successfully");
+      } catch (err: any) {
+        console.error("Failed to save exam or award badge:", err.response?.data || err.message);
+      }
+
+      // Confetti
       const duration = 3000;
       const end = Date.now() + duration;
       (function frame() {
@@ -175,10 +138,10 @@ const HTMLexamContent: React.FC = () => {
         confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
         if (Date.now() < end) requestAnimationFrame(frame);
       })();
-    }
-  }, [isExamComplete, htmlOutput, user]);
+    };
 
-  const handleCongratsClick = () => navigate('/dashboard');
+    saveExam();
+  }, [isExamComplete, htmlOutput, user, loading]);
 
   return (
     <div className="lesson-container">
@@ -188,7 +151,6 @@ const HTMLexamContent: React.FC = () => {
           <div className="lesson-left">
             <h1>HTML Exam: Build Your HTML Document</h1>
             <p>Tap blocks to build your HTML structure.</p>
-
             <div className="code-blocks">
               {availableBlocks.map(tag => (
                 <CodeBlock
@@ -212,17 +174,15 @@ const HTMLexamContent: React.FC = () => {
           <div className="lesson-right">
             <h3 className="output-title">HTML Output:</h3>
             {errorMessage && <div className="error-message">{errorMessage}</div>}
-            <div className="html-output"><pre>{htmlOutput}</pre></div>
+            <pre className="html-output">{htmlOutput}</pre>
           </div>
         </div>
-      
+
         {showCongrats && (
           <div className="congrats-overlay" onClick={() => navigate('/dashboard')}>
             <div className="congrats-box">
               🎉 Congratulations! You completed the HTML Exam! 🎉
-              <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                Tap anywhere to return to dashboard
-              </p>
+              <p style={{ fontSize: '0.9rem', marginTop: '0.5rem' }}>Tap anywhere to return to dashboard</p>
             </div>
           </div>
         )}
@@ -230,6 +190,5 @@ const HTMLexamContent: React.FC = () => {
     </div>
   );
 };
-
 
 export default HTMLexamContent;
