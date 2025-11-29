@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./context/UserContext";
-
+import Games from "./games/spell_to_kill/QuizBattle"
 // Route Groups
 import { LessonRoutes } from "./routes/lessonsRoutes";
 import { OnboardingRoutes } from "./routes/onboardingRoutes";
@@ -18,6 +18,7 @@ function AppContent() {
 
   return (
     <Routes>
+      <Route path="/games/spell_to_kill" element={<Games />} />
       {/* Root & Auth Pages */}
       {RootRoutes}
 
