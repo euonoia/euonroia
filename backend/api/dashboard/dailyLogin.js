@@ -1,6 +1,7 @@
 import express from "express";
 import admin from "firebase-admin";
 import { authMiddleware } from "../../middlewares/auth.js";
+import { getLevelFromXP } from "../../utils/levelingup.js";
 
 const router = express.Router();
 
@@ -58,6 +59,7 @@ router.post("/daily-login", authMiddleware, async (req, res) => {
       return res.json({
         streak: user.streak || 0,
         xpEarned: 0,
+        levelUp: false,
         claimedToday: true,
       });
     }
@@ -74,11 +76,15 @@ router.post("/daily-login", authMiddleware, async (req, res) => {
 
     // XP calculation: +5 base, +2 per streak, max +20 bonus
     const xpEarned = 5 + Math.min(continuedStreak * 2, 20);
+    const newXP = (user.xp || 0) + xpEarned;
+    const newLevel = getLevelFromXP(newXP);
+    const levelUp = newLevel > (user.level || 1);
 
     // Update user
     await userRef.update({
       streak: continuedStreak,
-      xp: (user.xp || 0) + xpEarned,
+      xp: newXP,
+      level: newLevel,
       lastActive: admin.firestore.FieldValue.serverTimestamp(),
       lastClaimedReward: admin.firestore.FieldValue.serverTimestamp(),
       loggedDates: admin.firestore.FieldValue.arrayUnion(
@@ -89,6 +95,7 @@ router.post("/daily-login", authMiddleware, async (req, res) => {
     res.json({
       streak: continuedStreak,
       xpEarned,
+      levelUp,
       claimedToday: true,
       lastActive: now.toISOString(),
     });

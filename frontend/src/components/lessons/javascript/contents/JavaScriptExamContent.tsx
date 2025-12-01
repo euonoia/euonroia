@@ -87,44 +87,47 @@ ${scriptContent}  </script>
   const fullHTML = buildFullHTMLOutput();
 
   useEffect(() => {
-    if (!lessonComplete || !user || loading) return;
-    setShowCongrats(true);
+  if (!lessonComplete || !user || loading) return;
+  setShowCongrats(true);
 
-    const logs: string[] = [];
-    const displayName = user.name || "Student";
+  const logs: string[] = [];
+  const displayName = user.name || "Student";
 
-    if (usedBlocks.includes("let") && usedBlocks.includes("const") &&
-        usedBlocks.includes("function") && usedBlocks.includes("console.log")) {
-      logs.push(`Hello, ${displayName}!`);
+  if (usedBlocks.includes("let") && usedBlocks.includes("const") &&
+      usedBlocks.includes("function") && usedBlocks.includes("console.log")) {
+    logs.push(`Hello, ${displayName}!`);
+  }
+
+  if (lessonComplete && usedBlocks.includes("if") && usedBlocks.includes("comparison")) {
+    if (randomAge >= 18 && usedBlocks.includes("console-adult")) logs.push("You are an adult!");
+    else if (randomAge < 18 && usedBlocks.includes("console-minor")) logs.push("You are a minor!");
+  }
+
+  setOutput(logs.length > 0 ? logs.join("\n") : null);
+
+  const saveExam = async () => {
+    try {
+      // Call backend endpoint (JS output not sent anymore)
+      await axios.post("/api/lessons/javascript/quizzes");
+
+      console.log("JS Exam marked completed successfully");
+    } catch (err: any) {
+      console.error("Failed to save JS exam:", err.response?.data || err.message);
     }
 
-    if (lessonComplete && usedBlocks.includes("if") && usedBlocks.includes("comparison")) {
-      if (randomAge >= 18 && usedBlocks.includes("console-adult")) logs.push("You are an adult!");
-      else if (randomAge < 18 && usedBlocks.includes("console-minor")) logs.push("You are a minor!");
-    }
+    // Confetti animation
+    const duration = 3000;
+    const end = Date.now() + duration;
+    (function frame() {
+      confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+      confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    })();
+  };
 
-    setOutput(logs.length > 0 ? logs.join("\n") : null);
+  saveExam();
+}, [lessonComplete, usedBlocks, randomAge, user, loading]);
 
-    const saveExam = async () => {
-      try {
-        await axios.post("/api/lessons/javascript/quizzes", { jsOutput: fullHTML });
-        console.log("JS Exam saved successfully");
-      } catch (err: any) {
-        console.error("Failed to save JS exam:", err.response?.data || err.message);
-      }
-
-      // Confetti animation
-      const duration = 3000;
-      const end = Date.now() + duration;
-      (function frame() {
-        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
-        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
-        if (Date.now() < end) requestAnimationFrame(frame);
-      })();
-    };
-
-    saveExam();
-  }, [lessonComplete, usedBlocks, randomAge, fullHTML, user, loading]);
 
   if (loading) return <div>Loading user data...</div>;
 

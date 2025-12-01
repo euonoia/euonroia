@@ -1,28 +1,14 @@
 import express from "express";
 import admin from "firebase-admin";
 import { authMiddleware } from "../../middlewares/auth.js";
-import sanitizeHtml from "sanitize-html"; 
+import { getLevelFromXP } from "../../utils/levelingup.js";
 
 const router = express.Router();
 
-// POST /api/lessons/css-basics/quizzes
 router.post("/css-basics/quizzes", authMiddleware, async (req, res) => {
   try {
-    const uid = req.user.uid; // always trusted from middleware
-    const { htmlOutput } = req.body;
-
-    if (!htmlOutput || typeof htmlOutput !== "string") {
-      return res.status(400).json({ error: "No HTML output provided" });
-    }
-
-    // ✅ Sanitize HTML to prevent XSS
-   const sanitizedHtml = sanitizeHtml(htmlOutput, {
-    allowedTags: ['p','div','span','img','a'],
-    allowedAttributes: {
-      a: ['href', 'target'],
-      img: ['src','alt'],
-    },
-  });
+    const uid = req.user.uid;
+    if (!uid) return res.status(401).json({ error: "Unauthorized" });
 
     const quizRef = admin
       .firestore()
@@ -31,21 +17,29 @@ router.post("/css-basics/quizzes", authMiddleware, async (req, res) => {
       .collection("quizzes")
       .doc(uid);
 
-    await quizRef.set(
-      {
-        uid,
-        completed: true,
-        htmlOutput: sanitizedHtml,
-        score: 100, // you can replace this with a real server-side score calculation later
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    );
+    const quizDoc = await quizRef.get();
+    let xpAdded = false;
+    let levelUp = false;
 
-    res.json({ success: true });
+    if (!quizDoc.exists || !quizDoc.data()?.completed) {
+      await quizRef.set({ uid, completed: true, score: 100, timestamp: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
+
+      const userRef = admin.firestore().collection("users").doc(uid);
+      const userDoc = await userRef.get();
+      const userData = userDoc.data() || { xp: 0, level: 1 };
+      const newXP = (userData.xp || 0) + 25;
+      const newLevel = getLevelFromXP(newXP);
+
+      if (newLevel > (userData.level || 1)) levelUp = true;
+
+      await userRef.set({ xp: newXP, level: newLevel }, { merge: true });
+      xpAdded = true;
+    }
+
+    res.json({ success: true, xpAdded, levelUp });
   } catch (err) {
-    console.error("Failed to save CSS quiz:", err);
-    res.status(500).json({ error: "Failed to save CSS quiz" });
+    console.error("Failed to save CSS quiz or add XP:", err);
+    res.status(500).json({ error: "Failed to save CSS quiz or add XP" });
   }
 });
 

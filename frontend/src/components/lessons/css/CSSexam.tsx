@@ -97,29 +97,32 @@ const CSSExamContent: React.FC = () => {
   const isExamComplete = activeIndex >= blankOrder.length;
 
   useEffect(() => {
-    if (!isExamComplete) return;
-    setShowCongrats(true);
+  if (!isExamComplete) return;
+  setShowCongrats(true);
 
-    const saveExam = async () => {
-      try {
-        const htmlOutput = buildSkeletonOutput();
-        await axios.post("/api/lessons/css-basics/quizzes", { htmlOutput });
-        console.log("CSS exam saved successfully");
-      } catch (err: any) {
-        console.error("Failed to save CSS exam:", err.response?.data || err.message);
-      }
+  const saveExam = async () => {
+    try {
+      // Call backend endpoint (no HTML output sent anymore)
+      await axios.post("/api/lessons/css-basics/quizzes");
 
-      const duration = 3000;
-      const end = Date.now() + duration;
-      (function frame() {
-        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
-        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
-        if (Date.now() < end) requestAnimationFrame(frame);
-      })();
-    };
+      console.log("CSS Exam marked completed successfully");
+    } catch (err: any) {
+      console.error("Failed to save CSS exam:", err.response?.data || err.message);
+    }
 
-    saveExam();
-  }, [isExamComplete]);
+    // Confetti animation
+    const duration = 3000;
+    const end = Date.now() + duration;
+    (function frame() {
+      confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+      confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    })();
+  };
+
+  saveExam();
+}, [isExamComplete]);
+
 
   return (
     <div className={`lesson-container ${theme}`}>

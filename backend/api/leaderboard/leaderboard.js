@@ -1,28 +1,39 @@
 import express from "express";
 import admin from "firebase-admin";
 import { authMiddleware } from "../../middlewares/auth.js";
+import { getLevelFromXP } from "../../utils/levelingup.js"; // ESM import
 
 const router = express.Router();
 
-// GET /api/leaderboard
-router.get("/", /* authMiddleware, */ async (req, res) => {
+// GET /api/leaderboard (only for logged-in users)
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const usersSnapshot = await admin
       .firestore()
       .collection("users")
       .orderBy("xp", "desc")
-      .limit(10) // Adjust as needed
+      .limit(10)
       .get();
 
-    const leaderboard = usersSnapshot.docs.map((doc, index) => {
+    const leaderboard = [];
+
+    for (const [index, doc] of usersSnapshot.docs.entries()) {
       const data = doc.data();
-      return {
+      const xp = data.xp ?? 0;
+      const level = getLevelFromXP(xp); // calculate level dynamically
+
+      // Optional: if level is different from stored level, update Firestore
+      if (level !== (data.level ?? 1)) {
+        await doc.ref.set({ level }, { merge: true });
+      }
+
+      leaderboard.push({
         rank: index + 1,
         displayName: data.displayName || "Unknown",
-        xp: data.xp ?? 0,
-        level: data.level ?? 1,
-      };
-    });
+        xp,
+        level,
+      });
+    }
 
     res.json({ leaderboard });
   } catch (err) {
