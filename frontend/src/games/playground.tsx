@@ -12,7 +12,7 @@ const games = [
     title: "Spell To Kill",
     description: "A typing battle game where you defeat enemies with spells.",
     icon: <FaMagic />,
-    route: "/games/spell_to_kill",
+    route: "/adding-feature",
   },
   {
     id: "memory-cards",

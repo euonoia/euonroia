@@ -16,7 +16,7 @@ import dashboardRoutes from "./api/dashboard/index.js";
 import leaderboardRoutes from "./api/leaderboard/leaderboard.js";
 import Badges from "./api/badges/index.js";
 import preloadSnippets from "./api/trainer/preloadSnippets.js";
-
+import levelUp from "./api/games/leveledUp.js"
 
 
 
@@ -92,6 +92,7 @@ app.use("/api/milestones", dashboardRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/badges", Badges);
 app.use("/api/admin", preloadSnippets);
+app.use("/api/leveledUp",levelUp);
 
 /* --------------------------------------------------
    4️⃣ SERVE FRONTEND BUILD (Vite dist/)

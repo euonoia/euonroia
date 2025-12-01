@@ -1,5 +1,5 @@
 import React from "react";
-import { Question } from "../types/types"; // Assuming this path is correct
+import { Question } from "../types/types"; 
 
 
 type QuestionCardProps = {

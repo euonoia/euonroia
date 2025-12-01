@@ -10,10 +10,11 @@ export default function PlayerHealthBar({ hp, maxHp, playerDamage }: PlayerHealt
   const ratio = Math.max(0, hp) / maxHp;
   const [flash, setFlash] = useState(false);
 
+  // Trigger flash animation on damage
   useEffect(() => {
     if (playerDamage && playerDamage > 0) {
       setFlash(true);
-      const timeout = setTimeout(() => setFlash(false), 300);
+      const timeout = setTimeout(() => setFlash(false), 300); // duration of flash
       return () => clearTimeout(timeout);
     }
   }, [playerDamage]);
@@ -25,12 +26,20 @@ export default function PlayerHealthBar({ hp, maxHp, playerDamage }: PlayerHealt
   return (
     <div className={`player-health-bar ${flash ? "flash" : ""}`}>
       <div className="text-secondary font-semibold">Your HP</div>
+
       <div className="hp-bar-background">
         <div
           className={`hp-bar-fill transition-all ${healthColorClass}`}
-          style={{ width: `${ratio * 100}%` }}
+          style={{
+            width: `${ratio * 100}%`,
+            transform: flash ? "scaleX(1.05)" : "scaleX(1)",
+            transition: flash
+              ? "width 0.3s ease, transform 0.1s ease-in-out"
+              : "width 0.3s ease",
+          }}
         ></div>
       </div>
+
       <div className="text-secondary text-small mt-1">
         {hp} / {maxHp}
       </div>
