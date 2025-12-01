@@ -1,0 +1,135 @@
+/* ===============================
+    SPELL-TO-KILL: CUSTOM STYLES
+    Using variables from theme.css
+    =============================== */
+
+/* 1. Global / Main Container Styling */
+.main-container {
+    /* Apply background and main text colors using theme variables */
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: var(--font-family-base);
+    min-height: 100vh; /* Ensure it covers the whole viewport */
+    padding: var(--space-6);
+}
+
+/* 2. Text Utility Classes */
+.text-secondary {
+    color: var(--text-secondary);
+    font-size: var(--font-size-base);
+}
+
+.text-small {
+    font-size: 0.875rem; /* For player HP display */
+}
+
+.font-bold {
+    font-weight: 600;
+}
+
+.text-2xl {
+    font-size: var(--font-size-2xl);
+}
+
+.text-3xl {
+    font-size: var(--font-size-3xl);
+}
+
+
+/* 3. Card Styling (Enemy Canvas Wrapper and Question Card) */
+.card-container {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--space-2); 
+    padding: var(--space-4);
+    box-shadow: var(--shadow-sm);
+}
+
+/* 4. Layout Utilities */
+.text-center {
+    text-align: center;
+}
+
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+
+.grid-gap-2 { 
+    display: grid; 
+    gap: var(--space-2); 
+}
+
+.space-y-6 > * + * {
+    margin-top: var(--space-6);
+}
+
+
+/* 5. Player Health Bar Styles */
+.player-health-bar {
+    margin-top: var(--space-4);
+}
+
+.hp-bar-background {
+    width: 100%;
+    height: var(--space-4); /* 1rem height */
+    background-color: var(--color-border); /* A dark/muted color for the empty part */
+    border-radius: var(--space-4);
+    overflow: hidden;
+    margin-top: var(--space-1);
+}
+
+.hp-bar-fill {
+    height: 100%;
+    /* Added transition for smooth health bar changes */
+    transition: width 0.3s ease-in-out;
+}
+
+/* Health Bar Color Status using theme's semantic colors */
+.hp-bar-full { 
+    background-color: var(--color-success); 
+}
+.hp-bar-mid { 
+    background-color: var(--color-warning); 
+}
+.hp-bar-low { 
+    background-color: var(--color-error); 
+}
+
+
+/* 6. Question Button Styles */
+.choice-button {
+    /* Base button styles */
+    text-align: left;
+    padding: var(--space-3);
+    border-radius: var(--space-2);
+    border: 1px solid var(--border-color);
+    width: 100%;
+    color: var(--text-primary); 
+    
+    /* Interactive states */
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: var(--bg-card);
+}
+
+.choice-button:hover:not(:disabled) {
+    background-color: var(--border-color); /* Slightly darker/lighter background */
+    border-color: var(--accent);
+    box-shadow: var(--shadow-sm);
+}
+
+.choice-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+/* Player HP flash effect */
+.player-health-bar.flash .hp-bar-fill {
+    animation: flash-red 0.3s;
+}
+
+@keyframes flash-red {
+    0% { background-color: var(--color-error); }
+    50% { background-color: var(--color-success); }
+    100% { background-color: var(--color-success); }
+}

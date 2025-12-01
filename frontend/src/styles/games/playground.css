@@ -1,0 +1,119 @@
+/* ===============================
+   PLAYGROUND PAGE STYLES
+   =============================== */
+
+.playground-wrapper {
+  background: var(--bg-main);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* MAIN WRAPPER */
+.playground-main {
+  padding-top: 90px;
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+  padding-bottom: var(--space-6);
+}
+
+/* ===============================
+   LAYOUT: 2 COLUMNS
+   =============================== */
+
+.playground-layout {
+  display: flex;
+  gap: var(--space-10);
+  max-width: 1300px;
+  margin: 0 auto;
+  align-items: flex-start;
+}
+
+/* Left Column — CARDS */
+.playground-left {
+  flex: 1.2;
+}
+
+/* Right Column — HERO */
+.playground-right {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* HERO SECTION */
+.playground-hero {
+  text-align: left;
+  padding: var(--space-8) var(--space-4);
+}
+
+.playground-hero-content h1 {
+  font-size: var(--font-size-3xl);
+  font-weight: bold;
+  margin-bottom: var(--space-3);
+}
+
+.playground-hero-content p {
+  font-size: var(--font-size-lg);
+  color: var(--text-secondary);
+}
+
+/* GRID SECTION */
+.playground-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-6);
+}
+
+/* CARD */
+.playground-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: var(--space-6);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-md);
+  transition: 0.25s ease;
+  cursor: pointer;
+  text-align: center;
+}
+
+.playground-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-lg);
+  background: var(--color-surface);
+}
+
+/* ICON */
+.playground-icon svg {
+  width: 3rem;
+  height: 3rem;
+  color: var(--accent);
+  margin-bottom: var(--space-4);
+}
+
+.playground-card h2 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--space-2);
+}
+
+.playground-card p {
+  color: var(--text-secondary);
+}
+
+/* ===============================
+   MOBILE RESPONSIVE
+   =============================== */
+
+@media (max-width: 900px) {
+  .playground-layout {
+    flex-direction: column-reverse; /* hero on top, cards under */
+    gap: var(--space-8);
+  }
+
+  .playground-hero {
+    text-align: center;
+  }
+}

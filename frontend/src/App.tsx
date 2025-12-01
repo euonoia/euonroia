@@ -1,12 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useUser } from "./context/UserContext";
-import Games from "./games/spell_to_kill/QuizBattle"
 // Route Groups
 import { LessonRoutes } from "./routes/lessonsRoutes";
 import { OnboardingRoutes } from "./routes/onboardingRoutes";
 import { SystemRoutes } from "./routes/systemRoutes";
 import { RootRoutes } from "./routes/rootRoutes";
 import { PolicyRoutes } from "./routes/PolicyRoutes";
+import { GamesRoutes } from "./routes/gamesRoutes";
 
 function AppContent() {
   const { loading } = useUser();
@@ -18,7 +18,6 @@ function AppContent() {
 
   return (
     <Routes>
-      <Route path="/games/spell_to_kill" element={<Games />} />
       {/* Root & Auth Pages */}
       {RootRoutes}
 
@@ -31,9 +30,12 @@ function AppContent() {
       {/* Onboarding Lessons */}
       {OnboardingRoutes}
       
-        {/* Policies */}
+      {/* Policies */}
       {PolicyRoutes}
 
+      {/* Games */}
+      {GamesRoutes}
+      
       {/* 404 Fallback */}
       <Route path="*" element={<p>Page not found</p>} />
     </Routes>
