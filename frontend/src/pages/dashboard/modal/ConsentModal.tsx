@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useUser } from "../../../context/UserContext";
-import axios from "axios";
+import axios from "../../../utils/axiosClient";
 import "../../../styles/policy/policy.css";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void; 
 }
-
 
 export default function ConsentModal({ isOpen, onClose }: Props) {
   const { user, fetchUser } = useUser();
@@ -18,31 +17,27 @@ export default function ConsentModal({ isOpen, onClose }: Props) {
   if (!isOpen || !user) return null;
 
   const handleAgree = async () => {
-    if (!user) return;
+  if (!user) return;
 
-    setLoading(true);
-    try {
-      await axios.post(
-        `${import.meta.env.VITE_BACKEND_URL}/auth/consent/log-consent`,
-        {
-          uid: user.uid,
-          email: user.email,
-          agreed: true,
-        },
-        { withCredentials: true }
-      );
+  setLoading(true);
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_BACKEND_URL}/auth/consent/log`,
+      {}, // no body needed
+      { withCredentials: true }
+    );
 
-      // Refresh user info to update agreedToPolicies
-      fetchUser?.();
+    console.log("Consent response:", response.data);
+    fetchUser?.();
+    onClose();
+  } catch (err: any) {
+    console.error("Consent logging failed:", err.response?.data || err.message);
+    alert("Failed to record consent. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
-      onClose(); // close modal after agreeing
-    } catch (err) {
-      console.error("Consent logging failed:", err);
-      alert("Failed to record consent. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="policy-modal-overlay">
@@ -59,7 +54,7 @@ export default function ConsentModal({ isOpen, onClose }: Props) {
             marginBottom: "1rem",
           }}
         >
-         <p>
+          <p>
             Before continuing, please review and accept our platform policies. These
             policies explain how we handle your data, how you are expected to use our
             services, and your rights as a user. By proceeding, you acknowledge that you

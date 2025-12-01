@@ -26,33 +26,44 @@ router.get("/status", authMiddleware, async (req, res) => {
   }
 });
 
-router.post("/log-consent", authMiddleware, async (req, res) => {
+router.post("/log", authMiddleware, async (req, res) => {
   try {
-    const { uid, email, agreed } = req.body;
+    const user = req.user;
 
-    if (!uid || !email || !agreed) {
-      return res.status(400).json({ error: "Missing required fields" });
+    if (!user?.uid) {
+      return res.status(401).json({ error: "Unauthenticated or missing UID" });
     }
 
-    // Hash IP for privacy
+    const uid = user.uid;
+
+    // Fetch email from Firestore if not in JWT
+    const userDoc = await admin.firestore().collection("users").doc(uid).get();
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: "User not found in Firestore" });
+    }
+
+    const email = userDoc.data()?.email;
+    if (!email) {
+      return res.status(400).json({ error: "User email not found" });
+    }
+
     const hashedIp = req.ip
       ? crypto.createHash("sha256").update(req.ip).digest("hex")
       : null;
 
     const consentsRef = admin.firestore().collection("consents");
 
-    // Check for existing consent
+    // Check if consent already exists
     const existing = await consentsRef.where("email", "==", email).limit(1).get();
 
     if (!existing.empty) {
-      // Already agreed — update user just in case & return
       await admin.firestore().collection("users").doc(uid).set(
         { agreedToPolicies: true },
         { merge: true }
       );
 
       return res.json({
-        message: "Consent already exists, no duplicate created",
+        message: "Consent already exists, user updated",
         agreedToPolicies: true,
       });
     }
@@ -67,20 +78,20 @@ router.post("/log-consent", authMiddleware, async (req, res) => {
       userAgent: req.headers["user-agent"] || null,
     });
 
-    // Mark user as agreed
+    // Update user record
     await admin.firestore().collection("users").doc(uid).set(
       { agreedToPolicies: true },
       { merge: true }
     );
 
     res.json({
-      message: "Consent logged and linked to user",
+      message: "Consent successfully registered",
       agreedToPolicies: true,
     });
 
   } catch (err) {
-    console.error("Consent logging error:", err);
-    res.status(500).json({ error: "Failed to log consent" });
+    console.error("Register consent error:", err);
+    res.status(500).json({ error: "Failed to register consent", details: err.message });
   }
 });
 

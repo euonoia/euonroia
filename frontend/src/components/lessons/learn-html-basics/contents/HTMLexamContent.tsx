@@ -113,35 +113,36 @@ const HTMLexamContent: React.FC = () => {
     doctypeAdded && htmlAdded && headAdded && bodyAdded &&
     headingsAdded && paragraphsAdded && linksAdded && imagesAdded;
 
-  // ✅ POST exam and badge only when user exists & exam complete
-  useEffect(() => {
-    if (!isExamComplete || !user || loading) return;
-    setShowCongrats(true);
+ useEffect(() => {
+  if (!isExamComplete || !user || loading) return;
+  setShowCongrats(true);
 
-    const saveExam = async () => {
-      try {
-        // Use axiosClient → automatically sends CSRF + cookies
-        await axios.post(`/api/lessons/html-basics/quizzes`, { htmlOutput });
+  const saveExam = async () => {
+    try {
+      // POST completion, backend handles XP and preventing duplicates
+      await axios.post(`/api/lessons/html-basics/quizzes`);
 
-        await axios.post(`/api/badges/check`, { uid: user.uid, badgeId: "first_lesson" });
+      // Award badge
+      await axios.post(`/api/badges/check`, { uid: user.uid, badgeId: "first_lesson" });
 
-        console.log("Exam saved and badge awarded successfully");
-      } catch (err: any) {
-        console.error("Failed to save exam or award badge:", err.response?.data || err.message);
-      }
+      console.log("Exam marked completed and badge awarded");
+    } catch (err: any) {
+      console.error("Failed to save exam or award badge:", err.response?.data || err.message);
+    }
 
-      // Confetti
-      const duration = 3000;
-      const end = Date.now() + duration;
-      (function frame() {
-        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
-        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
-        if (Date.now() < end) requestAnimationFrame(frame);
-      })();
-    };
+    // Confetti
+    const duration = 3000;
+    const end = Date.now() + duration;
+    (function frame() {
+      confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 } });
+      confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 } });
+      if (Date.now() < end) requestAnimationFrame(frame);
+    })();
+  };
 
-    saveExam();
-  }, [isExamComplete, htmlOutput, user, loading]);
+  saveExam();
+}, [isExamComplete, user, loading]);
+
 
   return (
     <div className="lesson-container">
