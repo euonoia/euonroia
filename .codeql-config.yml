@@ -1,5 +1,0 @@
-name: Monorepo CodeQL Config
-version: 2
-paths:
-  - frontend
-  - backend
