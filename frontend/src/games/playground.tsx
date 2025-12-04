@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { FaMagic, FaBrain, FaPuzzlePiece } from "react-icons/fa";
 import Header from "../components/header";
 import Footer from "../components/footer";
-import { useUser } from "../context/UserContext"; // <-- added
-import "../styles/games/playground.css"; // custom CSS
+import { useUser } from "../context/UserContext";
+import "../styles/games/playground.css"; 
 
 const games = [
   {
