@@ -1,5 +1,5 @@
 # ---- Backend Dockerfile (Production) ----
-FROM node:18-alpine
+FROM node:25.2.1-alpine
 
 # Set working directory
 WORKDIR /app
