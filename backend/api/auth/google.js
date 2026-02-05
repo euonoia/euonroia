@@ -155,14 +155,16 @@ router.get("/callback", async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // CSRF token tied to JWT
+   // CSRF token tied to JWT
     const csrfToken = generateCsrfToken(accessToken);
     res.cookie("euonroiaCsrfToken", csrfToken, {
-      httpOnly: false, // frontend JS reads this
+      httpOnly: true,         // <-- FIX: HttpOnly
       secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
       maxAge: 60 * 60 * 1000,
+      path: "/",              // make it accessible to all backend routes
     });
+
 
     res.redirect(`${FRONTEND_URL}/dashboard`);
   } catch (err) {
