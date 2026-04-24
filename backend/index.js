@@ -114,3 +114,4 @@ app.get(/^\/(?!api|auth).*/, spaRateLimit, (req, res) => {
 app.listen(ENV.PORT, () => {
   console.log(`🚀 Backend + Frontend running on port ${ENV.PORT}`);
 });
+

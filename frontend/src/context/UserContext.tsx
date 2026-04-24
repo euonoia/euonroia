@@ -36,7 +36,7 @@ export const UserProvider = ({ children }: Props): React.ReactNode => {
   const fetchUser = async (): Promise<void> => {
     setLoading(true);
     try {
-      const res = await axiosClient.post("/auth/me"); // CSRF handled automatically
+      const res = await axiosClient.get("/auth/me"); // CSRF handled automatically
       setUser(res.data.user || null);
       setLoginError(false);
     } catch (err: any) {

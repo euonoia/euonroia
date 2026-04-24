@@ -34,7 +34,9 @@
     "@types/sanitize-html": "^2.16.0"
   },
   "resolutions": {
-  "jws": "4.0.1",
-  "cookie": "0.7.2"
+    "uuid": "^14.0.0",
+    "jws": "4.0.1",
+    "cookie": "^1.1.1", 
+    "@tootallnate/once": "^3.0.1"
 }
 }
