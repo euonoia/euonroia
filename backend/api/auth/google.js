@@ -4,22 +4,20 @@ import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { generateCsrfToken } from "../../middlewares/csrfVerify.js";
+import { ENV } from "../../config/env.js";
 
 const router = Router();
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = ENV.NODE_ENV === "production";
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
-const FRONTEND_URL = isProduction
-  ? "https://euonroia.onrender.com"
-  : "http://localhost:5173";
+const FRONTEND_URL = ENV.FRONTEND_URL;
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || ENV.GOOGLE_REDIRECT_URI;
 
 const client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  isProduction
-    ? `${FRONTEND_URL}/auth/google/callback`
-    : "http://localhost:5000/auth/google/callback"
+  GOOGLE_REDIRECT_URI
 );
 
 // --- Google Login Redirect ---
@@ -155,16 +153,15 @@ router.get("/callback", async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-   // CSRF token tied to JWT
+    // CSRF token tied to JWT
     const csrfToken = generateCsrfToken(accessToken);
     res.cookie("euonroiaCsrfToken", csrfToken, {
-      httpOnly: true,         // <-- FIX: HttpOnly
+      httpOnly: false,
       secure: isProduction,
       sameSite: isProduction ? "None" : "Lax",
       maxAge: 60 * 60 * 1000,
-      path: "/",              // make it accessible to all backend routes
+      path: "/", // allow frontend JS to read it for unsafe requests
     });
-
 
     res.redirect(`${FRONTEND_URL}/dashboard`);
   } catch (err) {

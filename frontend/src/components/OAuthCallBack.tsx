@@ -17,17 +17,13 @@ const OAuthCallback: React.FC = () => {
         setMessage("Checking authentication...");
 
         // ✅ Attach CSRF token from cookie if backend expects it
-        const csrfToken = Cookies.get("csrfToken");
+        const csrfToken = Cookies.get("euonroiaCsrfToken");
 
-        const res = await axios.post(
-          `${BACKEND_URL}/auth/me`,
-          {},
-          {
-            headers: { "x-csrf-token": csrfToken || "" },
-            withCredentials: true, // include HTTP-only cookies
-            timeout: 5000,
-          }
-        );
+        const res = await axios.get(`${BACKEND_URL}/auth/me`, {
+          headers: { "x-csrf-token": csrfToken || "" },
+          withCredentials: true,
+          timeout: 5000,
+        });
 
         if (!mounted) return;
 
