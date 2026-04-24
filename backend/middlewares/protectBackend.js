@@ -9,9 +9,7 @@ export function protectBackend(req, res, next) {
   if (ENV.NODE_ENV !== "production") {
     // If there is no origin (direct hit) or it's local, let it through
     if (!origin || origin.includes("localhost") || origin.includes("127.0.0.1")) {
-      // We don't return next() immediately because we still need to 
-      // check if the user is logged in below! 
-      console.log("✅ Local origin allowed:", origin);
+    
     } else {
        return res.status(403).send("❌ Access forbidden: invalid local origin");
     }
@@ -31,7 +29,6 @@ export function protectBackend(req, res, next) {
 
   if (requiresAuth) {
     if (!token) {
-        console.log("❌ No token found in cookies");
         return res.status(401).json({ error: "Not logged in" });
     }
 
@@ -46,7 +43,6 @@ export function protectBackend(req, res, next) {
 
       return next();
     } catch (err) {
-      console.log("❌ JWT Verify Error:", err.message);
       return res.status(401).json({ error: "Invalid or expired token" });
     }
   }
