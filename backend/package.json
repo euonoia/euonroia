@@ -36,6 +36,7 @@
   "resolutions": {
     "uuid": "^14.0.0",
     "jws": "4.0.1",
-    "cookie": "^1.1.1"  
+    "cookie": "^1.1.1", 
+    "@tootallnate/once": "^3.0.1"
 }
 }
